@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_tags %}
+{% block content %}
+
+<div class="content-wrapper">
+  <h5 class="text-left mt-0 mb-3">Jig Composition</h5>
+  <div class="row">
+    <div class="col-12 grid-margin stretch-card">
+      <div class="card">
+        <div class="card-body">
+          <div class="container py-4">
+
+            <!-- Tray Cards -->
+                                        <div class="model-columns">
+                      {% for card in cards %}
+                        <div class="model-column">
+                          <div class="model-header">
+                            Model No:
+                            {% for m in card.models %}
+                              <strong>{{ m.model_no }}</strong>{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                          </div>
+                          <div style="text-align:center; margin-bottom:0.5rem;">
+                            Case Qty:
+                            {% for m in card.models %}
+                              <strong>{{ m.case_qty }}</strong>{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                          </div>
+                          <div class="case-badges">
+                                                      {% for case in card.cases %}
+                                                        <div class="case-badge">
+                                                          <img src="{% static 'assets/icons/case1.png' %}" alt="Case" style="height:32px;width:32px;vertical-align:middle;">
+                                                        </div>
+                                                      {% endfor %}
+                                                    </div>
+                           
+                        </div>
+                      {% endfor %}
+                    </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+</div>

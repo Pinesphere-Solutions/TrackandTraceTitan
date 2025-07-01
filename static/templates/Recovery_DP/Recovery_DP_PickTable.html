@@ -1,0 +1,1748 @@
+{% extends "base.html" %} {% load static %} {% block content %}
+<style>
+  .content-wrapper {
+    transition: opacity 0.3s ease;
+  }
+
+  /* When modal is active, dim the content */
+  .tray-scan-modal.active ~ .content-wrapper {
+    opacity: 0.3;
+    pointer-events: none; /* Optional: disable interaction */
+  }
+  span {
+    color: #2a2a2a;
+  }
+
+  h6 {
+    color: grey;
+    margin-top: 6px; /* moves it down a bit */
+    font-weight: normal; /* optional: make font lighter if needed */
+  }
+
+  /* New top header container: flex left aligned, no interference with existing styles */
+  .modal-top-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 12px;
+  }
+
+  /* TrayScanDetails 3-column grid with scroll */
+  #trayScanDetails.table-grid {
+    display: grid !important; /* override any existing grid or flex */
+    grid-template-columns: 90px 1fr 1fr !important; /* S.no column is now fixed width */
+    gap: 10px !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    padding-right: 10px; /* prevent scrollbar overlay */
+    margin-top: 10px;
+  }
+
+  /* Styling individual grid cells, only inside trayScanDetails */
+  #trayScanDetails.table-grid > div {
+    background: #f7f7f7;
+    padding: 8px 12px;
+    border-radius: 30px;
+    font-size: 12px;
+    border: 1px solid #ddd;
+    margin: 0; /* reset any margin from <p> or others */
+  }
+
+  /* Sticky header row: first 3 divs inside trayScanDetails */
+  #trayScanDetails.table-grid > div:nth-child(-n + 3) {
+    background-color: #e0e0e0;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    align-items: center;
+  }
+
+  /* Override only when modal is open */
+  .tray-scan-modal.open {
+    width: 600px; /* your desired expanded width */
+    margin-right: 20px;
+  }
+
+  /* Keep it hidden with negative offset matching default width */
+  .tray-scan-modal {
+    right: -500px; /* must match the new width above to stay hidden properly */
+  }
+
+  #trayScanModal {
+    border-radius: 12px;
+    max-height: 90vh;
+    top: 40px; /* Moves the entire modal down from the top of the viewport */
+    height: calc(100% - 40px); /* Keeps height correct */
+  }
+
+  #trayScanDetails {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding-top: 10px;
+  }
+
+  /* Make each <p> act like a table cell */
+  #trayScanDetails p {
+    margin: 0;
+    padding: 4px 8px;
+    background: #f7f7f7;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+
+  .highlighted-tray-scan {
+    background-color: #88c4e3 !important;
+  }
+  .tray-scan-modal {
+    position: fixed;
+    top: 0;
+    right: -400px; /* Hidden by default */
+    width: 400px;
+    height: 100%;
+    background: white;
+    box-shadow: -3px 0 10px rgba(0, 0, 0, 0.2);
+    overflow-y: auto;
+    transition: right 0.3s ease;
+    z-index: 9999;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+
+  .tray-scan-modal.open {
+    right: 0; /* Slide in */
+  }
+
+  .tray-scan-modal-content {
+    position: relative;
+    height: 100%;
+  }
+
+  .tray-scan-close {
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .highlighted-tray-scan {
+    background-color: #cceeff !important;
+  }
+  .pagination-wrapper {
+    position: fixed;
+
+    top: 530px;
+    right: 20px;
+    background: transparent;
+    z-index: 999;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .table-responsive {
+      max-height: 800px;
+    }
+  }
+
+  .table-responsive {
+    max-height: 250px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    margin-bottom: 20px;
+  }
+
+  .table-responsive::-webkit-scrollbar {
+    display: none;
+  }
+
+  thead th {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 10;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+  }
+
+  html,
+  body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* hide scroll for full screen */
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .content-wrapper {
+    flex: 1;
+    overflow-y: auto; /* enable scroll only for content section */
+    padding-bottom: 70px;
+  }
+
+  footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 40px;
+  }
+
+  /* Reduce table height for web view (desktop only) */
+  @media (min-width: 1025px) {
+    .table-responsive {
+      max-height: 300px; /* reduced height for large screens */
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .table-responsive {
+      max-height: 600px; /* Increased height for tablets */
+    }
+  }
+
+  /* Make the table header sticky */
+  thead th {
+    position: sticky;
+    top: 0;
+    background-color: white; /* or your table header bg color */
+    z-index: 10; /* ensure it stays above the table rows */
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* optional shadow for better separation */
+  }
+
+  .table-responsive {
+    margin-bottom: 60px; /* add some free space below table */
+    max-height: 300px; /* or any fixed height you want */
+    overflow-y: auto; /* vertical scroll only */
+  }
+  .card-body {
+    width: 100%;
+    overflow-x: auto;
+    max-height: 2000px;
+  }
+</style>
+
+<div class="content-wrapper">
+  <h5 class="text-left mt-0 mb-3">Day Planning / Day Planning Pick Table</h5>
+  <div class="row">
+    <div class="col-12 grid-margin stretch-card">
+      <div class="card">
+        <div class="card-body">
+          <div class="table-responsive">
+            <!-- Table Section -->
+            <div class="table-responsive">
+              <table id="order-listing" class="table">
+                <thead>
+                  <tr>
+                    <th>
+                      S.No <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Date and Time
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Model/Stock No
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Plating Color
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Polish Finish
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Version <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Source - Location
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Tray Type Capacity
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      No of Tray <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Total Quantity
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Process Status
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Action <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Batch Status
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Current Location
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Remarks <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for data in master_data %}
+                  <tr {% if forloop.first %}class="highlighted-tray-scan"{% endif %}>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ data.date_time|date:"Y-m-d H:i A"|default:"N/A" }}</td>
+                    <td style="position: relative;">
+                      <span class="model-hover-trigger" style="cursor: pointer;">
+                        {{ data.model_stock_no__model_no }}
+                        <div class="model-image-tooltip" style="position: absolute; left: 50%; top: 110%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 9999; display: flex; align-items: center; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s;">
+                          <button class="img-scroll-left" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8592;</button>
+                          <div class="img-gallery" style="display: flex; gap: 6px; overflow: hidden; width: 180px;">
+                            {% for img_url in data.model_images %}
+                              <img src="{{ img_url }}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px;" />
+                            {% endfor %}
+                          </div>
+                          <button class="img-scroll-right" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8594;</button>
+                        </div>
+                      </span>
+                    </td>
+                    <td>{{ data.plating_color|default:"N/A" }}</td>
+                    <td>{{ data.polish_finish|default:"N/A" }}</td>
+                    <td>{{ data.version__version_name|default:"N/A" }}</td>
+                    <td>{{ data.vendor_location|default:"N/A" }}</td>
+                    <td>{{ data.tray_type|default:"N/A" }} {{ data.tray_capacity|default:"0" }}</td>
+                    <td>{{ data.no_of_trays|default:"0" }}</td>
+                    <td>{{ data.total_batch_quantity|default:"0" }}</td>
+                    <td>
+                      <!-- Dynamic Process Status based on conditions -->
+                      {% if data.Moved_to_R_Picker %}
+                        <div
+                          title="Tray Scan"
+                          class="d-flex align-items-center justify-content-center rounded-circle ms-1"
+                          style="
+                            width: 28px;
+                            height: 28px;
+                            background-color: #0c8249;
+                            color: white;
+                            font-weight: bold;
+                          "
+                        >
+                          T
+                        </div>
+                      {% elif data.Onhold_picking %}
+                        <div
+                          title="Tray Scan"
+                          class="d-flex align-items-center justify-content-center rounded-circle ms-1"
+                          style="
+                            width: 28px;
+                            height: 28px;
+                            background-color: #c3c2c2;
+                            color: white;
+                            font-weight: bold;
+                          "
+                        >
+                          T
+                        </div>
+                      {% elif data.last_process_module and data.next_process_module %}
+                        <div
+                          title="Tray Scan"
+                          class="d-flex align-items-center justify-content-center rounded-circle ms-1"
+                          style="
+                            width: 28px;
+                            height: 28px;
+                            background: linear-gradient(
+                              to right,
+                              green 50%,
+                              #bfbfbf 50%
+                            );
+                            color: white;
+                            font-weight: bold;
+                          "
+                        >
+                          T
+                        </div>
+                      {% else %}
+                        <div
+                          title="Tray Scan"
+                          class="d-flex align-items-center justify-content-center rounded-circle ms-1"
+                          style="
+                            width: 28px;
+                            height: 28px;
+                            background-color: #d3d2d2;
+                            color: white;
+                            font-weight: bold;
+                          "
+                        >
+                          T
+                        </div>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if not data.Moved_to_R_Picker %}
+                        <a href="#" class="edit-qty-btn" data-batch-id="{{ data.batch_id }}">
+                          <img src="{% static 'assets/icons/edit1.png' %}" alt="Edit" style="width: 28px; margin-right: 8px; height: auto"/>
+                        </a>
+                      {% else %}
+                        <span style="opacity:0.5; pointer-events:none; display:inline-block;">
+                          <img src="{% static 'assets/icons/edit1.png' %}" alt="Edit Disabled" style="width: 28px; margin-right: 8px; height: auto; filter: grayscale(1) opacity(0.5);"/>
+                        </span>
+                      {% endif %}
+                      {% if not data.Moved_to_R_Picker %}
+                        <a href="#" title="Delete">
+                          <img
+                            src="{% static 'assets/icons/bin.png' %}"
+                            alt="Delete"
+                            style="width: 28px; margin-right: 8px; height: auto; cursor:pointer;"
+                          />
+                        </a>
+                      {% else %}
+                        <span title="Cannot delete after moved" style="opacity:0.5; pointer-events:none; display:inline-block;">
+                          <img
+                            src="{% static 'assets/icons/bin.png' %}"
+                            alt="Delete Disabled"
+                            style="width: 28px; margin-right: 8px; height: auto; filter: grayscale(1) opacity(0.5); cursor:not-allowed;"
+                          />
+                        </span>
+                      {% endif %}
+                      <a
+                        href="#"
+                        class="text-primary tray-scan-btn"
+                        style="text-decoration: underline"
+                        data-batch-id="{{ data.batch_id }}"
+                        data-model-no="{{ data.model_stock_no__model_no }}"
+                        data-no-of-trays="{{ data.no_of_trays }}"
+                        data-tray-capacity="{{ data.tray_capacity|default:'0' }}"
+                        data-moved-to-d-picker="{{ data.Moved_to_R_Picker }}"
+                        data-tray-qty-list="{{ data.tray_qty_list|default:'[]'|safe }}"
+                        >Tray Scan</a
+                      >
+                    </td>
+                    <td>
+                      <!-- Dynamic Batch Status based on conditions -->
+                      {% if data.Moved_to_R_Picker %}
+                        <div
+                          class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+                          style="
+                            border: 2px solid #0d5d17;
+                            background-color: #c5f9c2;
+                            color: #2f801b;
+                            font-size: clamp(0.75rem, 2vw, 0.875rem);
+                            white-space: nowrap;
+                            padding-top: 0.5rem;
+                            padding-bottom: 0.5rem;
+                          "
+                        >
+                          Yet To Release
+                        </div>
+                      {% elif data.R_Draft_Saved %}
+                        <div
+                          class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+                          style="
+                            border: 2px solid #4997ac;
+                            background-color: #d1f2f3;
+                            color: #03425d;
+                            font-size: clamp(0.75rem, 2vw, 0.875rem);
+                            white-space: nowrap;
+                            padding-top: 0.5rem;
+                            padding-bottom: 0.5rem;
+                          "
+                        >
+                          On-Hold
+                        </div>
+                      {% elif data.last_process_module and data.next_process_module %}
+                        <div
+                          class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+                          style="
+                            border: 2px solid #d2d454;
+                            background-color: #f0f5b7;
+                            color: #4d5204;
+                            font-size: clamp(0.75rem, 2vw, 0.875rem);
+                            white-space: nowrap;
+                            padding-top: 0.5rem;
+                            padding-bottom: 0.5rem;
+                          "
+                        >
+                          Released
+                        </div>
+                      {% else %}
+                        <div
+                          class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+                          style="
+                            border: 2px solid #a6a6a6;
+                            background-color: #dcdada;
+                            color: #505050;
+                            font-size: clamp(0.75rem, 2vw, 0.875rem);
+                            white-space: nowrap;
+                            padding-top: 0.5rem;
+                            padding-bottom: 0.5rem;
+                          "
+                        >
+                          Yet to Start
+                        </div>
+                      {% endif %}
+                    </td>
+                                        <td>
+                      <div
+                        class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+                        style="
+                          border: 2px solid #9adeed;
+                          background-color: #d1edf3;
+                          color: #033b5d;
+                          font-size: clamp(0.75rem, 2vw, 0.875rem);
+                          white-space: nowrap;
+                          padding-top: 0.5rem;
+                          padding-bottom: 0.5rem;
+                        "
+                      >
+                        {{ data.last_process_module|default:"N/A" }}
+                      </div>
+                    </td>
+                    <td>
+                        {% if not data.Moved_to_R_Picker %}
+
+                      <!-- VoiceRec with tooltip (audio remark) -->
+                        <a href="#" title="Add Audio Remark" class="remark-tooltip-trigger" style="display: inline-flex; align-items: center; height: 28px; margin-left: 0; position: relative; cursor: pointer;">
+                          <img src="{% static 'assets/icons/rec.png' %}" alt="VoiceRec" style="width: 20px; height: 20px"/>
+                          <div class="remark-tooltip" style="position: absolute; top: 110%; left: 50%; transform: translateX(-50%); width: 300px; background: #fff; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; padding: 15px; z-index: 1000;">
+                            <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 10px solid #fff;"></div>
+                            <!-- Audio recording UI placeholder -->
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                              <button type="button" style="background: #28a745; color: #fff; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fa fa-microphone"></i>
+                              </button>
+                              <span style="font-size: 14px; color: #333;">Hold to record audio</span>
+                            </div>
+                            <div style="text-align: right; margin-top: 10px;">
+                              <button type="button" style="background-color: #007bff; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;">
+                                <i class="fa fa-send"></i>
+                              </button>
+                            </div>
+                          </div>
+                        </a>
+
+                                            <a
+                        href="#"
+                        title="Add Remark"
+                        class="remark-tooltip-trigger"
+                        style="display: inline-flex; align-items: center; height: 20px; margin-left: 5px; position: relative; cursor: pointer;"
+                      >
+                        <img
+                          src="{% static 'assets/icons/chat1.png' %}"
+                          alt="Chat"
+                          style="width: 20px; height: 20px"
+                        />
+                        <div
+                          class="remark-tooltip"
+                          style="position: absolute; top: 110%; left: 50%; transform: translateX(-50%); width: 300px; background: #fff; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; padding: 15px; z-index: 1000;"
+                        >
+                          <div
+                            style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 10px solid #fff;"
+                          ></div>
+                          <textarea
+                            placeholder="Type your remark..."
+                            style="width: 85%; height: 40px; resize: vertical; border: 1px solid #ccc; padding: 5px; border-radius: 4px; font-family: Arial, sans-serif; font-size: 14px;"
+                            {% if data.rec_pick_remarks %}readonly{% endif %}
+                          >{{ data.rec_pick_remarks|default_if_none:"" }}</textarea>
+                          <div style="text-align: right; margin-top: -35px">
+                            {% if not data.rec_pick_remarks %}
+                            <button
+                              type="button"
+                              style="background-color: #007bff; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;"
+                            >
+                              <i class="fa fa-send"></i>
+                            </button>
+                            {% else %}
+                            <div style="margin-top: 40px; color: #31708f; background: #d9edf7; border: 1px solid #bce8f1; border-radius: 4px; padding: 8px 12px; font-size: 10px; text-align: left;">
+                              <i class="fa fa-info-circle" style="margin-right: 6px;"></i>
+                              Remark already saved and cannot be edited.
+                            </div>
+                            {% endif %}
+                          </div>
+                        </div>
+                      </a>
+                       {% else %}
+                      <!-- Audio Remark Icon (disabled) -->
+                      <span title="Disabled after moved" style="display: inline-flex; align-items: center; height: 28px; margin-left: 0; opacity: 0.5; pointer-events: none;">
+                        <img src="{% static 'assets/icons/rec.png' %}" alt="VoiceRec Disabled" style="width: 20px; height: 20px; filter: grayscale(1) opacity(0.5);" />
+                      </span>
+                      <!-- Chat Remark Icon (disabled) -->
+                      <span title="Disabled after moved" style="display: inline-flex; align-items: center; height: 20px; margin-left: 5px; opacity: 0.5; pointer-events: none;">
+                        <img src="{% static 'assets/icons/chat1.png' %}" alt="Chat Disabled" style="width: 20px; height: 20px; filter: grayscale(1) opacity(0.5);" />
+                      </span>
+                    {% endif %}
+                    </td>
+                  
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="15" class="text-center">No data available</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+
+              <!-- Tray Scan (hyperlink) - Right side modal -->
+              <div
+                id="trayScanModal"
+                class="tray-scan-modal active"
+                id="trayScanModal"
+              >
+                <div class="tray-scan-modal-content">
+                  <span id="closeTrayScanModal" class="tray-scan-close"
+                    >&times;</span
+                  >
+
+                  <!-- New top header container: title + user profile aligned left -->
+                  <div
+                    class="modal-top-header"
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 20px;
+                      padding-bottom: 10px;
+                    "
+                  >
+                    <div
+                      class="user-profile"
+                      style="display: flex; align-items: center; gap: 8px"
+                    >
+                      <img
+                        src="/static/assets/images/imagePlaceholder.png"
+                        alt="User Profile"
+                        style="
+                          border-radius: 50%;
+                          width: 50px;
+                          height: 50px;
+                          object-fit: cover;
+                        "
+                      />
+                      <span>Model No:</span>
+                      <h6 id="modalModelNo">(Fetch Dynamically)</h6>
+                    </div>
+                  </div>
+
+                  <!-- Existing centered h3 title -->
+                  <h5 style="text-align: center">
+                    Day Planning - Tray Info Table (Before the Scan)
+                  </h5>
+
+                  <!-- trayScanDetails will be a scrollable 3-column grid with headers and unlimited rows -->
+                  <div id="trayScanDetails" class="table-grid">
+                    <!-- Headers -->
+                    <div>S.no</div>
+                    <div>Tray ID</div>
+                    <div>Tray Qty</div>
+
+                    <!-- Example rows (replace with dynamic content) -->
+                  </div>
+                  <!-- ✅ NEW BUTTONS SECTION -->
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: center;
+                      gap: 10px;
+                      margin-top: 20px;
+                    "
+                  >
+                    <button
+                      id="trayScanDraftBtn"
+                      type="button"
+                      style="
+                        padding: 8px 16px;
+                        background: #007bff;
+                        color: white;
+                        border: none;
+                        border-radius: 30px;
+                      "
+                    >
+                      Draft
+                    </button>
+                    <button
+                      id="trayScanSubmitBtn"
+                      style="
+                        padding: 8px 16px;
+                        background: #28a745;
+                        color: white;
+                        border: none;
+                        border-radius: 30px;
+                      "
+                    >
+                      Submit
+                    </button>
+                    <button
+                      id="trayScanCancelBtn"
+                      style="
+                        padding: 8px 16px;
+                        background: #dc3545;
+                        color: white;
+                        border: none;
+                        border-radius: 30px;
+                      "
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Pagination Section -->
+
+            <div class="pagination-wrapper">
+              <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-end mb-0">
+                  {% if page_obj.has_previous %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                  {% else %}
+                    <li class="page-item disabled">
+                      <span class="page-link">Previous</span>
+                    </li>
+                  {% endif %}
+              
+                  {% for num in paginator.page_range %}
+                    {% if page_obj.number == num %}
+                      <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% else %}
+                      <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                  {% endfor %}
+              
+                  {% if page_obj.has_next %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                  {% else %}
+                    <li class="page-item disabled">
+                      <span class="page-link">Next</span>
+                    </li>
+                  {% endif %}
+                </ul>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script for Sorting the Table for each rows -->
+  {% block script %}
+
+    <!-- Script for Model / Stock No - Image Mouse Hover -->
+  <script nonce="{{ csp_nonce }}">
+    document.addEventListener("DOMContentLoaded", function () {
+      document
+        .querySelectorAll(".model-hover-trigger")
+        .forEach(function (trigger) {
+          const tooltip = trigger.querySelector(".model-image-tooltip");
+          let currentIndex = 0;
+          let tooltipPinned = false;
+          const images = Array.from(
+            tooltip.querySelectorAll(".img-gallery img")
+          );
+
+          function showImages(start) {
+            images.forEach((img, i) => {
+              img.style.display =
+                i >= start && i < start + 3 ? "block" : "none";
+            });
+          }
+          showImages(currentIndex);
+
+          function adjustTooltipPosition() {
+            // Reset to default
+            tooltip.style.left = "50%";
+            tooltip.style.top = "110%";
+            tooltip.style.right = "";
+            tooltip.style.bottom = "";
+            tooltip.style.transform = "translateX(-50%)";
+            tooltip.style.maxWidth = "350px";
+            tooltip.style.maxHeight = "300px";
+            tooltip.style.overflow = "auto";
+
+            // Get bounding rectangles
+            const tooltipRect = tooltip.getBoundingClientRect();
+            const triggerRect = trigger.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+
+            // Horizontal adjustment
+            if (tooltipRect.right > viewportWidth) {
+              tooltip.style.left = "auto";
+              tooltip.style.right = "0";
+              tooltip.style.transform = "none";
+            } else if (tooltipRect.left < 0) {
+              tooltip.style.left = "0";
+              tooltip.style.transform = "none";
+            }
+
+            // Vertical adjustment
+            if (tooltipRect.bottom > viewportHeight) {
+              tooltip.style.top = "auto";
+              tooltip.style.bottom = "110%";
+            } else if (tooltipRect.top < 0) {
+              tooltip.style.top = "0";
+              tooltip.style.bottom = "auto";
+            }
+          }
+
+          trigger.addEventListener("mouseenter", function () {
+            if (!tooltipPinned) {
+              tooltip.style.opacity = "1";
+              tooltip.style.pointerEvents = "auto";
+              setTimeout(adjustTooltipPosition, 10);
+            }
+          });
+          trigger.addEventListener("mousemove", function () {
+            if (!tooltipPinned) adjustTooltipPosition();
+          });
+          trigger.addEventListener("mouseleave", function () {
+            if (!tooltipPinned) {
+              tooltip.style.opacity = "0";
+              tooltip.style.pointerEvents = "none";
+            }
+          });
+          tooltip.addEventListener("mouseenter", function () {
+            if (!tooltipPinned) {
+              tooltip.style.opacity = "1";
+              tooltip.style.pointerEvents = "auto";
+            }
+          });
+          tooltip.addEventListener("mouseleave", function () {
+            if (!tooltipPinned) {
+              tooltip.style.opacity = "0";
+              tooltip.style.pointerEvents = "none";
+            }
+          });
+
+          // Pin tooltip on click
+          trigger.addEventListener("click", function (e) {
+            e.preventDefault();
+            tooltipPinned = true;
+            tooltip.style.opacity = "1";
+            tooltip.style.pointerEvents = "auto";
+            adjustTooltipPosition();
+          });
+
+          // Unpin tooltip if user clicks outside
+          document.addEventListener("mousedown", function (e) {
+            if (!trigger.contains(e.target) && !tooltip.contains(e.target)) {
+              tooltipPinned = false;
+              tooltip.style.opacity = "0";
+              tooltip.style.pointerEvents = "none";
+            }
+          });
+
+          tooltip
+            .querySelector(".img-scroll-left")
+            .addEventListener("click", function (e) {
+              e.stopPropagation();
+              if (currentIndex > 0) {
+                currentIndex--;
+                showImages(currentIndex);
+              }
+            });
+          tooltip
+            .querySelector(".img-scroll-right")
+            .addEventListener("click", function (e) {
+              e.stopPropagation();
+              if (currentIndex < images.length - 3) {
+                currentIndex++;
+                showImages(currentIndex);
+              }
+            });
+
+          // Add click event to images for modal slider
+          images.forEach(function (img, idx) {
+            img.style.cursor = "pointer";
+            img.addEventListener("click", function (e) {
+              e.stopPropagation();
+              openImageSlider(
+                images.map((i) => i.src),
+                idx
+              );
+            });
+          });
+        });
+
+      // Modal slider functions (unchanged)
+      const modal = document.getElementById("imageSliderModal");
+      const closeModal = document.getElementById("closeImageSliderModal");
+      const slidesContainer = modal.querySelector(".slides");
+      let sliderImages = [];
+      let currentSlide = 0;
+
+      function openImageSlider(srcArray, startIdx) {
+        sliderImages = srcArray;
+        slidesContainer.innerHTML = "";
+        sliderImages.forEach((src) => {
+          const slide = document.createElement("div");
+          slide.className = "slide";
+          const img = document.createElement("img");
+          img.src = src;
+          slide.appendChild(img);
+          slidesContainer.appendChild(slide);
+        });
+        currentSlide = startIdx;
+        showSlide(currentSlide);
+        modal.classList.add("open");
+      }
+
+      function showSlide(n) {
+        const slides = slidesContainer.querySelectorAll(".slide");
+        if (!slides.length) return;
+        currentSlide = (n + slides.length) % slides.length;
+        slides.forEach((slide, idx) => {
+          slide.classList.toggle("active", idx === currentSlide);
+        });
+      }
+
+      modal.querySelector("#prevBtn").addEventListener("click", function (e) {
+        e.stopPropagation();
+        showSlide(currentSlide - 1);
+      });
+      modal.querySelector("#nextBtn").addEventListener("click", function (e) {
+        e.stopPropagation();
+        showSlide(currentSlide + 1);
+      });
+      closeModal.addEventListener("click", function () {
+        modal.classList.remove("open");
+      });
+      modal.addEventListener("click", function (e) {
+        if (e.target === modal) modal.classList.remove("open");
+      });
+    });
+  </script>
+  <script nonce="{{ csp_nonce }}">
+    document.addEventListener("DOMContentLoaded", function () {
+
+      const cancelBtn = document.getElementById("trayScanCancelBtn");
+      if (cancelBtn) {
+        cancelBtn.addEventListener("click", function () {
+          const modal = document.getElementById("trayScanModal");
+          if (modal) modal.classList.remove("open");
+        });
+      }
+
+       // DELETE BUTTON HANDLER
+      document.querySelectorAll('a[title="Delete"]').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const row = btn.closest('tr');
+          if (!row) return;
+          const trayScanLink = row.querySelector('.tray-scan-btn');
+          if (!trayScanLink) return;
+          const batchId = trayScanLink.getAttribute('data-batch-id');
+          if (!batchId) {
+            Swal.fire('Error', 'Batch ID not found!', 'error');
+            return;
+          }
+          Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you really want to delete this batch?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              fetch('/recovery_dp/rec_delete_batch/', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ batch_id: batchId })
+              })
+              .then(res => res.json())
+              .then(data => {
+                if (data.success) {
+                  row.remove();
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Deleted!',
+                    text: 'Batch has been deleted.',
+                    timer: 1200,
+                    showConfirmButton: false
+                  });                  
+                } else {
+                  Swal.fire('Error', data.error || 'Delete failed', 'error');
+                }
+              });
+            }
+          });
+        });
+      });
+
+      document.querySelectorAll('.edit-qty-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const row = btn.closest('tr');
+          if (!row) return;
+          const qtyCell = row.querySelector('td:nth-child(10)');
+          if (!qtyCell) return;
+          const batchId = btn.getAttribute('data-batch-id');
+          const oldValue = qtyCell.textContent.trim();
+          // Prevent multiple inputs
+          if (qtyCell.querySelector('input')) return;
+          qtyCell.innerHTML = `<input type="number" min="1" class="form-control" value="${oldValue}" style="width: 80px; display:inline-block;" />`;
+          const input = qtyCell.querySelector('input');
+          input.focus();
+          input.select();
+      
+          input.addEventListener('keydown', function(ev) {
+            if (ev.key === 'Enter') {
+              const newValue = input.value.trim();
+              if (!newValue || isNaN(newValue) || parseInt(newValue) <= 0) {
+                Swal.fire('Error', 'Enter a valid quantity.', 'error');
+                return;
+              }
+              fetch('/recovery_dp/rec_update_batch_quantity/', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ batch_id: batchId, total_batch_quantity: newValue })
+              })
+              .then(res => res.json())
+              .then(data => {
+                if (data.success) {
+                  qtyCell.textContent = newValue;
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Quantity updated!',
+                    timer: 1200,
+                    showConfirmButton: false
+                  }).then(() => {
+                    location.reload();
+                  });
+                               } else {
+                  Swal.fire('Error', data.error || 'Update failed', 'error');
+                  qtyCell.textContent = oldValue;
+                }
+              })
+              .catch(() => {
+                Swal.fire('Error', 'Network error', 'error');
+                qtyCell.textContent = oldValue;
+              });
+            }
+            if (ev.key === 'Escape') {
+              qtyCell.textContent = oldValue;
+            }
+          });
+      
+          input.addEventListener('blur', function() {
+            qtyCell.textContent = oldValue;
+          });
+        });
+      });
+
+      const table = document.getElementById("order-listing");
+      if (!table) {
+        console.warn("Table with ID 'order-listing' not found.");
+        return;
+      }
+
+      const headers = table.querySelectorAll("thead th");
+      const tbody = table.querySelector("tbody");
+
+      let sortDirection = {};
+
+      headers.forEach((header, index) => {
+        header.style.cursor = "pointer";
+
+        header.addEventListener("click", function () {
+          const rows = Array.from(tbody.querySelectorAll("tr"));
+          const dir = sortDirection[index] === "asc" ? "desc" : "asc";
+          sortDirection[index] = dir;
+
+          rows.sort((a, b) => {
+            const cellA = a.children[index].textContent.trim();
+            const cellB = b.children[index].textContent.trim();
+            const valA = isNaN(cellA) ? cellA : parseFloat(cellA);
+            const valB = isNaN(cellB) ? cellB : parseFloat(cellB);
+
+            if (valA < valB) return dir === "asc" ? -1 : 1;
+            if (valA > valB) return dir === "asc" ? 1 : -1;
+            return 0;
+          });
+
+          tbody.innerHTML = "";
+          rows.forEach((row) => tbody.appendChild(row));
+        });
+      });
+    });
+  </script>
+
+  <!-- Script for Tray Scan - Modal Popup -->
+  <script nonce="{{ csp_nonce }}">
+  // Helper to get CSRF token
+  function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+  }
+  
+  document.addEventListener("DOMContentLoaded", () => {
+      const trayScanLinks = document.querySelectorAll(".tray-scan-btn");
+      const modal = document.getElementById("trayScanModal");
+      const closeBtn = document.getElementById("closeTrayScanModal");
+      const detailsDiv = document.getElementById("trayScanDetails");
+      const modalModelNo = document.getElementById("modalModelNo");
+  
+      trayScanLinks.forEach((link) => {
+          link.addEventListener("click", async (event) => {
+              event.preventDefault();
+              window.currentTrayScanBatchId = event.target.getAttribute("data-batch-id");
+  
+              const row = event.target.closest("tr");
+              if (!row) return;
+
+              
+  
+              // Get dynamic data from the clicked row
+              const batchId = event.target.getAttribute("data-batch-id");
+              const modelNo = event.target.getAttribute("data-model-no");
+              const noOfTrays = parseInt(event.target.getAttribute("data-no-of-trays")) || 0;
+              const trayCapacity = event.target.getAttribute("data-tray-capacity") || "";
+  
+              // Highlight the clicked row
+              document.querySelectorAll("tbody tr").forEach((row) => {
+                  row.classList.remove("highlighted-tray-scan");
+              });
+              row.classList.add("highlighted-tray-scan");
+  
+              // Update modal with dynamic model number
+              if (modalModelNo && modelNo) {
+                  modalModelNo.textContent = modelNo;
+              }
+  
+              // Try to fetch DraftTrayId data first, fallback to TrayId
+              let traysData = [];
+              let isDraft = false;
+              try {
+                  const draftResp = await fetch(`/recovery_dp/draft_tray_id_list/?batch_id=${encodeURIComponent(batchId)}`);
+                  const draftResult = await draftResp.json();
+                  if (draftResult.success && Array.isArray(draftResult.trays) && draftResult.trays.length > 0) {
+                      traysData = draftResult.trays;
+                      isDraft = true;
+                  } else {
+                      // Fallback to TrayId (readonly)
+                      const resp = await fetch(`/recovery_dp/rec_tray_id_list/?batch_id=${encodeURIComponent(batchId)}`);
+                      const result = await resp.json();
+                      if (result.success && Array.isArray(result.trays) && result.trays.length > 0) {
+                          traysData = result.trays;
+                          isDraft = false;
+                      }
+                  }
+              } catch (e) {
+                  // Ignore fetch errors, fallback to default
+              }
+  
+              let html = `
+                  <div>S.no</div>
+                  <div>Tray ID</div>
+                  <div>Tray Qty</div>
+              `;
+  
+              let showButtons = true;
+  
+                            // ...existing code...
+              let trayQtyList = [];
+              try {
+                  trayQtyList = JSON.parse(event.target.getAttribute("data-tray-qty-list") || "[]");
+              } catch (e) {
+                  trayQtyList = [];
+              }
+              let totalRows = noOfTrays;
+              for (let i = 0; i < totalRows; i++) {
+                  const tray = traysData[i] || {};
+                  const trayQty = tray.tray_quantity || trayQtyList[i] || trayCapacity;
+                  html += `
+                      <div>${i === 0 ? '1 (Top Tray)' : (i + 1)}</div>
+                      <div>
+                          <input type="text" class="form-control" value="${tray.tray_id || ''}" data-draft-id="${tray.id || ''}" style="width: 100%;" />
+                      </div>
+                      <div>
+                          <input type="number" class="form-control" value="${trayQty}" style="width: 100%;" ${i === 0 ? '' : 'readonly'} />
+                      </div>
+                  `;
+              }
+              // ...existing code...
+              showButtons = isDraft || traysData.length === 0;
+              // The unmatched else block is removed to fix the syntax error.
+  
+              detailsDiv.innerHTML = html;
+  
+              // Auto-focus the first Tray ID input when modal opens
+              const firstTrayIdInput = detailsDiv.querySelector('input[type="text"]:not([readonly])');
+              if (firstTrayIdInput) {
+                  firstTrayIdInput.focus();
+                  firstTrayIdInput.select();
+              }
+  
+             
+              const isReleased = event.target.getAttribute("data-moved-to-d-picker") === "True";
+              
+              // Make all inputs readonly if Released
+              if (isReleased) {
+                  detailsDiv.querySelectorAll('input').forEach(inp => inp.setAttribute('readonly', 'readonly'));
+              }
+              
+              // Hide buttons if Released
+              const buttonSection = modal.querySelector('.tray-scan-modal-content > div[style*="justify-content: center"]');
+              if (buttonSection) {
+                  buttonSection.style.display = isReleased ? "none" : (showButtons ? "flex" : "none");
+              }
+              // --- END BLOCK ---
+  
+              modal.classList.add("open");
+  
+              // Enable editing only when edit icon is clicked (for first tray)
+              const editBtn = detailsDiv.querySelector('.tray-edit-btn');
+              const qtyInput = detailsDiv.querySelector('.tray-qty-input');
+              if (editBtn && qtyInput) {
+                  const maxQty = parseInt(qtyInput.value, 10) || 0;
+  
+                  editBtn.addEventListener('click', function() {
+                      qtyInput.removeAttribute('readonly');
+                      qtyInput.focus();
+                  });
+  
+                  qtyInput.addEventListener('input', function() {
+                      let val = parseInt(qtyInput.value, 10) || 0;
+                      if (val > maxQty) {
+                          qtyInput.value = maxQty;
+                      }
+                      if (val < 0) {
+                          qtyInput.value = 0;
+                      }
+                  });
+              }
+  
+              // Tray ID validation logic
+              if (!isReleased) {
+
+                const trayIdInputs = detailsDiv.querySelectorAll('input[type="text"]:not([readonly])');
+                trayIdInputs.forEach((input, idx, allInputs) => {
+                    input.addEventListener('input', function () {
+                        let prevError = input.parentNode.querySelector('.tray-id-error');
+                        if (prevError) prevError.remove();
+                    });
+    
+                    input.addEventListener('blur', async function () {
+                        let prevError = input.parentNode.querySelector('.tray-id-error');
+                        if (prevError) prevError.remove();
+    
+                        const trayId = input.value.trim();
+                        if (!trayId) return;
+    
+                        // 1. Check for duplicates in other inputs (in-modal)
+                        let duplicateInModal = false;
+                        allInputs.forEach((otherInput, otherIdx) => {
+                            if (otherIdx !== idx && otherInput.value.trim() === trayId) {
+                                duplicateInModal = true;
+                            }
+                        });
+                        if (duplicateInModal) {
+                            const errorDiv = document.createElement('div');
+                            errorDiv.className = 'tray-id-error';
+                            errorDiv.style.color = 'red';
+                            errorDiv.style.fontSize = '12px';
+                            errorDiv.textContent = 'Already scanned in a row!';
+                            input.parentNode.appendChild(errorDiv);
+                            input.focus();
+                            input.select();
+                            return;
+                        }
+    
+                        // 2. Check with backend if tray_id exists in DB
+                        try {
+                            const resp = await fetch(`/recovery_dp/rec_tray_id_unique_check/?tray_id=${encodeURIComponent(trayId)}`);
+                            const result = await resp.json();
+                            if (result.exists) {
+                                const errorDiv = document.createElement('div');
+                                errorDiv.className = 'tray-id-error';
+                                errorDiv.style.color = 'red';
+                                errorDiv.style.fontSize = '12px';
+                                errorDiv.textContent = 'Tray ID already exists!';
+                                input.parentNode.appendChild(errorDiv);
+                                input.focus();
+                                input.select();
+                            }
+                        } catch (e) {
+                            // Optionally handle network error
+                        }
+                    });
+                    
+  
+                  input.addEventListener('keydown', async function (e) {
+                      if (e.key === 'Enter') {
+                          e.preventDefault();
+                          input.blur();
+                          setTimeout(() => {
+                              if (!input.parentNode.querySelector('.tray-id-error')) {
+                                  const nextInput = allInputs[idx + 1];
+                                  if (nextInput) {
+                                      nextInput.focus();
+                                      nextInput.select();
+                                  }
+                              } else {
+                                  input.focus();
+                                  input.select();
+                              }
+                          }, 50);
+                      }
+                  });
+              });
+            }
+  
+              // Draft button logic
+            const draftBtn = document.getElementById('trayScanDraftBtn');
+              if (draftBtn) {
+                  draftBtn.onclick = function() {
+                      if (detailsDiv.querySelector('.tray-id-error')) {
+                          Swal.fire('Error', 'Please fix duplicate Tray IDs before saving draft.', 'error');
+                          return;
+                      }
+                      detailsDiv.querySelectorAll('.tray-id-error').forEach(el => el.remove());
+              
+                      const trayRows = [];
+                      const trayIdInputs = detailsDiv.querySelectorAll('input[type="text"]');
+                      const trayQtyInputs = detailsDiv.querySelectorAll('input[type="number"]');
+              
+                      for (let i = 0; i < trayIdInputs.length; i++) {
+                          const tray_id = trayIdInputs[i].value; // allow empty
+                          const tray_quantity = trayQtyInputs[i].value;
+                          const draft_id = trayIdInputs[i].getAttribute('data-draft-id') || null;
+                          // Always push, even if tray_id is empty
+                          trayRows.push({
+                              tray_id,
+                              tray_quantity,
+                              id: draft_id
+                          });
+                      }
+                      const batchId = window.currentTrayScanBatchId || '';
+              
+                      fetch('/recovery_dp/rec_draft_tray/', {
+                          method: 'POST',
+                          headers: {
+                              'Content-Type': 'application/json',
+                              'X-CSRFToken': getCookie('csrftoken')
+                          },
+                          body: JSON.stringify({
+                              batch_id: batchId,
+                              trays: trayRows
+                          })
+                      })
+                      .then(res => res.json())
+                      .then(data => {
+                          if (data.success) {
+                              // Refetch trays in the same order and re-render
+                              const ids = trayRows.map(tray => tray.id).filter(Boolean);
+                              const params = new URLSearchParams();
+                              params.append('batch_id', batchId);
+                              ids.forEach(id => params.append('ids[]', id));
+                              fetch(`/recovery_dp/draft_tray_id_list/?${params.toString()}`)
+                                  .then(res => res.json())
+                                  .then(data2 => {
+                                      if (data2.success && Array.isArray(data2.trays)) {
+                                          // Re-render the tray rows in the same order, but keep empty rows too
+                                          let html = `
+                                              <div>S.no</div>
+                                              <div>Tray ID</div>
+                                              <div>Tray Qty</div>
+                                          `;
+                                          let noOfTrays = trayIdInputs.length;
+                                        for (let i = 0; i < noOfTrays; i++) {
+                                            const tray = data2.trays[i] || {};
+                                            html += `
+                                                <div>${i === 0 ? '1 (Top Tray)' : (i + 1)}</div>
+                                                <div>
+                                                    <input type="text" class="form-control" value="${tray.tray_id || ''}" data-draft-id="${tray.id || ''}" style="width: 100%;" />
+                                                </div>
+                                                <div>
+                                                    <input type="number" class="form-control" value="${tray.tray_quantity || ''}" style="width: 100%;" ${i === 0 ? '' : 'readonly'} />
+                                                </div>
+                                            `;
+                                        }
+
+                                          detailsDiv.innerHTML = html;
+                                          Swal.fire({
+                                            icon: 'success',
+                                            title: 'Success!',
+                                            text: 'Draft saved!',
+                                            timer: 1200,
+                                            showConfirmButton: false
+                                          });
+                                          modal.classList.remove("open");
+                                          // Update the batch status cell in the row
+                                          const currentRow = document.querySelector(`.tray-scan-btn[data-batch-id="${batchId}"]`)?.closest('tr');
+                                          if (currentRow) {
+                                              const statusCell = currentRow.querySelector('td:nth-child(13)'); // 13th column is Batch Status
+                                              if (statusCell) {
+                                                  statusCell.innerHTML = `
+                                                      <div
+                                                        class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+                                                        style="
+                                                          border: 2px solid #4997ac;
+                                                          background-color: #d1f2f3;
+                                                          color: #03425d;
+                                                          font-size: clamp(0.75rem, 2vw, 0.875rem);
+                                                          white-space: nowrap;
+                                                          padding-top: 0.5rem;
+                                                          padding-bottom: 0.5rem;
+                                                        "
+                                                      >
+                                                        On-Hold
+                                                      </div>
+                                                  `;
+                                              }
+                                          }
+
+                                      } else {
+                                          Swal.fire('Success', 'Draft saved!', 'success');
+                                          modal.classList.remove("open");
+                                      }
+                                  });
+                          } else {
+                              Swal.fire('Error', data.error || 'Failed to save draft', 'error');
+                          }
+                      })
+                      .catch(error => {
+                          console.error('Error:', error);
+                          Swal.fire('Error', 'Network error occurred', 'error');
+                      });
+                  };
+              }
+
+              
+              // Submit button logic
+            const submitBtn = document.getElementById('trayScanSubmitBtn');
+              if (submitBtn) {
+                  submitBtn.onclick = function() {
+                      if (detailsDiv.querySelector('.tray-id-error')) {
+                          Swal.fire('Error', 'Please fix duplicate Tray IDs before submitting.', 'error');
+                          return;
+                      }
+                      detailsDiv.querySelectorAll('.tray-id-error').forEach(el => el.remove());
+              
+                      const trayRows = [];
+                      const trayIdInputs = detailsDiv.querySelectorAll('input[type="text"]');
+                      const trayQtyInputs = detailsDiv.querySelectorAll('input[type="number"]');
+                      let emptyTrayId = false;
+                      for (let i = 0; i < trayIdInputs.length; i++) {
+                          const tray_id = trayIdInputs[i].value.trim();
+                          const tray_quantity = trayQtyInputs[i].value;
+                          // Remove previous error if any
+                          let prevError = trayIdInputs[i].parentNode.querySelector('.tray-id-error');
+                          if (prevError) prevError.remove();
+                          if (!tray_id) {
+                              emptyTrayId = true;
+                              // Show inline error
+                              const errorDiv = document.createElement('div');
+                              errorDiv.className = 'tray-id-error';
+                              errorDiv.style.color = 'red';
+                              errorDiv.style.fontSize = '12px';
+                              errorDiv.textContent = 'Tray ID should not be empty!';
+                              trayIdInputs[i].parentNode.appendChild(errorDiv);
+                              trayIdInputs[i].focus();
+                              break;
+                          }
+                          trayRows.push({
+                              tray_id,
+                              tray_quantity
+                          });
+                      }
+                      if (emptyTrayId) {
+                          return;
+                      }
+                      const batchId = window.currentTrayScanBatchId || '';
+              
+                      fetch('/recovery_dp/rec_tray_scan/', {
+                          method: 'POST',
+                          headers: {
+                              'Content-Type': 'application/json',
+                              'X-CSRFToken': getCookie('csrftoken')
+                          },
+                          body: JSON.stringify({
+                              batch_id: batchId,
+                              trays: trayRows
+                          })
+                      })
+                      .then(res => res.json())
+                      .then(data => {
+                          if (data.success) {
+                              Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: 'Tray scan saved!',
+                                timer: 1200,
+                                showConfirmButton: false
+                              });
+                              modal.classList.remove("open");
+                              const currentRow = document.querySelector(`.tray-scan-btn[data-batch-id="${batchId}"]`)?.closest('tr');
+                              if (currentRow) {
+                                  const statusCell = currentRow.querySelector('td:nth-child(13)');
+                                  if (statusCell) {
+                                      statusCell.innerHTML = `
+                                          <div
+                                            class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+                                            style="
+                                              border: 2px solid #0d5d17;
+                                              background-color: #c5f9c2;
+                                              color: #2f801b;
+                                              font-size: clamp(0.75rem, 2vw, 0.875rem);
+                                              white-space: nowrap;
+                                              padding-top: 0.5rem;
+                                              padding-bottom: 0.5rem;
+                                            "
+                                          >
+                                            Yet To Release
+                                          </div>
+                                      `;
+                                  }
+                              }
+
+                              
+
+                            // Disable audio icon
+                            const audioIcon = currentRow.querySelector('a[title="Add Audio Remark"]');
+                            if (audioIcon) {
+                                const span = document.createElement('span');
+                                span.title = "Disabled after moved";
+                                span.style = "display: inline-flex; align-items: center; height: 28px; margin-left: 0; opacity: 0.5; pointer-events: none;";
+                                span.innerHTML = audioIcon.innerHTML;
+                                audioIcon.replaceWith(span);
+                            }
+                            //Current location as "Input Screening"
+                            const locationCell = currentRow.querySelector('td:nth-child(14)');
+                            if (locationCell) {
+                                locationCell.innerHTML = `
+                                  <div
+                                    class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+                                    style="
+                                      border: 2px solid #9adeed;
+                                      background-color: #d1edf3;
+                                      color: #033b5d;
+                                      font-size: clamp(0.75rem, 2vw, 0.875rem);
+                                      white-space: nowrap;
+                                      padding-top: 0.5rem;
+                                      padding-bottom: 0.5rem;
+                                    "
+                                  >
+                                    Day Planning
+                                  </div>
+                                `;
+                            }
+
+                            // Disable chat icon and textarea
+                            const chatIcon = currentRow.querySelector('a[title="Add Remark"]');
+                            if (chatIcon) {
+                                const span = document.createElement('span');
+                                span.title = "Disabled after moved";
+                                span.style = "display: inline-flex; align-items: center; height: 20px; margin-left: 5px; opacity: 0.5; pointer-events: none;";
+                                span.innerHTML = chatIcon.innerHTML;
+                                chatIcon.replaceWith(span);
+                            }
+
+                            // Make textarea readonly if present
+                            const textarea = currentRow.querySelector('textarea');
+                            if (textarea) textarea.setAttribute('readonly', true);
+                            // Optionally, hide send button if present
+                            const sendBtn = currentRow.querySelector('.remark-tooltip button');
+                            if (sendBtn) sendBtn.style.display = 'none';
+
+                          } else if (data.duplicate_tray_ids) {
+                              trayIdInputs.forEach((input, idx) => {
+                                  if (data.duplicate_tray_ids.includes(input.value)) {
+                                      const errorDiv = document.createElement('div');
+                                      errorDiv.className = 'tray-id-error';
+                                      errorDiv.style.color = 'red';
+                                      errorDiv.style.fontSize = '12px';
+                                      errorDiv.textContent = 'Tray ID already exists!';
+                                      input.parentNode.appendChild(errorDiv);
+                                  }
+                              });
+                              Swal.fire('Error', 'Duplicate Tray ID(s) found. Please correct.', 'error');
+                          } else {
+                              Swal.fire('Error', data.error || 'Failed to save tray scan', 'error');
+                          }
+                      })
+                      .catch(error => {
+                          console.error('Error:', error);
+                          Swal.fire('Error', 'Network error occurred', 'error');
+                      });
+                  };
+              }
+            
+            
+          
+            });
+      });
+  
+      closeBtn.addEventListener("click", () => {
+          modal.classList.remove("open");
+      });
+  
+      modal.addEventListener("click", (event) => {
+          if (event.target === modal) {
+              modal.classList.remove("open");
+          }
+      });
+  });
+
+  
+  </script>
+
+ <script nonce="{{ csp_nonce }}">
+    document.addEventListener("DOMContentLoaded", function () {
+      var triggers = document.querySelectorAll(".remark-tooltip-trigger");
+      triggers.forEach(function (trigger) {
+        var tooltip = trigger.querySelector(".remark-tooltip");
+        var sendButton = tooltip ? tooltip.querySelector("button") : null;
+        function showTooltip() {
+          tooltip.style.opacity = "1";
+          tooltip.style.visibility = "visible";
+          var rect = tooltip.getBoundingClientRect();
+          if (rect.right > window.innerWidth) {
+            tooltip.style.left = "auto";
+            tooltip.style.right = "0";
+            tooltip.style.transform = "none";
+          }
+          if (rect.left < 0) {
+            tooltip.style.left = "0";
+            tooltip.style.transform = "none";
+          }
+          var textarea = tooltip.querySelector("textarea");
+          if (textarea) {
+            textarea.focus();
+          }
+        }
+        function hideTooltip() {
+          tooltip.style.opacity = "0";
+          tooltip.style.visibility = "hidden";
+        }
+        trigger.addEventListener("mouseenter", showTooltip);
+        trigger.addEventListener("mouseleave", function () {
+          setTimeout(function () {
+            if (!trigger.matches(":hover") && !tooltip.matches(":hover")) {
+              hideTooltip();
+            }
+          }, 100);
+        });
+        tooltip.addEventListener("mouseleave", function () {
+          setTimeout(function () {
+            if (!tooltip.matches(":hover") && !trigger.matches(":hover")) {
+              hideTooltip();
+            }
+          }, 100);
+        });
+        trigger.addEventListener("click", function (e) {
+          e.preventDefault();
+        });
+        if (sendButton) {
+          sendButton.addEventListener("click", function (e) {
+            e.preventDefault();
+            // Find the textarea and get its value
+            var textarea = tooltip.querySelector("textarea");
+            var remark = textarea ? textarea.value.trim() : "";
+            if (!remark) {
+              Swal.fire('Error', 'Please enter a remark before sending.', 'error');
+              return;
+            }
+            // Find the batch_id from the row (tr) data attribute or from a hidden field
+            var row = trigger.closest("tr");
+            var trayScanLink = row ? row.querySelector('.tray-scan-btn') : null;
+            var batchId = trayScanLink ? trayScanLink.getAttribute('data-batch-id') : null;
+            if (!batchId) {
+              Swal.fire('Error', 'Batch ID not found.', 'error');
+              return;
+            }
+            fetch('/recovery_dp/rec_save_dp_pick_remark/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+              },
+              body: JSON.stringify({
+                batch_id: batchId,
+                remark: remark
+              })
+            })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Remark saved!',
+                  timer: 1200,
+                  showConfirmButton: false
+                }).then(() => {
+                  // Make the textarea readonly
+                  if (textarea) {
+                    textarea.setAttribute("readonly", true);
+                  }
+
+                  // Replace send button with info message
+                  if (sendButton && tooltip) {
+                    const infoDiv = document.createElement("div");
+                    infoDiv.style.marginTop = "40px";
+                    infoDiv.style.color = "#31708f";
+                    infoDiv.style.background = "#d9edf7";
+                    infoDiv.style.border = "1px solid #bce8f1";
+                    infoDiv.style.borderRadius = "4px";
+                    infoDiv.style.padding = "8px 12px";
+                    infoDiv.style.fontSize = "10px";
+                    infoDiv.style.textAlign = "left";
+                    infoDiv.innerHTML = `
+                      <i class="fa fa-info-circle" style="margin-right: 6px;"></i>
+                      Remark already saved and cannot be edited.
+                    `;
+                    sendButton.parentNode.replaceChild(infoDiv, sendButton);
+                  }
+
+                  hideTooltip(); // optional if you still want to hide the tooltip
+                });
+
+              } else {
+                Swal.fire('Error', data.error || 'Failed to save remark', 'error');
+              }
+            })
+            .catch(() => {
+              Swal.fire('Error', 'Network error', 'error');
+            });
+          });
+        }
+      });
+    });
+  </script>
+
+  {% endblock %} {% endblock content %}
+</div>

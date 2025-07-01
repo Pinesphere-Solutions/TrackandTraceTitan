@@ -1,0 +1,1736 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<style nonce="{{ csp_nonce }}">
+  :root {
+    --clr-primary: #126a83;      /* Teal */
+    --clr-secondary: #023E4D;    /* Deep Navy */
+    --clr-tertiary: #FF6B6B;     /* Soft Coral */
+    --clr-bg: #F5F9FA;           /* Light background */
+    --clr-surface: #FFFFFF;      /* Surface white */
+    --clr-text: #212529;         /* Default text */
+    --clr-muted: #6C757D;        /* Muted text */
+  }
+  /* Full page layout */
+  body {
+    margin: 0;
+    background: var(--clr-bg);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--clr-text);
+    overflow-x: hidden;
+  }
+  /* Main card container */
+  .bulk-card {
+    background: var(--clr-surface);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    margin: 2rem auto;
+    max-width: 1300px; /* Reduced width since we removed one column */
+    overflow: hidden;
+    animation: slideIn 0.8s ease-out;
+  }
+  @keyframes slideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  /* Header with animated background */
+  .card-header {
+    background: var(--clr-secondary);
+    color: var(--clr-surface);
+    padding: 0.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-header h1 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
+  .card-header::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 45deg, var(--clr-tertiary), var(--clr-secondary));
+    animation: spin 10s linear infinite;
+    opacity: 0.15;
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  /* Lottie animation in header */
+  .header-lottie {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    width: 60px;
+    height: 60px;
+    opacity: 0.35;
+  }
+  /* Body styling */
+  .card-body {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  .action-area {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .btn {
+    border: none;
+    border-radius: 6px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn-outline {
+    background: transparent;
+    border: 2px solid var(--clr-primary);
+    color: var(--clr-primary);
+  }
+  .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  }
+  .btn svg.icon {
+    margin-right: 0.5rem;
+  }
+  /* Split area: Upload area & File list */
+  .upload-file-area {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+  .file-upload-area {
+    flex: 1 1 460px;
+    border: 2px dashed var(--clr-muted);
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.3s, border-color 0.3s;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+  }
+  .file-upload-area:hover {
+    background: rgba(18,106,131,0.05);
+  }
+  .file-upload-area p {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--clr-muted);
+  }
+  .upload-link {
+    color: var(--clr-primary);
+    font-weight: 600;
+    text-decoration: underline;
+  }
+  .lottie-upload {
+    width: 80px;
+    height: 80px;
+  }
+  .file-upload-area.dragover {
+    background: rgba(18,106,131,0.1);
+    border-color: var(--clr-primary);
+  }
+  /* File List styling */
+  .file-list {
+    flex: 1 1 300px;
+    display: grid;
+    gap: 1rem;
+  }
+  .file-card {
+    background: var(--clr-surface);
+    border: 1px solid var(--clr-muted);
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: box-shadow 0.3s;
+    animation: fadeIn 0.5s ease-in;
+  }
+  .file-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .file-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .file-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--clr-bg);
+    color: var(--clr-primary);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .file-details {
+    overflow: hidden;
+  }
+  .file-name {
+    font-weight: 500;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+  }
+  .file-size {
+    font-size: 0.8rem;
+    color: var(--clr-muted);
+    margin-top: 2px;
+  }
+  .remove-file {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: var(--clr-bg);
+    color: var(--clr-text);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+  }
+  .remove-file:hover {
+    background: var(--clr-tertiary);
+    color: var(--clr-surface);
+  }
+  /* Data Table Section */
+  .data-table-card {
+    margin: 0rem 5px 0.5rem 3px;
+    animation: slideIn 0.8s ease-out;
+  }
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .table-header h2 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    color: var(--clr-text);
+    margin: 0;
+  }
+  .table-header h2 .icon {
+    margin-right: 0.5rem;
+  }
+  .table-container {
+    overflow-x: auto; /* Changed to auto for horizontal scrolling */
+    overflow-y: auto;
+    max-height: 320px;
+  }
+  .data-table {
+    width: 100%;
+    min-width: 1100px; /* Reduced minimum width since we removed one column */
+    border-collapse: collapse; /* Collapse borders for grid view */
+    background: var(--clr-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  .data-table th,
+  .data-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border: 1px solid var(--clr-muted);  /* Grid lines for rows and columns */
+  }
+
+  /* Action Column */
+  .data-table .actions {
+    width: 80px;
+    text-align: right;
+  }
+  /* Redesigned Delete Button */
+  .btn-delete {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: var(--clr-bg);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+  }
+  .btn-delete:hover {
+    background: var(--clr-tertiary);
+    transform: scale(1.1);
+  }
+  .btn-delete .icon {
+    width: 18px;
+    height: 18px;
+    stroke: var(--clr-text);
+    stroke-width: 2;
+  }
+  .cell-input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--clr-primary);
+    border-radius: 6px;
+    min-width: 100px; /* Ensure minimum input width */
+    font-family: inherit;
+    font-size: 0.9rem;
+  }
+  .cell-input:focus { 
+    outline: none; 
+    border-color: var(--clr-secondary);
+    box-shadow: 0 0 0 2px rgba(18, 106, 131, 0.2);
+  }
+  
+  /* Simple dropdown styling - no conflicts */
+  .simple-dropdown {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 10px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 40px !important;
+  }
+  
+  .simple-dropdown:focus {
+    border-color: var(--clr-secondary) !important;
+    box-shadow: 0 0 0 2px rgba(18, 106, 131, 0.2) !important;
+  }
+  
+  .simple-dropdown option {
+    padding: 8px;
+    background: white;
+    color: #333;
+  }
+  
+  /* Auto-filled field styling */
+  .auto-filled {
+    background-color: #e8f5e8 !important;
+    border-left: 3px solid #28a745 !important;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .table-row-animation { animation: fadeIn 0.5s ease-in; }
+
+  /* Override any row gutter padding for the card-header so it touches the bulk-card edges */
+  .bulk-card > .card-header {
+    margin-left: -14px !important;
+    margin-right: -14px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  
+  /* Then add inner padding if desired to the header-content */
+  .header-content {
+    padding: 1rem 1rem; /* Adjust as needed */
+  }
+  @media (max-width: 425px) {
+  .card-header h1{
+    font-size: 12px !important;
+  }
+  .btn-outline{
+    padding: 0.5rem 0.5rem !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+  }
+  }
+  /* Responsive adjustments */
+  @media (max-width: 426px){
+    .file-upload-area p {
+    font-size: 12px !important;
+    }
+  }
+  @media (max-width: 426px) {
+  .card-header h1{
+    font-size: 12px !important;
+  }
+  .btn-outline{
+    padding: 0.5rem 0.5rem !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+  }
+  }
+</style>
+
+<div class="bulk-card">
+  <div class="card-header" style="
+  background: url('{% static 'assets/images/banner.jpg' %}') no-repeat center center;
+  background-size: cover;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  padding: 1.5rem 1rem;
+">
+  <!-- Optional overlay for darkening the banner -->
+  <div style="
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgb(2 62 77 / 80%);
+      z-index: 1;
+  "></div>
+  
+  <div class="header-content" style="position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between;">
+    <h1 class="heading-title">
+      Day Planning / Bulk Upload
+    </h1>
+  </div>
+  
+  <!-- Add Model Button over the banner image -->
+  <button id="add-model-btn" class="btn btn-outline" style="
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 2;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: 2px solid var(--clr-primary);
+    background: #fff;
+    color: var(--clr-primary);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+  ">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="var(--clr-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+          <line x1="3" y1="9" x2="21" y2="9"/>
+          <line x1="3" y1="15" x2="21" y2="15"/>
+          <line x1="9" y1="3" x2="9" y2="21"/>
+          <line x1="15" y1="3" x2="15" y2="21"/>
+        </svg>
+    Single Upload
+  </button>
+  
+  <!-- Optional bottom bar -->
+  <div class="header-bottom" style="
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(to right, #023E4D, #126a83);
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    z-index: 2;
+  "></div>
+</div>
+  <!-- Card Body content follows -->
+  <div class="card-body">
+    <div class="upload-file-area">
+      <!-- Drag & Drop File Upload -->
+      <div class="file-upload-area" id="file-upload-area">
+        <p>Drag and drop Excel files here or <span class="upload-link">Click to Select</span></p>
+          <div class="lottie-upload" style="flex-shrink:0;">
+            <!-- Replace the Lottie animation with a static logo image -->
+            <img src="{% static 'assets/gif/upload.gif' %}" alt="Upload Logo" style="width:60px; height:auto; object-fit:contain; margin-top: 10px;">
+          </div>
+        <input type="file" id="file-upload" accept=".xlsx,.xls" hidden>
+      </div>
+      <!-- File List -->
+      <div id="file-list" class="file-list"></div>
+    </div>
+  </div>
+</div>
+
+<div id="data-table-section" class="card data-table-card" style="display:none;">
+  <div class="card-body">
+    <div class="table-header">
+      <h2>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="var(--clr-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+          <rect x="3" y="3" width="16" height="16" rx="2" ry="2"/>
+          <line x1="3" y1="9" x2="21" y2="9"/>
+          <line x1="3" y1="15" x2="21" y2="15"/>
+          <line x1="9" y1="3" x2="9" y2="21"/>
+          <line x1="15" y1="3" x2="15" y2="21"/>
+        </svg>
+        Data Table
+      </h2>
+    </div>
+    <div class="table-container" id="data-table-container"></div>
+  </div>
+</div>
+</div>
+<div id="toast-container" class="toast-container"></div>
+
+<script nonce="{{ csp_nonce }}">
+  document.addEventListener('DOMContentLoaded', () => {
+    const fileUploadInput = document.getElementById('file-upload');
+    const fileListContainer = document.getElementById('file-list');
+    const addModelButton = document.getElementById('add-model-btn');
+    const dataTableSection = document.getElementById('data-table-section');
+    const dataTableContainer = document.getElementById('data-table-container');
+    const fileUploadArea = document.getElementById('file-upload-area');
+
+    let files = [];
+    let tableData = [];
+    let fileDataMap = new Map(); // Map to store file data for each file
+    // Updated column structure for new fields (removed ID since S.NO serves the same purpose)
+    let columns = ['S.NO', 'Plating Stk No', 'Polishing Stk No', 'Plating Colour', 'Category', 'Input Qty', 'Source'];
+    let sortColumn = null;
+    let sortDirection = 'asc';
+
+    // ========== BUG FIX: ADD THESE FUNCTIONS HERE ==========
+    
+    // Function to disable upload controls
+    function disableUploadControls() {
+      const fileUploadArea = document.getElementById('file-upload-area');
+      const fileUploadInput = document.getElementById('file-upload');
+      const addModelButton = document.getElementById('add-model-btn');
+      
+      // Disable file upload area
+      fileUploadArea.style.pointerEvents = 'none';
+      fileUploadArea.style.opacity = '0.5';
+      fileUploadArea.style.cursor = 'not-allowed';
+      
+      // Disable file input
+      fileUploadInput.disabled = true;
+      
+      // Disable Single Upload button
+      addModelButton.disabled = true;
+      addModelButton.style.opacity = '0.5';
+      addModelButton.style.cursor = 'not-allowed';
+      addModelButton.style.pointerEvents = 'none';
+      
+      // Update the upload area text to indicate it's disabled
+      const uploadText = fileUploadArea.querySelector('p');
+      if (uploadText) {
+        uploadText.innerHTML = 'Upload disabled - Clear table to upload new files';
+        uploadText.style.color = '#6C757D';
+      }
+    }
+
+    // Function to enable upload controls
+    function enableUploadControls() {
+      const fileUploadArea = document.getElementById('file-upload-area');
+      const fileUploadInput = document.getElementById('file-upload');
+      const addModelButton = document.getElementById('add-model-btn');
+      
+      // Enable file upload area
+      fileUploadArea.style.pointerEvents = 'auto';
+      fileUploadArea.style.opacity = '1';
+      fileUploadArea.style.cursor = 'pointer';
+      
+      // Enable file input
+      fileUploadInput.disabled = false;
+      
+      // Enable Single Upload button
+      addModelButton.disabled = false;
+      addModelButton.style.opacity = '1';
+      addModelButton.style.cursor = 'pointer';
+      addModelButton.style.pointerEvents = 'auto';
+      
+      // Restore original upload area text
+      const uploadText = fileUploadArea.querySelector('p');
+      if (uploadText) {
+        uploadText.innerHTML = 'Drag and drop Excel files here or <span class="upload-link">Click to Select</span>';
+        uploadText.style.color = 'var(--clr-muted)';
+      }
+    }
+    
+    // ========== FRESH SIMPLE DROPDOWN FUNCTIONALITY ==========
+    
+    let categoriesCache = null;
+    let locationsCache = null;
+    
+// Replace the createSimpleDropdown function with this fixed version:
+
+function createSimpleDropdown(td, row, column, currentValue) {
+  // Create a simple select element
+  const select = document.createElement('select');
+  select.className = 'simple-dropdown';
+  select.style.cssText = `
+    width: 100%;
+    min-width: 150px;
+    padding: 8px 12px;
+    border: 2px solid #126a83;
+    border-radius: 6px;
+    background: white;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+  `;
+  
+  // Add default option
+  const defaultOption = document.createElement('option');
+  defaultOption.value = '';
+  defaultOption.textContent = `Choose ${column}...`;
+  select.appendChild(defaultOption);
+  
+  // Clear the cell and add select
+  td.innerHTML = '';
+  td.appendChild(select);
+  
+  // Load data and populate
+  loadDropdownData(column).then(data => {
+    // Clear existing options
+    select.innerHTML = '';
+    
+    // Add default option again
+    const defaultOpt = document.createElement('option');
+    defaultOpt.value = '';
+    defaultOpt.textContent = `Choose ${column}...`;
+    select.appendChild(defaultOpt);
+    
+    // Add data options
+    data.forEach(item => {
+      const option = document.createElement('option');
+      const fieldName = column === 'Category' ? 'category_name' : 'location_name';
+      option.value = item[fieldName];
+      option.textContent = item[fieldName];
+      
+      // Pre-select current value
+      if (item[fieldName] === currentValue) {
+        option.selected = true;
+      }
+      
+      select.appendChild(option);
+    });
+    
+    // Focus after loading and open dropdown
+    setTimeout(() => {
+      select.focus();
+      // Try to open the dropdown programmatically
+      if (select.showPicker) {
+        select.showPicker();
+      }
+    }, 100);
+  });
+  
+  // Flag to prevent immediate closure
+  let isSelecting = false;
+  
+  // Handle change event - when user actually selects something
+  select.addEventListener('change', function(e) {
+    e.stopPropagation();
+    const selectedValue = this.value;
+    
+    // Update the data
+    row[column] = selectedValue;
+    
+    // Update the display
+    td.textContent = selectedValue || currentValue || '';
+    
+    console.log(`Selected ${column}:`, selectedValue);
+    isSelecting = false;
+  });
+  
+  // Handle blur event - when dropdown loses focus
+  select.addEventListener('blur', function(e) {
+    // Only close if we're not in the middle of selecting
+    if (!isSelecting) {
+      setTimeout(() => {
+        // If no selection was made, revert to original value
+        if (this.parentNode === td) {
+          td.textContent = currentValue || '';
+        }
+      }, 150);
+    }
+  });
+  
+  // Handle mousedown on select to indicate selection is starting
+  select.addEventListener('mousedown', function(e) {
+    isSelecting = true;
+  });
+  
+  // Handle keyboard events
+  select.addEventListener('keydown', function(e) {
+    e.stopPropagation();
+    
+    if (e.key === 'Escape') {
+      // Cancel and revert
+      td.textContent = currentValue || '';
+      isSelecting = false;
+    } else if (e.key === 'Enter') {
+      // Confirm selection
+      const selectedValue = this.value;
+      row[column] = selectedValue;
+      td.textContent = selectedValue || currentValue || '';
+      isSelecting = false;
+    } else {
+      // Any other key means user is navigating
+      isSelecting = true;
+    }
+  });
+  
+  // Prevent cell click events from interfering
+  select.addEventListener('click', function(e) {
+    e.stopPropagation();
+    isSelecting = true;
+  });
+}
+
+    function loadDropdownData(column) {
+      /**
+       * Load data for dropdowns with caching
+       */
+      if (column === 'Category') {
+        if (categoriesCache) {
+          return Promise.resolve(categoriesCache);
+        }
+        
+        return fetch('/dayplanning/get_categories/')
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              categoriesCache = data.categories;
+              return categoriesCache;
+            }
+            return [];
+          })
+          .catch(() => []);
+      }
+      
+      if (column === 'Source') {
+        if (locationsCache) {
+          return Promise.resolve(locationsCache);
+        }
+        
+        return fetch('/dayplanning/get_locations/')
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              locationsCache = data.locations;
+              return locationsCache;
+            }
+            return [];
+          })
+          .catch(() => []);
+      }
+      
+      return Promise.resolve([]);
+    }
+    
+    // ========== END FRESH DROPDOWN FUNCTIONALITY ==========
+    
+    function autoFetchRelatedFields(row, platingStockNo) {
+      /**
+       * Auto-populate Polishing Stk No and Plating Colour based on Plating Stk No
+       * 
+       * Logic:
+       * 1. Extract model number and color code from Plating Stk No
+       * 2. Generate Polishing Stk No by replacing color code with 'X'
+       * 3. Fetch Plating Colour from backend based on color code
+       * 
+       * Example:
+       * Input: 1805SAB02
+       * Output: Polishing Stk No = 1805XAB02, Plating Colour = [fetched from backend]
+       */
+      
+      if (!platingStockNo || platingStockNo.length < 8) {
+        return; // Too short to be valid
+      }
+      
+      try {
+        // Validate format and extract components
+        const platingBase = platingStockNo.split("/")[0];
+        
+        // Check if ends with "02"
+        if (!platingBase.endsWith("02")) {
+          showAutoFetchMessage("Plating Stk No must end with '02'", 'warning');
+          return;
+        }
+        
+        // Extract model, color code, and suffix using regex
+        const match = platingBase.match(/^(\d+)([A-Z])([A-Z][A-Z]02)$/);
+        if (!match) {
+          showAutoFetchMessage("Invalid Plating Stk No format. Expected: ModelNumber + ColorCode + LettersLetters02", 'warning');
+          return;
+        }
+        
+        const [, modelNumber, colorCode, suffix] = match;
+        
+        // Generate Polishing Stk No by replacing color code with 'X'
+        const polishingStockNo = `${modelNumber}X${suffix}`;
+        row['Polishing Stk No'] = polishingStockNo;
+        
+        // Mark as auto-filled for visual indication
+        if (!row._autoFilled) row._autoFilled = [];
+        if (!row._autoFilled.includes('Polishing Stk No')) {
+          row._autoFilled.push('Polishing Stk No');
+        }
+        
+        // Show loading state
+        showAutoFetchMessage("Auto-fetching plating colour...", 'info');
+        
+        // Fetch plating colour from backend
+        fetchPlatingColour(colorCode, platingStockNo)
+          .then(platingColour => {
+            if (platingColour) {
+              row['Plating Colour'] = platingColour;
+              // Mark plating colour as auto-filled
+              if (!row._autoFilled.includes('Plating Colour')) {
+                row._autoFilled.push('Plating Colour');
+              }
+              showAutoFetchMessage(`✅ Auto-filled: Polishing Stk No → ${polishingStockNo}, Plating Colour → ${platingColour}`, 'success');
+            } else {
+              showAutoFetchMessage(`✅ Polishing Stk No auto-filled → ${polishingStockNo}. Please manually enter Plating Colour.`, 'warning');
+            }
+            // Re-render table to show updated values
+            renderTable();
+          })
+          .catch(error => {
+            console.error('Error fetching plating colour:', error);
+            showAutoFetchMessage(`✅ Polishing Stk No auto-filled → ${polishingStockNo}. Could not fetch Plating Colour.`, 'warning');
+            // Re-render table to show at least the polishing stock number
+            renderTable();
+          });
+        
+      } catch (error) {
+        console.error('Error in auto-fetch:', error);
+        showAutoFetchMessage("Error processing Plating Stk No", 'error');
+      }
+    }
+    
+    function fetchPlatingColour(colorCode, platingStockNo) {
+      /**
+       * Fetch plating colour from backend based on color code
+       * This makes an API call to validate and get the plating colour
+       */
+      return fetch('/dayplanning/get_plating_colour/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+          color_code: colorCode,
+          plating_stock_no: platingStockNo
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && data.plating_colour) {
+          return data.plating_colour;
+        } else {
+          console.warn('Could not fetch plating colour:', data.error || 'Unknown error');
+          return null;
+        }
+      })
+      .catch(error => {
+        console.error('API error:', error);
+        return null;
+      });
+    }
+    
+    function showAutoFetchMessage(message, type = 'info') {
+      /**
+       * Show temporary message for auto-fetch operations
+       */
+      const messageElement = document.createElement('div');
+      messageElement.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        padding: 12px 20px;
+        border-radius: 6px;
+        font-weight: 500;
+        max-width: 400px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: opacity 0.3s ease;
+      `;
+      
+      // Style based on type
+      switch(type) {
+        case 'success':
+          messageElement.style.backgroundColor = '#d4edda';
+          messageElement.style.color = '#155724';
+          messageElement.style.borderLeft = '4px solid #28a745';
+          break;
+        case 'warning':
+          messageElement.style.backgroundColor = '#fff3cd';
+          messageElement.style.color = '#856404';
+          messageElement.style.borderLeft = '4px solid #ffc107';
+          break;
+        case 'error':
+          messageElement.style.backgroundColor = '#f8d7da';
+          messageElement.style.color = '#721c24';
+          messageElement.style.borderLeft = '4px solid #dc3545';
+          break;
+        default: // info
+          messageElement.style.backgroundColor = '#d1ecf1';
+          messageElement.style.color = '#0c5460';
+          messageElement.style.borderLeft = '4px solid #17a2b8';
+      }
+      
+      messageElement.textContent = message;
+      document.body.appendChild(messageElement);
+      
+      // Auto-remove after 4 seconds
+      setTimeout(() => {
+        messageElement.style.opacity = '0';
+        setTimeout(() => {
+          if (messageElement.parentNode) {
+            document.body.removeChild(messageElement);
+          }
+        }, 300);
+      }, 4000);
+    }
+    
+    // ========== END AUTO-FETCH FUNCTIONALITY ==========
+
+    // Remove SweetAlert from new model; simply display an empty table.
+    addModelButton.addEventListener('click', handleAddModel);
+    fileUploadInput.addEventListener('change', handleFileSelect);
+
+    function createEmptyRow() {
+      return {
+        'S.NO': String(tableData.length + 1),
+        'Plating Stk No': '',
+        'Polishing Stk No': '',
+        'Plating Colour': '',
+        'Category': '',
+        'Input Qty': '',
+        'Source': ''
+      };
+    }
+
+    // Replace the handleFileSelect function with this enhanced version:
+
+function handleFileSelect(e) {
+  const selectedFiles = Array.from(e.target.files);
+  if (!selectedFiles.length) return;
+  
+  // Only allow one file - take the first one
+  const file = selectedFiles[0];
+  
+  const validTypes = [
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-excel'
+  ];
+  if (!validTypes.includes(file.type) && !file.name.endsWith('.xls') && !file.name.endsWith('.xlsx')) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Invalid file format',
+      text: 'Please upload only Excel files (.xlsx, .xls)',
+      width: '500px'
+    });
+    return;
+  }
+
+  // Clear any existing data
+  files = [];
+  tableData = [];
+  fileDataMap.clear();
+
+  // Add the new file
+  files.push(file);
+
+  // Show loading state
+  Swal.fire({
+    title: 'Processing File...',
+    text: 'Validating columns and reading data...',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    showConfirmButton: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
+  // Prepare FormData for AJAX upload
+  const formData = new FormData();
+  formData.append('file', file);
+
+  fetch('/dayplanning/bulk_upload/preview/', {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    Swal.close(); // Close loading dialog
+    
+    if (data.success) {
+      // Store file data in map
+      fileDataMap.set(file.name, data.data);
+      
+      // Add new rows with proper S.NO
+      const newRows = data.data.map((row, idx) => ({
+        ...row,
+        'S.NO': String(idx + 1),
+        _fileSource: file.name // Track which file this row came from
+      }));
+      tableData = newRows;
+      dataTableSection.style.display = 'block';
+      renderTable();
+      renderFileList(); // Update file list display
+      
+      // Disable upload controls after successful upload
+      disableUploadControls();
+      
+      // Show success with warnings if any
+      if (data.warnings && data.warnings.length > 0) {
+        const warningText = data.warnings.slice(0, 5).join('<br>');
+        const moreWarnings = data.warnings.length > 5 ? `<br><br>... and ${data.warnings.length - 5} more warnings.` : '';
+        
+        Swal.fire({
+          icon: 'warning',
+          title: '⚠️ File Loaded with Warnings',
+          html: `
+            <div style="text-align: left;">
+              <p><strong>Excel data loaded successfully, but some rows have issues:</strong></p>
+              <div style="margin-top: 10px; font-size: 14px;">
+                ${warningText}${moreWarnings}
+              </div>
+              <p style="margin-top: 15px;"><strong>Please review and correct the data before submitting.</strong></p>
+            </div>
+          `,
+          width: '600px',
+          showConfirmButton: true
+        });
+      } else {
+        Swal.fire({
+          icon: 'success',
+          title: 'File Loaded Successfully!',
+          text: `${data.data.length} rows loaded for preview.`,
+          showConfirmButton: false,
+          timer: 2000
+        });
+      }
+    } else {
+      // Clear everything if processing failed
+      files = [];
+      tableData = [];
+      fileDataMap.clear();
+      renderFileList();
+      
+      // Enhanced error display for column validation
+      const isColumnError = data.error.includes('Column Name Mismatch') || 
+                           data.error.includes('Missing') && data.error.includes('column');
+      
+      if (isColumnError) {
+        Swal.fire({
+          icon: 'error',
+          title: '❌ Excel Format Error',
+          html: `
+            <div style="text-align: left;">
+              <div style="margin-bottom: 15px;">
+                ${data.error.replace(/\n/g, '<br>')}
+              </div>
+              <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-top: 15px;">
+                <strong>💡 How to fix:</strong><br>
+                1. Ensure your Excel file has exactly 7 columns<br>
+                2. Column names must match exactly (case-sensitive)<br>
+                3. No extra spaces in column names<br>
+                4. First row should be headers, data starts from row 2
+              </div>
+            </div>
+          `,
+          width: '650px',
+          showConfirmButton: true
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'File Processing Error',
+          text: data.error || 'Could not read Excel file.',
+          width: '500px'
+        });
+      }
+    }
+  })
+  .catch(error => {
+    Swal.close(); // Close loading dialog
+    console.error('Upload error:', error);
+    
+    // Clear everything if upload failed
+    files = [];
+    tableData = [];
+    fileDataMap.clear();
+    renderFileList();
+    
+    Swal.fire({
+      icon: 'error',
+      title: 'Upload Failed',
+      text: 'Could not upload file. Please check your connection and try again.',
+      width: '500px'
+    });
+  });
+
+  // Clear the file input so same file can be re-uploaded.
+  e.target.value = '';
+}
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    // ========== BUG FIX: MODIFIED handleAddModel FUNCTION ==========
+    function handleAddModel() {
+      // Check if upload controls are disabled
+      const addModelButton = document.getElementById('add-model-btn');
+      if (addModelButton.disabled) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Action Not Allowed',
+          text: 'Please clear the current table before adding new data.',
+          showConfirmButton: true
+        });
+        return;
+      }
+      
+      tableData = [createEmptyRow()];
+      dataTableSection.style.display = 'block';
+      renderTable();
+      
+      // DISABLE UPLOAD CONTROLS AFTER ADDING MODEL
+      disableUploadControls();
+    }
+
+    function renderFileList() {
+      fileListContainer.innerHTML = '';
+      if (!files.length) return;
+      files.forEach((file, index) => {
+        const fileCard = document.createElement('div');
+        fileCard.className = 'file-card';
+        fileCard.innerHTML = `
+          <div class="file-info">
+            <div class="file-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--clr-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+            </div>
+            <div class="file-details">
+              <div class="file-name" title="${file.name}">${file.name}</div>
+              <div class="file-size">${formatFileSize(file.size)}</div>
+            </div>
+          </div>
+          <button class="remove-file" data-index="${index}" aria-label="Remove file">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--clr-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        `;
+        fileListContainer.appendChild(fileCard);
+        fileCard.querySelector('.remove-file').addEventListener('click', () => {
+          Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you really want to remove this file? All data will be cleared.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              handleRemoveFile(index);
+              Swal.fire({
+                icon: 'success',
+                title: 'Deleted!',
+                text: 'File has been removed successfully.',
+                showConfirmButton: false,
+                timer: 2000
+              });
+            }
+          });
+        });
+      });
+    }
+
+    // ========== BUG FIX: MODIFIED handleRemoveFile FUNCTION ==========
+    function handleRemoveFile(index) {
+      // Clear all data since we only allow one file
+      files = [];
+      tableData = [];
+      fileDataMap.clear();
+      
+      // Update displays
+      renderFileList();
+      renderTable();
+      
+      // Hide table since no data remains
+      dataTableSection.style.display = 'none';
+      
+      // ENABLE UPLOAD CONTROLS WHEN FILE IS REMOVED
+      enableUploadControls();
+    }
+
+// Replace the renderTable function with this version that removes sorting:
+
+function renderTable() {
+  if (!tableData.length) {
+    dataTableContainer.innerHTML = `
+      <div class="empty-table">
+        <p>No data available</p>
+        <p>Upload an Excel file or click "Add Model (Table)" to start</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Remove sorting logic - use original tableData order
+  const sortedData = [...tableData]; // No sorting, just use original order
+
+  const table = document.createElement('table');
+  table.className = 'data-table';
+  const thead = document.createElement('thead');
+  const headerRow = document.createElement('tr');
+  
+  columns.forEach(column => {
+    const th = document.createElement('th');
+    // Remove sorting functionality - just show column name
+    th.textContent = column;
+    // Remove click event listener for sorting
+    // th.addEventListener('click', () => handleSort(column)); // REMOVED
+    headerRow.appendChild(th);
+  });
+  
+  const actionsTh = document.createElement('th');
+  actionsTh.className = 'actions';
+  actionsTh.textContent = 'Actions';
+  headerRow.appendChild(actionsTh);
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+  
+  const tbody = document.createElement('tbody');
+  sortedData.forEach((row, rowIndex) => {
+    const tr = document.createElement('tr');
+    tr.classList.add('table-row-animation');
+    columns.forEach(column => {
+      const td = document.createElement('td');
+      if (column === 'S.NO') {
+        td.textContent = row[column];
+      } else {
+        td.className = 'editable-cell';
+        td.textContent = row[column];
+        
+        // Add visual indicator for auto-filled fields
+        if ((column === 'Polishing Stk No' || column === 'Plating Colour') && row[column] && row._autoFilled && row._autoFilled.includes(column)) {
+          td.style.backgroundColor = '#e8f5e8';
+          td.style.borderLeft = '3px solid #28a745';
+          td.title = 'Auto-filled based on Plating Stk No';
+        }
+        
+        td.addEventListener('click', () => {
+          const currentValue = row[column] || '';
+          
+          // Special handling for dropdown fields
+          if (column === 'Category' || column === 'Source') {
+            createSimpleDropdown(td, row, column, currentValue);
+            return;
+          }
+          
+          const input = document.createElement('input');
+          input.className = 'cell-input';
+          input.value = currentValue;
+          td.textContent = '';
+          td.appendChild(input);
+          input.focus();
+          
+          // Auto-fetch functionality for Plating Stk No
+          if (column === 'Plating Stk No') {
+            input.addEventListener('blur', () => {
+              const platingStockNo = input.value.trim();
+              if (platingStockNo) {
+                autoFetchRelatedFields(row, platingStockNo);
+              }
+              handleBlur();
+            });
+          }
+          
+          const handleBlur = () => {
+            row[column] = input.value;
+            td.textContent = input.value;
+            input.removeEventListener('blur', handleBlur);
+            input.removeEventListener('keydown', handleKeydown);
+          };
+          const handleKeydown = (e) => {
+            if (e.key === 'Enter') {
+              if (column === 'Plating Stk No') {
+                const platingStockNo = input.value.trim();
+                if (platingStockNo) {
+                  autoFetchRelatedFields(row, platingStockNo);
+                }
+              }
+              handleBlur();
+            } else if (e.key === 'Escape') {
+              td.textContent = currentValue;
+            }
+          };
+          input.addEventListener('blur', handleBlur);
+          input.addEventListener('keydown', handleKeydown);
+        });
+      }
+      tr.appendChild(td);
+    });
+    
+    const actionsTd = document.createElement('td');
+    actionsTd.className = 'actions';
+    const deleteButton = document.createElement('button');
+    deleteButton.className = 'btn-delete';
+    deleteButton.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+         viewBox="0 0 24 24" fill="none" stroke="var(--clr-muted)" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" class="icon btn-delete-icon">
+        <polyline points="3 6 5 6 21 6"></polyline>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        <line x1="10" y1="11" x2="10" y2="17"></line>
+        <line x1="14" y1="11" x2="14" y2="17"></line>
+      </svg>
+    `;
+
+    // Confirmation for deleting a row
+    deleteButton.addEventListener('click', () => {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you really want to delete this row?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if (result.isConfirmed) {
+            const originalIndex = tableData.findIndex(r => r['S.NO'] === row['S.NO']);
+            if (originalIndex !== -1) {
+            handleDeleteRow(originalIndex);
+            }
+        }
+      });
+    });
+    actionsTd.appendChild(deleteButton);
+    tr.appendChild(actionsTd);
+    tbody.appendChild(tr);
+  });
+  
+  // Add extra row for new row addition (Excel-like row)
+  const addRowTR = document.createElement('tr');
+  const addRowTD = document.createElement('td');
+  addRowTD.colSpan = columns.length + 1;
+  addRowTD.style.textAlign = 'center';
+  addRowTD.style.cursor = 'pointer';
+  addRowTD.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+     stroke="var(--clr-primary)" stroke-width="2" stroke-linecap="round"
+     stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+  `;
+  addRowTD.addEventListener('click', () => {
+    tableData.push(createEmptyRow());
+    renderTable();
+  });
+  addRowTR.appendChild(addRowTD);
+  tbody.appendChild(addRowTR);
+  table.appendChild(tbody);
+  dataTableContainer.innerHTML = '';
+  dataTableContainer.appendChild(table);
+
+  // Add Submit and Cancel buttons below the table
+  const tableActionsContainer = document.createElement('div');
+  tableActionsContainer.className = 'table-actions';
+  tableActionsContainer.style.display = 'flex';
+  tableActionsContainer.style.justifyContent = 'center';
+  tableActionsContainer.style.gap = '1rem';
+  tableActionsContainer.style.marginTop = '1rem';
+  
+  const submitButton = document.createElement('button');
+  submitButton.className = 'btn btn-outline';
+  submitButton.textContent = 'Submit';
+  
+  // Submit button event listener (keep existing functionality)
+        // Submit button event listener
+      submitButton.addEventListener('click', () => {
+        // Validate that we have data to submit
+        if (!tableData || tableData.length === 0) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'No Data',
+            text: 'Please add some data to the table before submitting.'
+          });
+          return;
+        }
+
+        // Filter out empty rows (rows where all fields except S.NO are empty)
+        const validRows = tableData.filter(row => {
+          const hasData = Object.keys(row).some(key => {
+            if (key === 'S.NO' || key === '_fileSource') return false; // Skip S.NO and internal fields for validation
+            return row[key] && row[key].toString().trim() !== '';
+          });
+          return hasData;
+        });
+
+        if (validRows.length === 0) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'No Valid Data',
+            text: 'Please ensure at least one row has complete data before submitting.'
+          });
+          return;
+        }
+
+        // Show loading state
+        Swal.fire({
+          title: 'Processing...',
+          text: 'Please wait while we process your data.',
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          showConfirmButton: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        // Clean rows by removing internal fields
+        const cleanRows = validRows.map(row => {
+          const cleanRow = { ...row };
+          delete cleanRow._fileSource;
+          return cleanRow;
+        });
+
+        // Send data to the bulk upload endpoint
+        fetch('/dayplanning/bulk_upload/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          body: JSON.stringify({ rows: cleanRows })
+        })
+        .then(async response => {
+          const contentType = response.headers.get('content-type');
+          let data = {};
+
+          if (contentType && contentType.includes('application/json')) {
+            data = await response.json();
+          } else {
+            const text = await response.text();
+            try {
+              data = JSON.parse(text);
+            } catch (e) {
+              data = { error: text };
+            }
+          }
+
+          if (response.ok && data.success) {
+            let alertContent = data.message || 'Your data has been submitted successfully.';
+            let alertType = 'success';
+            let alertTitle = 'Success!';
+
+            if (data.failed_rows && data.failed_rows.length > 0) {
+              // Partial success - some rows failed
+              alertType = 'warning';
+              alertTitle = '⚠️ Partial Success';
+              const failedRowsText = data.failed_rows.slice(0, 10).join('<br>');
+              const moreErrors = data.failed_rows.length > 10
+                ? `<br><br>... and ${data.failed_rows.length - 10} more errors.`
+                : '';
+              alertContent = `
+                <div style="text-align:left;">
+                  <strong>${data.message}</strong><br><br>
+                  <strong>Details:</strong><br>
+                  ${failedRowsText}${moreErrors}
+                </div>
+              `;
+
+              // Extract failed row numbers from error messages
+              const failedRowNumbers = new Set();
+              data.failed_rows.forEach(errorMsg => {
+                const match = errorMsg.match(/Row (\d+):/);
+                if (match) {
+                  failedRowNumbers.add(parseInt(match[1]));
+                }
+              });
+
+              // Remove successful rows, keep only failed rows
+              if (failedRowNumbers.size > 0) {
+                // Create a mapping of original row indices to current tableData indices
+                const originalToCurrentMapping = new Map();
+                validRows.forEach((row, validIndex) => {
+                  const originalRowIndex = validIndex + 1; // Row numbers start from 1
+                  const currentIndex = tableData.findIndex(tableRow => 
+                    tableRow['S.NO'] === row['S.NO'] || 
+                    (tableRow['Plating Stk No'] === row['Plating Stk No'] && 
+                     tableRow['Polishing Stk No'] === row['Polishing Stk No'] && 
+                     tableRow['Plating Colour'] === row['Plating Colour'] && 
+                     tableRow['Category'] === row['Category'] && 
+                     tableRow['Input Qty'] === row['Input Qty'] && 
+                     tableRow['Source'] === row['Source'])
+                  );
+                  if (currentIndex !== -1) {
+                    originalToCurrentMapping.set(originalRowIndex, currentIndex);
+                  }
+                });
+
+                // Filter tableData to keep only failed rows
+                const failedRows = tableData.filter((row, index) => {
+                  // Check if this row corresponds to any failed row
+                  for (let [originalIndex, currentIndex] of originalToCurrentMapping.entries()) {
+                    if (currentIndex === index && failedRowNumbers.has(originalIndex)) {
+                      return true;
+                    }
+                  }
+                  return false;
+                });
+
+                // Re-index the failed rows
+                tableData = failedRows.map((row, index) => ({
+                  ...row,
+                  'S.NO': String(index + 1)
+                }));
+
+                // Re-render the table with only failed rows
+                renderTable();
+              }
+            } else {
+              // ========== BUG FIX: Complete success - clear all data and ENABLE UPLOAD CONTROLS ==========
+              tableData = [];
+              files = [];
+              fileDataMap.clear();
+              renderTable();
+              renderFileList();
+              dataTableSection.style.display = 'none';
+              
+              // ENABLE UPLOAD CONTROLS AFTER SUCCESSFUL SUBMISSION
+              enableUploadControls();
+            }
+
+            Swal.fire({
+              icon: alertType,
+              title: alertTitle,
+              html: alertContent,
+              width: '600px',
+              showConfirmButton: true
+            });
+          } else {
+            // Handle error response
+            let errorHtml = '';
+            if (data.failed_rows && data.failed_rows.length > 0) {
+              errorHtml = '<div style="text-align:left;">' +
+                data.failed_rows.map(msg => `<div>${msg}</div>`).join('') +
+                '</div>';
+            }
+            Swal.fire({
+              icon: 'error',
+              title: 'Submission Failed',
+              html: (data.error ? `<div>${data.error}</div>` : '') + errorHtml,
+              width: '600px',
+              showConfirmButton: true
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Submission error:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Network Error',
+            text: 'Could not submit data. Please check your connection and try again.',
+            showConfirmButton: true
+          });
+        });
+      });
+      
+  // Complete Cancel button setup in your renderTable function:
+
+const cancelButton = document.createElement('button');
+cancelButton.className = 'btn btn-outline';
+cancelButton.textContent = 'Cancel';
+// Apply red styling for the Cancel button
+cancelButton.style.borderColor = 'red';
+cancelButton.style.color = 'red';
+
+// Enhanced Cancel button event listener with confirmation
+cancelButton.addEventListener('click', () => {
+  // Show confirmation dialog before clearing data
+  Swal.fire({
+    title: 'Are you sure?',
+    html: `
+      <div style="text-align: center;">
+        <p>Do you really want to cancel?</p>
+        <p style="color: #d33; font-weight: bold;">⚠️ All unsaved data will be lost and the table will be cleared.</p>
+      </div>
+    `,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Yes, cancel it!',
+    cancelButtonText: 'No, keep editing',
+    reverseButtons: true, // This puts "No, keep editing" on the right side
+    width: '500px'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // User confirmed - proceed with clearing data
+      tableData = [];
+      files = [];
+      fileDataMap.clear();
+      renderTable();
+      renderFileList();
+      dataTableSection.style.display = 'none';
+      
+      // ENABLE UPLOAD CONTROLS WHEN CANCELLED
+      enableUploadControls();
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Cancelled Successfully!',
+        text: 'The table has been cancelled and all data cleared.',
+        showConfirmButton: false,
+        timer: 2000
+      });
+    }
+    // If user clicks "No, keep editing" or cancels, do nothing - just stay on the page
+  });
+});
+  
+  tableActionsContainer.appendChild(submitButton);
+  tableActionsContainer.appendChild(cancelButton);
+  dataTableContainer.appendChild(tableActionsContainer);
+}
+
+// Also remove the handleSort function since it's no longer needed:
+// function handleSort(column) { ... } // DELETE THIS FUNCTION
+
+// And remove these sorting-related variables from the top:
+// let sortColumn = null;     // DELETE THIS LINE
+// let sortDirection = 'asc'; // DELETE THIS LINE
+    function formatFileSize(bytes) {
+      if (!bytes) return '0 Bytes';
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(1024));
+      return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
+    }
+
+    function generateMockData() {
+      return Array.from({ length: 10 }, (_, i) => ({
+        'S.NO': String(i + 1),
+        'Plating Stk No': `PS${i + 1}`,
+        'Polishing Stk No': `PO${i + 1}`,
+        'Plating Colour': ['Silver', 'Gold', 'Black'][i % 3],
+        'Category': ['Category A', 'Category B', 'Category C'][i % 3],
+        'Input Qty': 10 + i,
+        'Source': `Source_${i + 1}`
+      }));
+    }
+
+    // ========== BUG FIX: MODIFIED handleDeleteRow FUNCTION ==========
+    function handleDeleteRow(index) {
+      tableData.splice(index, 1);
+      
+      // Check if table is now empty
+      if (tableData.length === 0) {
+        // Clear all data and files when table becomes empty
+        files = [];
+        fileDataMap.clear();
+        renderFileList();
+        dataTableSection.style.display = 'none';
+        
+        // ENABLE UPLOAD CONTROLS WHEN TABLE IS EMPTY
+        enableUploadControls();
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'All data cleared',
+          text: 'Table is empty. Upload controls are now enabled.',
+          showConfirmButton: false,
+          timer: 2000
+        });
+      } else {
+        // Re-index remaining rows
+        tableData = tableData.map((row, idx) => ({
+          ...row,
+          'S.NO': String(idx + 1)
+        }));
+        renderTable();
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'Row deleted',
+          text: 'Row removed successfully',
+          showConfirmButton: false,
+          timer: 2000
+        });
+      }
+    }
+
+    function showToast(title, message, type = 'default') {
+      const toastContainer = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <div class="toast-content">
+          <div class="toast-title">${title}</div>
+          <div class="toast-description">${message}</div>
+        </div>
+        <button class="toast-close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="var(--clr-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      `;
+      toastContainer.appendChild(toast);
+      toast.querySelector('.toast-close').addEventListener('click', () => {
+        toast.style.animation = 'fadeOut 0.3s forwards';
+        setTimeout(() => toastContainer.removeChild(toast), 300);
+      });
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.style.animation = 'fadeOut 0.3s forwards';
+          setTimeout(() => { if (toast.parentNode) toastContainer.removeChild(toast); }, 300);
+        }
+      }, 5000);
+    }
+
+    // Drag & Drop events
+    fileUploadArea.addEventListener('click', () => fileUploadInput.click());
+    fileUploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      fileUploadArea.classList.add('dragover');
+    });
+    fileUploadArea.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      fileUploadArea.classList.remove('dragover');
+    });
+    fileUploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      fileUploadArea.classList.remove('dragover');
+      const droppedFiles = e.dataTransfer.files;
+      fileUploadInput.files = droppedFiles;
+      const changeEvent = new Event('change');
+      fileUploadInput.dispatchEvent(changeEvent);
+    });
+  });
+</script>
+  
+{% endblock %}

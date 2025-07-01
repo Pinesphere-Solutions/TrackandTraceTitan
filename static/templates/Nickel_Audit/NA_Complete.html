@@ -1,0 +1,524 @@
+{% extends "base.html" %} {% load static %} {% block content %}
+  <!-- Titan Global Stlyes -->
+ <link rel="stylesheet" href="{% static 'assets/css/titan-style.css' %}">
+ <div class="content-wrapper">
+  <h5 class="text-left mt-0 mb-3">
+    Nickel Audit Complete Table
+  </h5>
+  <div class="row">
+    <div class="col-12 grid-margin stretch-card">
+      <div class="card">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table id="order-listing" class="table">
+              <thead>
+                <tr>
+                  <th>S.No</th>
+                  <th>Date and Time</th>
+                  <th>Model/Stock No</th>
+                  <th>Plating Color</th>
+                  <th>Polish Finish</th>
+                  <th>Version</th>
+                  <th>Source - Location</th>
+                  <th>Tray Type Capacity</th>
+                  <th>No of Tray</th>
+                  <th>LOT Quantity</th>
+                  <th>Accept Quantity</th>
+                  <th>Reject Quantity</th>
+                  <th>Audit Quantity</th>
+                  <th>Process Status</th>
+                  <th>Action</th>
+                  <th>Batch Status</th>
+                  <th>Current Location</th>
+                  <th>Remarks</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td>2025-05-29 10:00 AM</td>
+                  <td style="position: relative">
+                    <span class="model-hover-trigger" style="cursor: pointer">
+                      1805
+                    </span>
+                  </td>
+                  <td>ISP</td>
+                  <td>A - Buffed</td>
+                  <td>A, B, D</td>
+                  <td>Nil</td>
+                  <td>Normal 16</td>
+                  <td>5</td>
+                  <td>100
+                    <input type="checkbox" style="margin-right:6px;vertical-align:middle;" />
+                  </td>
+                  <td>25</td>
+                  <td>5</td>
+                  <td>30
+                    <input type="checkbox" style="margin-right:6px;vertical-align:middle;" />
+                  </td>
+                                <td>
+                  <div style="background: #0c8249; color: white; width: 16px; height: 16px; font-size: 10px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;">Q</div>
+                  <div style="background: #0c8249; color: white; width: 16px; height: 16px; font-size: 10px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; margin-left: 6px; padding: 0 4px; text-align: center;">QC</div>
+                </td>
+                <!-- Action column data -->
+                                  <td>
+                  <span style="display:inline-block;">
+                    <img src="{% static 'assets/icons/edit1.png' %}" alt="Edit" style="width: 20px; margin-right: 8px; height: auto;" />
+                  </span>
+                  <span style="display:inline-block;">
+                    <img src="{% static 'assets/icons/bin.png' %}" alt="Delete" style="width: 20px; height: auto;" />
+                  </span>
+                  <button style="margin-left:8px; padding:4px 8px; font-size:11px; border-radius:20px; border:1px solid #0c8249; background:#eafff3; color:#0c8249; cursor:pointer;">Accept</button>
+                  <button style="margin-left:4px; padding:4px 8px; font-size:11px; border-radius:20px; border:1px solid #d25400; background:#fff3e6; color:#d25400; cursor:pointer;">Reject</button>
+                  <img src="{% static 'assets/icons/view.png' %}" alt="View" style="width: 20px; height: auto; margin-left:6px; vertical-align:middle; cursor:pointer;" />
+                </td>
+                  <td>
+                    <div style="border: 1px solid #0d5d17; background: #c5f9c2; color: #2f801b; font-size: 12px; padding: 6px 12px; border-radius: 20px; display: inline-block;">
+                      Yet to Release
+                    </div>
+                  </td>
+                  <td>
+                    <div style="border: 1px solid #9adeed; background: #d1edf3; color: #033b5d; font-size: 12px; padding: 6px 12px; border-radius: 20px; display: inline-block;">
+                      Day Planning
+                    </div>
+                  </td>
+                  <td style="padding: 8px 0 8px 8px">
+                                                                  <label style="cursor: pointer; display: inline-flex; align-items: center;">
+                                                                    <input type="checkbox" class="playpause-toggle" style="display: none" />
+                                                                    <img src="{% static 'assets/icons/play1.png' %}" alt="Play" class="play-icon" style="width: 20px; height: 20px;" />
+                                                                    <img src="{% static 'assets/icons/pause.png' %}" alt="Pause" class="pause-icon" style="display: none; width: 16px; height: 16px;" />
+                                                                    <img src="{% static 'assets/icons/chat.png' %}" alt="Chat" class="chat-icon" style="width: 20px; height: 20px; margin-left: 8px; cursor: pointer;" />
+                                                                  </label>
+                                                                </td>
+                  
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>2025-05-29 11:30 AM</td>
+                  <td style="position: relative">
+                    <span class="model-hover-trigger" style="cursor: pointer">
+                      1765
+                    </span>
+                  </td>
+                  <td>ISP</td>
+                  <td>A - Buffed</td>
+                  <td>A</td>
+                  <td>Nil</td>
+                  <td>Jumbo 12</td>
+                  <td>3</td>
+                  <td>60
+                    <input type="checkbox" style="margin-right:6px;vertical-align:middle;" />
+                  </td>
+                  <td>33</td>
+                  <td>65</td>
+                  <td>10
+                    <input type="checkbox" style="margin-right:6px;vertical-align:middle;" />
+                  </td>
+                                                                <td>
+                                  <div style="background: #0c8249; color: white; width: 16px; height: 16px; font-size: 10px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;">Q</div>
+                                  <div style="background: #0c8249; color: white; width: 16px; height: 16px; font-size: 10px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; margin-left: 6px; padding: 0 4px; text-align: center;">QC</div>
+                                </td>
+                  <!-- Action column data -->
+                                  <td>
+                  <span style="display:inline-block;">
+                    <img src="{% static 'assets/icons/edit1.png' %}" alt="Edit" style="width: 20px; margin-right: 8px; height: auto;" />
+                  </span>
+                  <span style="display:inline-block;">
+                    <img src="{% static 'assets/icons/bin.png' %}" alt="Delete" style="width: 20px; height: auto;" />
+                  </span>
+                  <button style="margin-left:8px; padding:4px 8px; font-size:11px; border-radius:20px; border:1px solid #0c8249; background:#eafff3; color:#0c8249; cursor:pointer;">Accept</button>
+                  <button style="margin-left:4px; padding:4px 8px; font-size:11px; border-radius:20px; border:1px solid #d25400; background:#fff3e6; color:#d25400; cursor:pointer;">Reject</button>
+                  <img src="{% static 'assets/icons/view.png' %}" alt="View" style="width: 20px; height: auto; margin-left:6px; vertical-align:middle; cursor:pointer;" />
+                </td>
+                  <td>
+                    <div style="border: 1px solid #4997ac;
+                          background-color: #d1f2f3;
+                          color: #03425d; font-size: 12px; padding: 6px 12px; border-radius: 20px; display: inline-block;">
+                      On-Hold
+                    </div>
+                  </td>
+                  <td>
+                    <div style="border: 1px solid #9adeed; background: #d1edf3; color: #033b5d; font-size: 12px; padding: 6px 12px; border-radius: 20px; display: inline-block;">
+                      Day Planning
+                    </div>
+                  </td>
+                  <td style="padding: 8px 0 8px 8px">
+                                                                  <label style="cursor: pointer; display: inline-flex; align-items: center;">
+                                                                    <input type="checkbox" class="playpause-toggle" style="display: none" />
+                                                                    <img src="{% static 'assets/icons/play1.png' %}" alt="Play" class="play-icon" style="width: 20px; height: 20px;" />
+                                                                    <img src="{% static 'assets/icons/pause.png' %}" alt="Pause" class="pause-icon" style="display: none; width: 16px; height: 16px;" />
+                                                                    <img src="{% static 'assets/icons/chat.png' %}" alt="Chat" class="chat-icon" style="width: 20px; height: 20px; margin-left: 8px; cursor: pointer;" />
+                                                                  </label>
+                                                                </td>
+                
+                </tr>
+                <!-- static row -->
+                <tr>
+                  <td>4</td>
+                  <td>2025-05-29 12:45 PM</td>
+                  <td style="position: relative">
+                    <span class="model-hover-trigger" style="cursor: pointer">
+                      7456
+                    </span>
+                  </td>
+                  <td>Rose Gold</td>
+                  <td>A - Buffed</td>
+                  <td>A</td>
+                  <td>Nil</td>
+                  <td>Normal 16</td>
+                  <td>2</td>
+                  <td>20
+                    <input type="checkbox" style="margin-right:6px;vertical-align:middle;" />
+                  </td>
+                  <td>25</td>
+                  <td>40</td>
+                  <td>5
+                    <input type="checkbox" style="margin-right:6px;vertical-align:middle;" />
+                  </td>
+                                                                <td>
+                                  <div style="background: #0c8249; color: white; width: 16px; height: 16px; font-size: 10px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;">Q</div>
+                                  <div style="background: #0c8249; color: white; width: 16px; height: 16px; font-size: 10px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; margin-left: 6px; padding: 0 4px; text-align: center;">QC</div>
+                                </td>
+                <!-- Action column data -->
+                                  <td>
+                  <span style="display:inline-block;">
+                    <img src="{% static 'assets/icons/edit1.png' %}" alt="Edit" style="width: 20px; margin-right: 8px; height: auto;" />
+                  </span>
+                  <span style="display:inline-block;">
+                    <img src="{% static 'assets/icons/bin.png' %}" alt="Delete" style="width: 20px; height: auto;" />
+                  </span>
+                  <button style="margin-left:8px; padding:4px 8px; font-size:11px; border-radius:20px; border:1px solid #0c8249; background:#eafff3; color:#0c8249; cursor:pointer;">Accept</button>
+                  <button style="margin-left:4px; padding:4px 8px; font-size:11px; border-radius:20px; border:1px solid #d25400; background:#fff3e6; color:#d25400; cursor:pointer;">Reject</button>
+                  <img src="{% static 'assets/icons/view.png' %}" alt="View" style="width: 20px; height: auto; margin-left:6px; vertical-align:middle; cursor:pointer;" />
+                </td>
+                  <td>
+                    <div style="border: 1px solid #a6a6a6;
+                          background-color: #dcdada;
+                          color: #505050; font-size: 12px; padding: 6px 12px; border-radius: 20px; display: inline-block;">
+                      Yet to Start
+                    </div>
+                  </td>
+                  <td>
+                    <div style="border: 1px solid #9adeed; background: #d1edf3; color: #033b5d; font-size: 12px; padding: 6px 12px; border-radius: 20px; display: inline-block;">
+                      Day Planning
+                    </div>
+                  </td>
+                  <td style="padding: 8px 0 8px 8px">
+                                                                  <label style="cursor: pointer; display: inline-flex; align-items: center;">
+                                                                    <input type="checkbox" class="playpause-toggle" style="display: none" />
+                                                                    <img src="{% static 'assets/icons/play1.png' %}" alt="Play" class="play-icon" style="width: 20px; height: 20px;" />
+                                                                    <img src="{% static 'assets/icons/pause.png' %}" alt="Pause" class="pause-icon" style="display: none; width: 16px; height: 16px;" />
+                                                                    <img src="{% static 'assets/icons/chat.png' %}" alt="Chat" class="chat-icon" style="width: 20px; height: 20px; margin-left: 8px; cursor: pointer;" />
+                                                                  </label>
+                                                                </td>
+                  
+                </tr>
+                 <!-- static row -->
+                <tr>
+                  <td>3</td>
+                  <td>2025-05-29 12:45 PM</td>
+                  <td style="position: relative">
+                    <span class="model-hover-trigger" style="cursor: pointer">
+                      7456
+                    </span>
+                  </td>
+                  <td>Rose Gold</td>
+                  <td>A - Buffed</td>
+                  <td>A</td>
+                  <td>Nil</td>
+                  <td>Normal 16</td>
+                  <td>2</td>
+                  <td>20
+                    <input type="checkbox" style="margin-right:6px;vertical-align:middle;" />
+                  </td>
+                  <td>25</td>
+                  <td>40</td>
+                  <td>5
+                    <input type="checkbox" style="margin-right:6px;vertical-align:middle;" />
+                  </td>
+                                                         <td>
+                              <div style="background: #0c8249; color: white; width: 16px; height: 16px; font-size: 10px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;">Q</div>
+                              <div style="background: #0c8249; color: white; width: 16px; height: 16px; font-size: 10px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; margin-left: 6px; padding: 0 4px; text-align: center;">QC</div>
+                            </td>
+                  <!-- Action column data -->
+                                  <td>
+                  <span style="display:inline-block;">
+                    <img src="{% static 'assets/icons/edit1.png' %}" alt="Edit" style="width: 20px; margin-right: 8px; height: auto;" />
+                  </span>
+                  <span style="display:inline-block;">
+                    <img src="{% static 'assets/icons/bin.png' %}" alt="Delete" style="width: 20px; height: auto;" />
+                  </span>
+                  <button style="margin-left:8px; padding:4px 8px; font-size:11px; border-radius:20px; border:1px solid #0c8249; background:#eafff3; color:#0c8249; cursor:pointer;">Accept</button>
+                  <button style="margin-left:4px; padding:4px 8px; font-size:11px; border-radius:20px; border:1px solid #d25400; background:#fff3e6; color:#d25400; cursor:pointer;">Reject</button>
+                  <img src="{% static 'assets/icons/view.png' %}" alt="View" style="width: 20px; height: auto; margin-left:6px; vertical-align:middle; cursor:pointer;" />
+                </td>
+                  <td>
+                    <div style="border: 1px solid #0d5d17; background: #c5f9c2; color: #2f801b; font-size: 12px; padding: 6px 12px; border-radius: 20px; display: inline-block;">
+                      Released
+                    </div>
+                  </td>
+                  <td>
+                    <div style="border: 1px solid #9adeed; background: #d1edf3; color: #033b5d; font-size: 12px; padding: 6px 12px; border-radius: 20px; display: inline-block;">
+                      Day Planning
+                    </div>
+                  </td>
+                                                                                                                                 <td style="padding: 8px 0 8px 8px">
+                                                                  <label style="cursor: pointer; display: inline-flex; align-items: center;">
+                                                                    <input type="checkbox" class="playpause-toggle" style="display: none" />
+                                                                    <img src="{% static 'assets/icons/play1.png' %}" alt="Play" class="play-icon" style="width: 20px; height: 20px;" />
+                                                                    <img src="{% static 'assets/icons/pause.png' %}" alt="Pause" class="pause-icon" style="display: none; width: 16px; height: 16px;" />
+                                                                    <img src="{% static 'assets/icons/chat.png' %}" alt="Chat" class="chat-icon" style="width: 20px; height: 20px; margin-left: 8px; cursor: pointer;" />
+                                                                  </label>
+                                                                </td>
+                  
+                </tr>
+                <!-- Add more static rows as needed -->
+              </tbody>
+            </table>
+          </div>
+          <!-- Pagination Section -->
+          <div class="pagination-wrapper" style="margin-top: 8px">
+            <nav aria-label="Page navigation">
+              <ul class="pagination justify-content-end mb-0"></ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script nonce="{{ csp_nonce }}">
+    // Simple pagination (same as before)
+    document.addEventListener("DOMContentLoaded", function () {
+      const table = document.getElementById("order-listing");
+      if (!table) return;
+      const tbody = table.querySelector("tbody");
+      const rows = Array.from(tbody.querySelectorAll("tr"));
+      const rowsPerPage = 10;
+      let currentPage = 1;
+      function renderTable(page) {
+        tbody.innerHTML = "";
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        rows.slice(start, end).forEach((row) => tbody.appendChild(row));
+        renderPagination(page);
+      }
+      function renderPagination(page) {
+        let totalPages = Math.ceil(rows.length / rowsPerPage);
+        const pagination = document.querySelector(".pagination");
+        if (!pagination) return;
+        pagination.innerHTML = "";
+        // Previous
+        const prev = document.createElement("li");
+        prev.className = "page-item" + (page === 1 ? " disabled" : "");
+        prev.innerHTML = `<a class="page-link" href="#">Previous</a>`;
+        prev.onclick = function (e) {
+          e.preventDefault();
+          if (page > 1) renderTable(page - 1);
+        };
+        pagination.appendChild(prev);
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+          const li = document.createElement("li");
+          li.className = "page-item" + (i === page ? " active" : "");
+          li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+          li.onclick = function (e) {
+            e.preventDefault();
+            renderTable(i);
+          };
+          pagination.appendChild(li);
+        }
+        // Next
+        const next = document.createElement("li");
+        next.className = "page-item" + (page === totalPages ? " disabled" : "");
+        next.innerHTML = `<a class="page-link" href="#">Next</a>`;
+        next.onclick = function (e) {
+          e.preventDefault();
+          if (page < totalPages) renderTable(page + 1);
+        };
+        pagination.appendChild(next);
+      }
+      renderTable(currentPage);
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Script for Bin confirmation alert -->
+  <script nonce="{{ csp_nonce }}">
+    document.body.addEventListener("click", function (e) {
+      if (
+        e.target.tagName === "IMG" &&
+        e.target.getAttribute("alt") === "Delete" &&
+        e.target.src.includes("bin.png") &&
+        e.target.closest("table#order-listing")
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        Swal.fire({
+          title: "Are you sure?",
+          text: "Do you want to delete this row?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes",
+          cancelButtonText: "No",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            const row = e.target.closest("tr");
+            if (row) row.remove();
+            Swal.fire("Deleted!", "The row has been deleted.", "success");
+          }
+        });
+      }
+    });
+  </script>
+  <!-- Edit to enable editable input box for "Total Qty" row data -->
+  <script nonce="{{ csp_nonce }}">
+    document.addEventListener("DOMContentLoaded", function () {
+      document.body.addEventListener("click", function (e) {
+        if (
+          e.target.tagName === "IMG" &&
+          e.target.getAttribute("alt") === "Edit" &&
+          e.target.src.includes("edit1.png") &&
+          e.target.closest("table#order-listing")
+        ) {
+          e.preventDefault();
+          const row = e.target.closest("tr");
+          if (!row) return;
+          const qtyCell = row.children[9];
+          if (!qtyCell) return;
+          if (qtyCell.querySelector("input")) return;
+          const currentValue = qtyCell.textContent.trim();
+          qtyCell.innerHTML = `<input type="number" min="0" style="width:60px; padding:2px 4px; font-size:inherit;" value="${currentValue}" />`;
+          const input = qtyCell.querySelector("input");
+          input.focus();
+          input.select();
+          input.addEventListener("blur", function () {
+            qtyCell.textContent = input.value;
+          });
+          input.addEventListener("keydown", function (ev) {
+            if (ev.key === "Enter") {
+              input.blur();
+            }
+          });
+        }
+      });
+    });
+  </script>
+
+  <!-- Script for Model / Stock No - Image Mouse Hover -->
+  <script nonce="{{ csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function () {
+  function createImageTooltip(images, modelNo = "") {
+    let idx = 0;
+    const tooltip = document.createElement('div');
+    tooltip.className = 'model-image-tooltip';
+    if (!images.length) {
+      tooltip.innerHTML = `
+        <div style="padding: 20px; text-align: center; color: #888; font-size: 15px; min-width:220px; min-height:80px;">
+          <b>No image exists for model number:</b><br>
+          <span style="color:#028084">${modelNo || "N/A"}</span>
+        </div>
+      `;
+      return tooltip;
+    }
+    tooltip.innerHTML = `
+      <div class="image-slider" style="display:flex;align-items:center;justify-content:center;gap:8px;min-width:180px;">
+        <button class="slider-btn prev-btn" ${images.length <= 3 ? 'disabled' : ''}>&lt;</button>
+        <div style="display:flex;gap:6px;">
+          <img src="${images[0] || ''}" alt="Model Image" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid #eee;box-shadow:0 1px 4px #0001;" />
+          <img src="${images[1] || ''}" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid #eee;box-shadow:0 1px 4px #0001;${images[1] ? '' : 'opacity:0;'}" />
+          <img src="${images[2] || ''}" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid #eee;box-shadow:0 1px 4px #0001;${images[2] ? '' : 'opacity:0;'}" />
+        </div>
+        <button class="slider-btn next-btn" ${images.length <= 3 ? 'disabled' : ''}>&gt;</button>
+      </div>
+      <div style="text-align:center; font-size:12px; margin-top:4px;">
+        <span class="slider-index">1-3</span> / ${images.length}
+      </div>
+    `;
+    // Slider logic for 3 visible images
+    const imgEls = tooltip.querySelectorAll('.image-slider img');
+    const prevBtn = tooltip.querySelector('.prev-btn');
+    const nextBtn = tooltip.querySelector('.next-btn');
+    const idxSpan = tooltip.querySelector('.slider-index');
+    function updateImgs() {
+      for (let i = 0; i < 3; i++) {
+        if (images[idx + i]) {
+          imgEls[i].src = images[idx + i];
+          imgEls[i].style.opacity = "1";
+        } else {
+          imgEls[i].src = "";
+          imgEls[i].style.opacity = "0";
+        }
+      }
+    idxSpan.textContent = `${idx+1}`;      
+    prevBtn.disabled = (idx === 0);
+      nextBtn.disabled = (idx + 3 >= images.length);
+    }
+    prevBtn && prevBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (idx > 0) { idx--; updateImgs(); }
+    });
+    nextBtn && nextBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (idx + 3 < images.length) { idx++; updateImgs(); }
+    });
+    updateImgs();
+    return tooltip;
+  }
+
+  document.querySelectorAll('td[style*="position: relative"]').forEach(function(cell) {
+    const textSpan = cell.querySelector('span');
+    if (!textSpan) return;
+    let tooltip = null;
+    let hideTimeout = null;
+    let images = [];
+    let modelNo = textSpan.textContent.trim();
+    // Demo: 5 images for each model
+    if (modelNo === "1805") images = [
+      "/static/assets/images/imagePlaceholder.png",
+      "/static/assets/images/imagePlaceholder.png",
+      "/static/assets/images/imagePlaceholder.png",
+      "/static/assets/images/imagePlaceholder.png",
+      "/static/assets/images/imagePlaceholder.png"
+    ];
+    if (modelNo === "1765") images = [
+      "/static/assets/images/imagePlaceholder.png",
+      "/static/assets/images/imagePlaceholder.png",
+      "/static/assets/images/imagePlaceholder.png",
+      "/static/assets/images/imagePlaceholder.png",
+      "/static/assets/images/imagePlaceholder.png"
+    ];
+    if (modelNo === "7456") images = [
+      "/static/assets/images/imagePlaceholder.png",
+      "/static/assets/images/imagePlaceholder.png",
+      "/static/assets/images/imagePlaceholder.png",
+      "/static/assets/images/imagePlaceholder.png",
+      "/static/assets/images/imagePlaceholder.png"
+    ];
+
+    textSpan.addEventListener('mouseenter', function(e) {
+      if (tooltip) tooltip.remove();
+      tooltip = createImageTooltip(images, modelNo);
+      document.body.appendChild(tooltip);
+      tooltip.style.display = 'block';
+      const rect = textSpan.getBoundingClientRect();
+      tooltip.style.top = (window.scrollY + rect.bottom + 6) + 'px';
+      tooltip.style.left = (window.scrollX + rect.left) + 'px';
+    });
+    textSpan.addEventListener('mouseleave', function() {
+      hideTimeout = setTimeout(() => { if (tooltip) { tooltip.remove(); tooltip = null; } }, 150);
+    });
+    document.body.addEventListener('mousemove', function(e) {
+      if (!tooltip) return;
+      if (e.target === tooltip || tooltip.contains(e.target)) {
+        clearTimeout(hideTimeout);
+      } else if (e.target !== textSpan) {
+        hideTimeout = setTimeout(() => { if (tooltip) { tooltip.remove(); tooltip = null; } }, 150);
+      }
+    });
+  });
+});
+</script>
+  {% endblock %}
+</div>

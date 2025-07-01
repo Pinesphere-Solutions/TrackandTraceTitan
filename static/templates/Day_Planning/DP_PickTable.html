@@ -1,0 +1,4828 @@
+{% extends "base.html" %} 
+
+{% load static %} 
+{% load stock_filters %} 
+{% block content %}
+<style>
+  /* Zoom animation for modal user profile image */
+.modal-top-header img {
+  transition: transform 0.3s cubic-bezier(.4,2,.3,1), box-shadow 0.3s;
+  will-change: transform;
+  cursor: pointer;
+}
+
+.modal-top-header img:hover {
+  transform: scale(1.18) rotate(-2deg);
+  box-shadow: 0 4px 24px rgba(2,128,132,0.18);
+  z-index: 10;
+}
+    /* Only header cell is sticky for Plating Stk No */
+  #order-listing th:nth-child(3) {
+    position: sticky;
+    left: 180px;
+    z-index: 30;
+    background: #fff;
+    min-width: 100px;
+  }
+  /* Remove sticky from td, make it relative for tooltip stacking */
+  #order-listing td:nth-child(3) {
+    position: relative;
+    z-index: 31; /* higher than sticky th */
+    background: #fff;
+    min-width: 100px;
+    /* Remove position: sticky and left if present */
+  }
+  /* Tooltip always above everything */
+  .model-image-tooltip {
+    position: absolute;
+    z-index: 99999 !important;
+  }
+
+    /* Add to your CSS or <style> block */
+  .plating-color-indicator {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+/* Force specific table headers to wrap onto two lines */
+#order-listing th:nth-child(4),   /* Polishing Stk No */
+#order-listing th:nth-child(5),   /* Plating Color */
+#order-listing th:nth-child(7),   /* Polish Finish */
+#order-listing th:nth-child(9),   /* Tray Cate-Capacity */
+#order-listing th:nth-child(11),  /* No of Tray */
+#order-listing th:nth-child(12),  /* Input Qty */
+#order-listing th:nth-child(13)   /* Process Status */ 
+{
+  white-space: normal !important;
+  line-height: 1.2 !important;
+  word-break: break-word !important;
+  min-width: 70px;
+  max-width: 120px;
+  text-align: center;
+  vertical-align: middle;
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+}
+    /* Responsive fix for DP_PickTable.html white container and table */
+  .content-wrapper,
+  .card,
+  .card-body {
+    min-height: 0 !important;
+    max-height: none !important;
+    height: auto !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important; /* Enough space for pagination/footer */
+    background: #fff !important;
+    box-sizing: border-box !important;
+  }
+  
+  .table-responsive {
+    min-height: 0 !important;
+    max-height: none !important;
+    height: auto !important;
+    margin-bottom: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+    overflow-y: scroll !important; /* Hide vertical scrollbar */
+
+  }
+  
+  @media (max-width: 900px) {
+    .content-wrapper {
+      padding-bottom: 110px !important;
+    }
+    .table-responsive {
+      max-height: 50vh !important;
+    }
+  }
+  @media (max-width: 600px) {
+    .content-wrapper {
+      padding-bottom: 130px !important;
+    }
+    .table-responsive {
+      max-height: 40vh !important;
+    }
+  }
+  
+  /* Remove all overflow-x: hidden and overflow: hidden from containers and html/body */
+  html, body,
+  .content-wrapper,
+  .main-panel,
+  .row,
+  .card,
+  .card-body,
+  .table-responsive,
+  #order-listing {
+    overflow: visible !important;
+  }
+  /* Make sure the white container never overlaps the pagination */
+@media (max-width: 900px) {
+  .content-wrapper {
+    padding-bottom: 0 !important;
+  }
+  .table-responsive {
+    max-height: none !important;
+  }
+}
+@media (max-width: 600px) {
+  .content-wrapper {
+    padding-bottom: 0 !important;
+  }
+  .table-responsive {
+    max-height: none !important;
+  }
+}
+/* Ensure row highlight is visible for sticky S.No and Date/Time columns */
+tr.dp-row-action-highlight > td:nth-child(1),
+tr.dp-row-action-highlight > td:nth-child(2) {
+  background: #f0f8ff !important;   /* Match your highlight color */
+  z-index: 50 !important;
+  position: sticky;
+  left: 0; /* or left: 80px for 2nd col if needed */
+}
+tr.dp-row-action-highlight > td:nth-child(2) {
+  left: 80px; /* match your sticky left for 2nd column */
+}
+  @media (width: 1920px) {
+.row {
+  max-height: 600px !important; /* Adjust height for larger screens */
+}
+}
+/* Only increase the white container and table area height for Samsung Galaxy Tab A9+ (11") and similar tablets */
+@media (min-width: 900px) and (max-width: 1300px) and (min-height: 600px) and (max-height: 900px) {
+  .content-wrapper {
+    min-height: 750px !important;
+    height: 85vh !important;
+    max-height: 850px !important;
+    margin-top: 40px !important;
+    margin-bottom: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  .table-responsive {
+    min-height: 420px !important;
+    height: 60vh !important;
+    max-height: 520px !important;
+  }
+  .content-wrapper > h5,
+  .card-body > h5.text-left.mt-0.mb-4 {
+    margin-top: 0 !important;
+  }
+}
+/* Freeze S.No (first column) */
+#order-listing th:nth-child(1),
+#order-listing td:nth-child(1) {
+  box-shadow: 2px 0 2px -1px rgba(0,0,0,0.04);
+}
+
+/* Freeze Date and Time (second column) */
+/* ...existing code... */
+#order-listing th:nth-child(2),
+#order-listing td:nth-child(2) {
+  max-width: 110px !important;
+  width: 100px !important;
+  box-shadow: 2px 0 2px -1px rgba(0,0,0,0.03);
+  word-break: break-all;
+  white-space: normal;
+  text-align: center;
+  /* Make border visible above sticky col 1 */
+  border-left: 1.5px solid #d1d1d1 !important; /* Use a stronger color if needed */
+}
+#order-listing th:nth-child(1),
+#order-listing td:nth-child(1) {
+  position: sticky;
+  left: 0;
+  z-index: 30;
+  background: #fff;
+  min-width: 80px;
+}
+
+#order-listing th:nth-child(2),
+#order-listing td:nth-child(2) {
+  position: sticky;
+  left: 80px; /* width of col 1 */
+  z-index: 25;
+  background: #fff;
+  min-width: 100px;
+}
+
+#order-listing th:nth-child(3),
+#order-listing td:nth-child(3) {
+  position: sticky;
+  left: 180px; /* 80px (col 1) + 100px (col 2) */
+  z-index: 20;
+  background: #fff;
+  min-width: 100px;
+}
+
+/* For sticky header cell (top row, Date/Time) */
+#order-listing thead th:nth-child(2) {
+  z-index: 35;
+  background: #028084 !important;
+  color: #e5fcff !important;
+  border-left: 2px solid #fff !important; /* White border for header, or match your theme */
+}
+/* ...existing code... */
+
+/* When header and column intersect, header should be above */
+#order-listing thead th:nth-child(1) { z-index: 40; background: #028084 !important; color: #e5fcff !important; }
+#order-listing thead th:nth-child(2) { z-index: 35; background: #028084 !important; color: #e5fcff !important; }
+#order-listing thead th:nth-child(3) { z-index: 30; background: #028084 !important; color: #e5fcff !important; }
+
+ 
+
+/* When header and column intersect, header should be above */
+#order-listing thead th:nth-child(1) { z-index: 40; background: #028084 !important; color: #e5fcff !important; }
+#order-listing thead th:nth-child(2) { z-index: 35; background: #028084 !important; color: #e5fcff !important; }
+
+
+/* Optional: Prevent overlap on hover/focus */
+#order-listing th,
+#order-listing td {
+  background-clip: padding-box;
+}
+@media (min-width: 1800px) and (max-width: 2000px) and (min-height: 1100px) and (max-height: 1300px) {
+  #order-listing,
+  #order-listing th,
+  #order-listing td {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+  }
+}
+@media (min-width: 600px) and (max-width: 1024px) {
+  #order-listing,
+  #order-listing th,
+  #order-listing td {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+  }
+}
+
+/* Add this at the end of your <style> block in DP_PickTable.html */
+
+/* Disable horizontal scroll for table on tablets, but allow on desktop */
+@media (min-width: 600px) and (max-width: 1024px) {
+  .table-responsive {
+    overflow-x: hidden !important;
+  }
+}
+@media (min-width: 1025px) {
+  .table-responsive {
+    overflow-x: auto !important;
+  }
+}
+
+#order-listing,
+#order-listing th,
+#order-listing td {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+}
+    body.sidebar-icon-only .main-panel,
+    body.sidebar-icon-only .content-wrapper,
+    body.sidebar-icon-only .card,
+    body.sidebar-icon-only .card-body,
+    body.sidebar-icon-only .table-responsive {
+      margin-left: 0 !important;
+      padding-left: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    
+    .content-wrapper,
+    .card,
+    .card-body,
+    .table-responsive {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin-right: 0 !important;
+      /* padding-right: 0 !important; */
+      box-sizing: border-box !important;
+    }
+  @media (min-width: 1800px) and (max-width: 2000px) and (min-height: 1100px) and (max-height: 1300px) {
+    .content-wrapper,
+    .row,
+    .col-12,
+    .grid-margin,
+    .stretch-card,
+    .card,
+    .card-body,
+    .table-responsive,
+    #order-listing {
+      max-width: 1400px !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      width: 100% !important;
+    }
+    .card {
+      min-height: 700px !important;
+      margin-bottom: 0 !important;
+    }
+    .card-body {
+      min-height: 650px !important;
+      padding: 0 !important;
+      margin-right: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+  overflow: scroll !important;
+  
+    }
+    #order-listing tr,
+    #order-listing td,
+    #order-listing th {
+      height: 44px !important;
+      min-height: 44px !important;
+    }
+  }
+  
+  /* Remove right space after the table and make table stretch fully */
+  .content-wrapper,
+  .row,
+  .col-12,
+  .grid-margin,
+  .stretch-card,
+  .card,
+  .card-body,
+  .table-responsive,
+  #order-listing {
+    margin-right: 0 !important;
+    padding-right: 0 !important;
+    
+    box-sizing: border-box !important;
+    
+  }
+  
+  
+  /* Remove left/right padding from .row and .col-12 if any */
+  .row,
+  .col-12 {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  
+  
+  /* Main panel and content wrapper base */
+  .main-panel,
+  .content-wrapper {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    min-height: 0 !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Responsive fix: prevent white container from overlapping pagination/footer */
+.content-wrapper {
+  box-sizing: border-box;
+  padding-bottom: 10px !important; /* Enough space for pagination/footer */
+  background: #fff;
+  min-height: 0 !important;
+  max-height: none !important;
+  height: auto !important;
+  margin-bottom: 0 !important;
+}
+
+  
+  @media (max-width: 600px) {
+    .content-wrapper {
+      padding-left: 8px !important;
+    }
+  }
+  
+  /* Title spacing */
+  .card-body > h5.text-left.mt-0.mb-4 {
+    margin-bottom: 12px !important;
+    margin-top: -5px !important;
+    padding-bottom: 0 !important;
+    margin-left: 5px !important;
+  }
+  .content-wrapper > h5.text-left.mt-0.mb-4 {
+    margin-top: -50px !important;
+    margin-bottom: -5px !important;
+    margin-left: -15px !important;
+  }
+  
+  /* Style for toggle switch and whole row inactive */
+  @media (max-width: 426px){
+    .file-upload-area p {
+      font-size: 12px !important;
+    }
+  }
+  .tooltip-inner {
+    white-space: pre-line !important;
+  }
+  td:first-child,
+  td:first-child * {
+    filter: none !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    color: inherit !important;
+  }
+  .row-inactive td:first-child {
+    background: none !important;
+    background-color: transparent !important;
+  }
+  .row-inactive,
+  .row-inactive td {
+    background: #ededed !important;
+    background-color: #ededed !important;
+  }
+  .row-inactive-blur {
+    filter: blur(0.7px);
+    cursor: not-allowed !important;
+    user-select: none;
+    pointer-events: none; /* allow hover for cursor effect */
+  }
+  .hold-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+  }
+  .hold-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .hold-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #e5e5e5; /* Always grey track */
+    border-radius: 20px;
+    transition: .3s;
+  }
+  .hold-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px; width: 16px;
+    left: 2px; bottom: 2px;
+    background-color: #bbb; /* Default grey circle */
+    border: 2px solid #bbb;
+    border-radius: 50%;
+    transition: .3s;
+  }
+  .hold-toggle-switch input:checked + .hold-slider:before {
+    transform: translateX(16px);
+    background-color: #007bff; /* Blue circle when ON */
+    border-color: #007bff;
+  }
+  .hold-toggle-switch input:not(:checked) + .hold-slider:before {
+    background-color: #bbb; /* Grey circle when OFF */
+    border-color: #bbb;
+  }
+  .hold-toggle-switch input:disabled + .hold-slider:before {
+    background-color: #bbb !important; /* Grey circle when disabled */
+    border-color: #bbb !important;
+  }
+  
+  /* end of toggle style switch */
+  #trayScanModal_DayPlanning table thead th {
+    background: #d2d2d2 !important;
+    color: #313131 !important;
+    font-weight: bold;
+    border-bottom: 1px solid #bdbdbd !important;
+    vertical-align: middle;
+  }
+  
+  /* Show tooltip on hover */
+  .model-hover-trigger:hover .model-image-tooltip {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    display: flex !important;
+  }
+  
+  /* Modal and tray scan styles */
+  .readonly-modal-header {
+    background: #f3f3f3;
+    border-radius: 8px 8px 0 0;
+    padding: 16px 20px 12px 20px !important;
+    margin-bottom: 10px;
+    align-items: flex-end !important;
+  }
+  .readonly-modal-header .user-profile {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+  }
+  #modalModelNo_DayPlanning {
+    margin-top: 10px !important;
+    display: inline-block;
+    font-weight: 600;
+    color: #028084;
+  }
+  /* Dim or blur main content when read-only tray scan modal is open */
+  .tray-scan-modal-DayPlanning.open ~ .content-wrapper {
+    opacity: 0.3;
+    pointer-events: none;
+    /* For blur effect, use the next line instead of opacity: */
+    /* filter: blur(2px); */
+  }
+  
+  /* Shrink table row height in read-only tray scan modal */
+  #trayScanModal_DayPlanning table tr,
+  #trayScanModal_DayPlanning table td,
+  #trayScanModal_DayPlanning table th {
+    height: 22px !important;
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+    font-size: 12px !important;
+  }
+  #trayScanModal_DayPlanning input.form-control {
+    height: 22px !important;
+    padding: 2px 6px !important;
+    font-size: 12px !important;
+  }
+  .tray-scan-modal-DayPlanning {
+    display: none;
+    position: fixed;
+    top: 40px;
+    right: 20px;
+    width: 600px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 20px;
+    z-index: 10000;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .tray-scan-modal-DayPlanning.open {
+    display: block;
+  }
+  .tray-scan-close-readonly {
+    position: absolute;
+    top: 18px;
+    right: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #d9534f;
+  }
+  #trayScanDetails.table-grid > div {
+    overflow: visible !important;
+    min-width: 0 !important;
+    word-break: break-all;
+  }
+  .tray-scan-modal h5 {
+    text-align: center !important;
+    margin: 0 auto 8px auto !important;
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    width: 100%;
+    display: block;
+  }
+  #trayScanDetails.table-grid > div.tray-validation-status-header {
+    background-color: #e0f7fa !important;
+    font-weight: bold !important;
+    color: #028084 !important;
+  }
+  #trayScanDetails.table-grid > div.tray-validation-status-cell {
+    background-color: #f1fcff !important;
+    font-weight: bold !important;
+    color: #028084 !important;
+  }
+  #order-listing thead th {
+    height: 38px !important;
+    background: #028084 !important;
+    color: #e5fcff !important;
+    vertical-align: middle !important;
+    border-bottom: 2.5px solid #bdbdbd !important;
+    position: sticky;
+  top: 0;
+    z-index: 20; /* higher than sticky columns */
+
+  }
+  
+  /* --- DP_PickTable: Match DP_Completed_Table style --- */
+  #order-listing {
+    border-collapse: collapse;
+    width: 100% !important;
+    min-width: 900px !important;
+    max-width: 1100px !important;
+    margin: 0 auto !important;
+    
+  }
+  #order-listing th,
+  #order-listing td {
+    border-right: 1px solid #d1d1d1;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 12px;
+  }
+  #order-listing th:last-child,
+  #order-listing td:last-child {
+    border-right: none;
+  }
+  #order-listing tr,
+  #order-listing td,
+  #order-listing th {
+    height: 30px !important;
+    padding: 4px 8px !important;
+  }
+
+/* start of pagination styles */
+.pagination-wrapper {
+  position: fixed;
+  left: 0;
+  bottom: 30px; /* Place above the footer */
+  width: 100vw;
+  background: #f5f7ff;
+  z-index: 101;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
+  padding: 15px 0 0 0;
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 600px) {
+  .pagination-wrapper {
+    bottom: 40px;
+    padding: 4px 0 0 0;
+  }
+}
+  
+.pagination .page-link {
+  padding: 2px 8px !important;
+  font-size: 13px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+}
+@media (max-width: 600px) {
+  .pagination-wrapper {
+    margin-left: 4px !important;
+    
+  }
+}
+/* --- Stylish Circle Pagination --- */
+.pagination {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  background: none;
+}
+
+.pagination li {
+  list-style: none;
+}
+
+.pagination li a,
+.pagination li span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f0f6fa;
+  color: #028084;
+  font-weight: 600;
+  font-size: 15px;
+  border: 2px solid transparent;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(2,128,132,0.06);
+  margin: 0 2px;
+}
+
+.pagination li a:hover,
+.pagination li:not(.active):not(.disabled) a:focus {
+  background: #028084;
+  color: #fff;
+  border-color: #028084;
+}
+
+.pagination li.active span {
+  background: #028084;
+  color: #fff;
+  border-color: #028084;
+  cursor: default;
+  box-shadow: 0 4px 12px rgba(2,128,132,0.13);
+}
+
+.pagination li.disabled span {
+  background: #e0e0e0;
+  color: #bdbdbd;
+  cursor: not-allowed;
+  border-color: #e0e0e0;
+}
+
+.pagination li .page-link {
+  border: none;
+  background: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.pagination li .fa {
+  font-size: 18px;
+  vertical-align: middle;
+}
+
+/* Responsive: smaller circles on mobile */
+@media (max-width: 600px) {
+  .pagination li a,
+  .pagination li span {
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
+  }
+}
+
+/* End of pagination styles */
+/* Tooltip for model images */
+.model-image-tooltip {
+position: absolute;
+z-index: 99999;
+background: #fff;
+border: 1px solid #ccc;
+border-radius: 8px;
+box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+padding: 10px;
+min-width: 220px;
+max-width: 350px;
+max-height: 220px;
+display: none;
+overflow: hidden;
+}
+.model-image-tooltip .image-slider {
+display: flex;
+align-items: center;
+gap: 8px;
+}
+.model-image-tooltip img {
+max-width: 180px;
+max-height: 180px;
+object-fit: contain;
+border-radius: 4px;
+}
+.model-image-tooltip .slider-btn {
+background: #eee;
+border: none;
+border-radius: 50%;
+width: 28px;
+height: 28px;
+font-size: 18px;
+cursor: pointer;
+}
+.model-image-tooltip.static {
+display: block !important;
+position: fixed !important;
+top: 80px !important;
+left: 50% !important;
+transform: translateX(-50%) !important;
+z-index: 100000;
+}
+.model-image-tooltip .close-btn {
+position: absolute;
+top: 4px;
+right: 8px;
+font-size: 18px;
+color: #888;
+cursor: pointer;
+}
+
+/* Reduce row height for .row class */
+.row {
+--bs-gutter-x: 30px;
+--bs-gutter-y: 0;
+display: flex;
+flex-wrap: wrap;
+margin-top: calc(-1 * var(--bs-gutter-y));
+margin-right: calc(-0.5 * var(--bs-gutter-x));
+margin-left: calc(-0.5 * var(--bs-gutter-x));
+min-height: 10px; /* Add this line to reduce minimum row height */
+padding-top: 2px; /* Optional: reduce vertical padding */
+ margin-bottom: 0 !important;
+padding-bottom: 0 !important;
+overflow-y: auto !important;
+overflow-x: auto !important;
+scrollbar-width: thin; /* For Firefox */
+-ms-overflow-style: auto; /* For IE/Edge */
+}
+
+
+/* Move the main title a little up and make it responsive */
+.content-wrapper > h5 {
+margin-top: -35px !important;
+margin-bottom: 5px !important;
+font-size: 18px;
+font-weight: 700;
+}
+
+@media (max-width: 600px) {
+.content-wrapper > h5 {
+  font-size: 1.05rem;
+  margin-top: 0.2rem !important;
+  margin-bottom: 0.7rem !important;
+}
+}
+/* Move the modalModelNo element a little down in the modal header */
+#modalModelNo {
+margin-top: 0px;
+display: inline-block;
+vertical-align: middle;
+font-weight: 600;
+color: #028084;
+}
+
+.dp-row-action-highlight {
+background-color: #f0f8ff !important; /* Light blue, or pick your color */
+transition: background 0.3s;
+}
+
+/* Floating alert style */
+.dp-float-alert {
+position: fixed;
+top: 80px;
+left: 50%;
+transform: translateX(-50%);
+background: #222;
+color: #fff;
+padding: 8px 8px;
+border-radius: 30px;
+font-size: 1rem;
+z-index: 99999;
+box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.3s;
+}
+.dp-float-alert.show {
+opacity: 1;
+pointer-events: auto;
+}
+.disabled-remark {
+cursor: not-allowed !important;
+opacity: 0.5 !important;
+pointer-events: none !important; /* <-- Add this line to fully disable hover/click */
+}
+/* Center all action icons in their cell */
+#order-listing td {
+vertical-align: middle !important;
+}
+#order-listing td a {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+height: 28px; /* or match your row height */
+vertical-align: middle;
+}
+#order-listing td a img {
+display: block;
+height: 22px;
+width: 22px;
+object-fit: contain;
+margin: 0 2px;
+}
+
+.image-slider-modal {
+display: none;
+position: fixed;
+top: 40px;
+right: 20px;
+width: 600px;
+background: #fff;
+border-radius: 12px;
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+padding: 20px;
+z-index: 10000;
+transition: right 0.3s ease;
+}
+.image-slider-modal.open {
+display: block;
+}
+.modal-close {
+position: absolute;
+top: 10px;
+right: 10px;
+font-size: 24px;
+cursor: pointer;
+color: #666;
+}
+.slider {
+position: relative;
+overflow: hidden;
+height: 350px;
+}
+.slides {
+display: flex;
+transition: transform 0.5s ease;
+width: 100%;
+}
+.slide {
+flex: 0 0 100%;
+box-sizing: border-box;
+display: none;
+}
+.slide.active {
+display: block;
+}
+.slide img {
+width: 100%;
+height: 350px;
+object-fit: cover;
+display: block;
+}
+.prev,
+.next {
+position: absolute;
+top: 50%;
+transform: translateY(-50%);
+background: rgba(0, 0, 0, 0.5);
+border: none;
+color: #fff;
+padding: 8px;
+cursor: pointer;
+border-radius: 50%;
+user-select: none;
+}
+.prev {
+left: 10px;
+}
+.next {
+right: 10px;
+}
+@media (max-width: 767px) {
+.image-slider-modal {
+  width: 100%;
+  right: 0;
+  top: 0;
+  border-radius: 0;
+  padding: 10px;
+}
+.slider {
+  height: 250px;
+}
+.slide img {
+  height: 250px;
+}
+}
+
+
+#order-listing th,
+#order-listing td {
+border-right: 1px solid #d1d1d1;
+border-bottom: 1px solid #e0e0e0;
+}
+
+#order-listing th:last-child,
+#order-listing td:last-child {
+border-right: none;
+}
+/* Overall Table Shrink */
+#order-listing tr,
+#order-listing td,
+#order-listing th {
+height: 20px !important;
+padding-top: 2px !important;
+padding-bottom: 2px !important;
+padding-left: 6px !important;
+padding-right: 6px !important;
+}
+/* Table heading font size */
+/* Add this at the end of your <style> block in DP_PickTable.html */
+
+/* Force all table headers to wrap onto two lines */
+#order-listing th {
+  white-space: normal !important;
+  line-height: 1 !important;
+  word-break: break-word !important;
+  min-width: 70px;
+  max-width: 120px;
+  text-align: left !important;
+  vertical-align: middle;
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+  padding-left: 16px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+/* Table data font size */
+#order-listing td {
+font-size: 12px !important;
+font-weight: 400;
+}
+
+
+/* When modal is active, dim the content */
+.tray-scan-modal.active ~ .content-wrapper {
+opacity: 0.3;
+pointer-events: none; /* Optional: disable interaction */
+}
+span {
+font-weight: bold;
+color: #2a2a2a;
+}
+
+h6 {
+color: grey;
+margin-top: 6px; /* moves it down a bit */
+font-weight: normal; /* optional: make font lighter if needed */
+}
+
+/* New top header container: flex left aligned, no interference with existing styles */
+.modal-top-header {
+display: flex;
+align-items: center;
+gap: 16px;
+padding-bottom: 8px;
+border-bottom: 1px solid #ddd;
+margin-bottom: 12px;
+}
+
+/* TrayScanDetails 3-column grid with scroll */
+#trayScanDetails.table-grid {
+display: grid !important; /* override any existing grid or flex */
+grid-template-columns: repeat(3, 1fr) !important; /* Table column max limit */
+gap: 0px !important;
+max-height: 300px !important;
+overflow-y: auto !important;
+padding-right: 10px; /* prevent scrollbar overlay */
+margin-top: 0;
+background: #fff;
+position: relative;
+}
+
+/* Styling individual grid cells, only inside trayScanDetails */
+#trayScanDetails.table-grid > div {
+background: #f7f7f7;
+padding: 8px 12px;
+
+font-size: 12px;
+border: 1px solid #ddd;
+margin: 0; /* reset any margin from <p> or others */
+}
+
+/* Sticky header row: first 3 divs inside trayScanDetails */
+#trayScanDetails.table-grid > div:nth-child(-n + 4) {
+background-color: #e0e0e0;
+font-weight: 600;
+position: sticky;
+top: -15px;
+z-index: 10;
+align-items: center;
+ 
+}
+
+/* Override only when modal is open */
+.tray-scan-modal.open {
+width: 600px; /* your desired expanded width */
+margin-right: 20px;
+}
+
+/* Keep it hidden with negative offset matching default width */
+.tray-scan-modal {
+right: -500px; /* must match the new width above to stay hidden properly */
+}
+
+#trayScanModal {
+border-radius: 12px;
+max-height: 90vh;
+top: 40px; /* Moves the entire modal down from the top of the viewport */
+height: calc(100% - 40px); /* Keeps height correct */
+}
+
+#trayScanDetails {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 12px;
+padding-top: 10px;
+}
+
+/* Make each <p> act like a table cell */
+#trayScanDetails p {
+margin: 0;
+padding: 4px 8px;
+background: #f7f7f7;
+border-radius: 6px;
+font-size: 14px;
+}
+
+.highlighted-tray-scan {
+background: #e6f7ff !important;
+transition: background 0.3s;
+}
+.tray-scan-modal {
+position: fixed;
+top: 0;
+right: -400px; /* Hidden by default */
+width: 400px;
+height: 100%;
+background: white;
+box-shadow: -3px 0 10px rgba(0, 0, 0, 0.2);
+overflow-y: auto;
+transition: right 0.3s ease;
+z-index: 9999;
+padding: 20px;
+font-family: Arial, sans-serif;
+}
+
+.tray-scan-modal.open {
+right: 0; /* Slide in */
+}
+
+.tray-scan-modal-content {
+position: relative;
+height: 100%;
+}
+
+.tray-scan-close {
+position: absolute;
+top: -5px;
+right: 10px;
+font-size: 24px;
+font-weight: bold;
+cursor: pointer;
+color: #d9534f; 
+}
+#order-listing tr:last-child td {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+
+
+
+html,
+body {
+height: 100%;
+margin: 0;
+padding: 0;
+overflow: hidden; /* hide scroll for full screen */
+}
+
+body {
+display: flex;
+flex-direction: column;
+min-height: 100vh;
+  overflow-y: hidden !important;
+}
+
+
+footer {
+position: absolute;
+bottom: 0;
+width: 100%;
+height: 40px;
+}
+
+/* Reduce table height for web view (desktop only) */
+@media (min-width: 1025px) {
+.table-responsive {
+  max-height: 300px; /* reduced height for large screens */
+}
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+.table-responsive {
+  max-height: 600px; /* Increased height for tablets */
+}
+}
+
+/* Make the table header sticky */
+thead th {
+position: sticky;
+top: 0;
+background-color: white; /* or your table header bg color */
+z-index: 10; /* ensure it stays above the table rows */
+box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* optional shadow for better separation */
+}
+
+/* Ensure the table header is always visible */
+@media (max-width: 426px){
+    .tray-scan-modal-DayPlanning {
+      width:100% !important;
+      right: 0px !important;
+    }
+    .tray-scan-modal h5{
+      font-size: .15rem !important;
+    }
+  }
+  @media (max-width: 426px){
+    #trayScanModal{
+      width: 90% !important;
+    } 
+      @media (max-width: 600px) {
+              /* Adjust each tray row cell */
+              #trayScanDetails > div {
+              min-height: 28px !important;
+              padding: 4px;
+              font-size: 14px;
+              }
+              /* Ensure inputs fill available width with proper padding */
+              #trayScanDetails input.form-control {
+              width: 100% !important;
+              padding: 4px;
+              }
+              /* Scale down icons/buttons for a better mobile view */
+              #trayScanDetails .tray-edit-btn,
+              #trayScanDetails .tray-verify-checkbox {
+              width: 20px !important;
+              height: 20px !important;
+              }
+            }
+    #trayValidateBtn{
+      font-size: 10px !important;
+    }
+    .tray-scan-modal-DayPlanning {
+      width:100% !important;
+      right: 0px !important;
+    }
+    .tray-scan-modal h5{
+      font-size: .15rem !important;
+    }
+    .user-profile{
+      font-size: 15px !important;
+    }
+  }
+
+ @media (width: 768px) {
+  #trayScanModal {
+    max-height: 53% !important; /* Adjust height for smaller screens */
+  }
+ }
+</style>
+
+<div class="content-wrapper">
+  <!-- <h5 class="text-left mt-0 mb-3">Day Planning Pick Table</h5> -->
+  <div class="row">
+    <div class="col-12 grid-margin stretch-card">
+      <div class="card">
+                <div class="card-body" style="padding-bottom:12px;">
+              <h5 class="text-left mt-0 mb-4" style="font-weight:700;">Day Planning Pick Table</h5>
+
+            <!-- Table Section -->
+            <div class="table-responsive">
+<table id="order-listing" class="table">
+                <thead>
+                  <tr>
+                    <th>
+                      S.No <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Last<br>Updated
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Plating Stk No
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Polishing Stk No
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Plating Color
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                     <th>
+                      Category
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Polish Finish
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Version <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    
+                    <th>
+                      Tray Cate-Capacity
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Source
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      No of Tray <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Input Qty
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Process Status
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Action <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Lot Status
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Current Stage
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Remarks <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+  {% for data in master_data %}
+    <tr
+      {% if data.hold_lot %}
+        class="row-inactive"
+      {% endif %}
+    >                 
+<!-- S.No Column - Only show toggle for Admin users -->
+
+<!-- Updated S.No Column - Replace the existing S.No td section with this -->
+<td>
+  <span style="display:flex; align-items:center; gap:6px;">
+    {% if is_admin %}
+      <!-- Admin users: Show toggle switch -->
+      <label class="hold-toggle-switch" style="margin-bottom:0;">
+        {% if not data.hold_lot %}
+          <input type="checkbox" class="hold-toggle-btn" checked />
+          <span class="hold-slider"></span>
+        {% else %}
+          <input type="checkbox" class="hold-toggle-btn" />
+          <span class="hold-slider"></span>
+        {% endif %}
+      </label>
+      
+      <!-- Hold remark icon -->
+      <span class="hold-remark-icon" 
+            style="display:{% if data.hold_lot or data.release_lot %}inline-block{% else %}none{% endif %}; cursor:pointer;" 
+            title="{% if data.holding_reason %}Holding Reason: {{ data.holding_reason }}{% endif %}{% if data.holding_reason and data.release_reason %}&#10;{% endif %}{% if data.release_reason %}Release Reason: {{ data.release_reason }}{% endif %}">
+        {% if data.hold_lot or data.release_lot %}
+          <img src="{% static 'assets/icons/view2.png' %}" alt="Remark" style="width:18px; height:18px;" />
+        {% endif %}
+      </span>
+    {% else %}
+      <!-- Normal users: Show only view icon if there's a holding/release reason -->
+      {% if data.hold_lot or data.release_lot or data.holding_reason or data.release_reason %}
+        <span class="hold-remark-icon" 
+              style="display:inline-block; cursor:pointer;" 
+              title="{% if data.holding_reason %}Holding Reason: {{ data.holding_reason }}{% endif %}{% if data.holding_reason and data.release_reason %}&#10;{% endif %}{% if data.release_reason %}Release Reason: {{ data.release_reason }}{% endif %}">
+          <img src="{% static 'assets/icons/view2.png' %}" alt="View Reason" style="width:18px; height:18px;" />
+        </span>
+      {% endif %}
+    {% endif %}
+    
+    <span class="sno-value">{{ forloop.counter }}</span>
+  </span>
+</td>
+
+    <!-- Last Updated Column -->
+    <td
+      {% if data.hold_lot %}
+        class="row-inactive-blur"
+      {% endif %}
+    >
+      {{ data.date_time|date:"d-M-y" }}<br>
+      <span style="display:inline-block; margin-top:4px;">{{ data.date_time|date:"H:i" }}</span>
+    </td>
+
+    <!-- Plating Stk No Column -->
+<td {% if data.hold_lot %}class="row-inactive-blur"{% endif %}>
+                      <span class="model-hover-trigger" style="cursor: pointer;">
+                        {{ data.plating_stk_no|highlight_plating_color|safe_html }}
+                        
+                        <div class="model-image-tooltip"
+                             style="position: absolute; left: 238%; top: 0%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 10010; display: flex; align-items: center; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s;">          
+                          <button class="img-scroll-left" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8592;</button>
+                          <div class="img-gallery" style="display: flex; gap: 6px; overflow: hidden; width: 180px;">
+                            {% for img_url in data.model_images %}
+                              <img src="{{ img_url }}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px;" />
+                            {% endfor %}
+                          </div>
+                          <button class="img-scroll-right" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8594;</button>
+                        </div>
+                      </span>
+                    </td>
+
+    <!-- Polishing Stk No Column -->
+<td {% if data.hold_lot %}class="row-inactive-blur"{% endif %}>
+                      {{ data.polishing_stk_no|default:"N/A"|highlight_polish_finish|safe_html }}
+                    </td>
+
+
+    <!-- Plating Color Column -->
+    <td
+      {% if data.hold_lot %}
+        class="row-inactive-blur"
+      {% endif %}
+    >
+      {{ data.plating_color|default:"N/A" }}
+    </td>
+
+    <!-- Category Column -->
+    <td
+      {% if data.hold_lot %}
+        class="row-inactive-blur"
+      {% endif %}
+    >
+      {{ data.category|default:"N/A" }}
+    </td>
+
+    <!-- Polish Finish Column -->
+    <td
+      {% if data.hold_lot %}
+        class="row-inactive-blur"
+      {% endif %}
+    >
+      {{ data.polish_finish|default:"N/A" }}
+    </td>
+
+    <!-- Version Column -->
+    <td
+      {% if data.hold_lot %}
+        class="row-inactive-blur"
+      {% endif %}
+    >
+      {{ data.version__version_internal|default:"N/A" }}
+    </td>
+
+    <!-- Tray Type and Capacity Column -->
+    <td
+      {% if data.hold_lot %}
+        class="row-inactive-blur"
+      {% endif %}
+    >
+      {{ data.tray_type|default:"N/A" }}-{{ data.tray_capacity|default:"0" }}
+    </td>
+
+    <!-- Source Column -->
+    <td
+      {% if data.hold_lot %}
+        class="row-inactive-blur"
+      {% endif %}
+    >
+      {{ data.location__location_name|default:"N/A" }}
+    </td>
+
+    <!-- No of Trays Column -->
+    <td
+      {% if data.hold_lot %}
+        class="row-inactive-blur"
+      {% endif %}
+    >
+      {{ data.no_of_trays|default:"0" }}
+    </td>
+
+    <!-- Input Qty Column -->
+    <td
+      {% if data.hold_lot %}
+        class="row-inactive-blur"
+      {% endif %}
+    >
+      {{ data.total_batch_quantity|default:"0" }}
+    </td>
+
+    <!-- Process Status Column -->
+    <td
+      {% if data.hold_lot %}
+        class="row-inactive-blur"
+      {% endif %}
+    >
+      <!-- Dynamic Process Status based on conditions -->
+      {% if data.Moved_to_D_Picker %}
+        <div
+          title="Tray Scan"
+          class="d-flex align-items-center justify-content-center rounded-circle ms-1"
+          style="
+            width: 28px;
+            height: 28px;
+            background-color: #0c8249;
+            color: white;
+            font-weight: bold;
+          "
+        >
+          T
+        </div>
+      {% elif data.Draft_Saved %}
+        <div
+        title="Tray Scan"
+        class="d-flex align-items-center justify-content-center rounded-circle ms-1"
+        style="
+          width: 28px;
+          height: 28px;
+         background: linear-gradient(
+            to right,
+            green 50%,
+            #bfbfbf 50%
+          );
+          color: white;
+          font-weight: bold;
+          line-height: 20px;
+          text-align: center;
+          padding-top: 1px;
+          padding-right: 1px;"
+      >
+          T
+        </div>
+      
+      {% else %}
+        <div
+          title="Tray Scan"
+          class="d-flex align-items-center justify-content-center rounded-circle ms-1"
+          style="
+            width: 28px;
+            height: 28px;
+            background-color: #d3d2d2;
+            color: white;
+            font-weight: bold;
+          "
+        >
+          T
+        </div>
+      {% endif %}
+    </td>
+
+<!-- Action Column - Only show Edit and Delete for Admin users -->
+    <td {% if data.hold_lot %}class="row-inactive-blur"{% endif %}>
+      {% if is_admin %}
+        <!-- Admin users see Edit and Delete buttons -->
+        {% if not data.Moved_to_D_Picker %}
+          <a href="#" class="edit-qty-btn" data-batch-id="{{ data.batch_id }}">
+            <img src="{% static 'assets/icons/edit1.png' %}" alt="Edit" style="width: 28px; margin-right: 8px; height: auto"/>
+          </a>
+        {% else %}
+          <span style="opacity:0.5; pointer-events:none; display:inline-block;">
+            <img src="{% static 'assets/icons/edit1.png' %}" alt="Edit Disabled" style="width: 28px; margin-right: 8px; height: auto; filter: grayscale(1) opacity(0.5);"/>
+          </span>
+        {% endif %}
+        
+        {% if not data.Moved_to_D_Picker %}
+          <a href="#" title="Delete">
+            <img src="{% static 'assets/icons/bin.png' %}" alt="Delete" style="width: 28px; margin-right: 8px; height: auto; cursor:pointer;" />
+          </a>
+        {% else %}
+          <span title="Cannot delete after moved" style="opacity:0.5; pointer-events:none; display:inline-block;">
+            <img src="{% static 'assets/icons/bin.png' %}" alt="Delete Disabled" style="width: 28px; margin-right: 8px; height: auto; filter: grayscale(1) opacity(0.5); cursor:not-allowed;" />
+          </span>
+        {% endif %}
+      {% endif %}
+      <!-- Normal users: Edit and Delete icons are completely hidden -->
+      
+      <!-- Tray Scan button is visible for all users -->
+      {% if not data.Moved_to_D_Picker %}
+        <a href="#" class="text-primary tray-scan-btn" style="text-decoration: underline"
+           data-batch-id="{{ data.batch_id }}" data-model-no="{{ data.model_stock_no__model_no }}"
+           data-no-of-trays="{{ data.no_of_trays }}" data-tray-capacity="{{ data.tray_capacity|default:'0' }}"
+           data-moved-to-d-picker="{{ data.Moved_to_D_Picker }}" data-tray-qty-list="{{ data.tray_qty_list|default:'[]'|safe }}"
+           data-top-tray-qty-verified="{{ data.top_tray_qty_verified }}" data-draft-saved="{{data.Draft_Saved}}"
+           data-total-batch-quantity="{{ data.total_batch_quantity|default:'0' }}"
+          data-model-image="{{ data.model_images.0|default:'' }}">Tray Scan</a>
+
+      {% endif %}
+    </td>
+
+<!-- Lot Status Column - Updated with Hold Logic -->
+<td
+  {% if data.hold_lot %}
+    class="row-inactive-blur"
+  {% endif %}
+>
+  <!-- Dynamic Lot Status based on conditions with Hold Logic -->
+  {% if data.hold_lot %}
+    <!-- When hold_lot is True, show "On Hold" status -->
+    <div
+      class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+      style="
+        border: 2px solid #dc3545;
+        background-color: #f8d7da;
+        color: #721c24;
+        font-size: clamp(0.75rem, 2vw, 0.875rem);
+        white-space: nowrap;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+      "
+    >
+      On Hold
+    </div>
+  {% elif data.Moved_to_D_Picker %}
+    <!-- Yet To Release Status -->
+    <div
+      class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+      style="
+        border: 2px solid #0d5d17;
+        background-color: #c5f9c2;
+        color: #2f801b;
+        font-size: clamp(0.75rem, 2vw, 0.875rem);
+        white-space: nowrap;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+      "
+    >
+      Yet To Release
+    </div>
+  {% elif data.Draft_Saved %}
+    <!-- Draft Status -->
+    <div
+      class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+      style="
+        border: 2px solid #4997ac;
+        background-color: #d1f2f3;
+        color: #03425d;
+        font-size: clamp(0.75rem, 2vw, 0.875rem);
+        white-space: nowrap;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+      "
+    >
+      Draft
+    </div>
+  
+  {% else %}
+    <!-- Yet to Start Status -->
+    <div
+      class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+      style="
+        border: 2px solid #a6a6a6;
+        background-color: #dcdada;
+        color: #505050;
+        font-size: clamp(0.75rem, 2vw, 0.875rem);
+        white-space: nowrap;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+      "
+    >
+      Yet to Start
+    </div>
+  {% endif %}
+</td>
+
+    <!-- Current Stage Column -->
+    <td
+      {% if data.hold_lot %}
+        class="row-inactive-blur"
+      {% endif %}
+    >
+      <div
+        class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+        style="
+          border: 2px solid #9adeed;
+          background-color: #d1edf3;
+          color: #033b5d;
+          font-size: clamp(0.75rem, 2vw, 0.875rem);
+          white-space: nowrap;
+          padding-top: 0.5rem;
+          padding-bottom: 0.5rem;
+        "
+      >
+        {% if data.last_procees_module == "DayPlanning" %}
+          {{ data.last_procees_module }}
+        {% else %}
+          Day Planning
+        {% endif %}
+      </div>
+    </td>
+
+<!-- Updated Remarks Column - Replace the existing Remarks td section with this -->
+<td
+  {% if data.hold_lot %}
+    class="row-inactive-blur"
+  {% endif %}
+>
+  {% if is_admin %}
+    <!-- Admin users: Show audio and remark icons if not moved -->
+    {% if not data.Moved_to_D_Picker %}
+      <!-- VoiceRec with tooltip (audio remark) -->
+      <a href="#" title="Add Audio Remark" class="remark-tooltip-trigger" style="display: inline-flex; align-items: center; height: 28px; margin-left: 0; position: relative; cursor: pointer;">
+        <img src="{% static 'assets/icons/rec.png' %}" alt="VoiceRec" style="width: 20px; height: 20px"/>
+        <div class="remark-tooltip" style="position: absolute; top: 110%; left: 50%; transform: translateX(-50%); width: 300px; background: #fff; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; padding: 15px; z-index: 1000;">
+          <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 10px solid #fff;"></div>
+          <!-- Audio recording UI placeholder -->
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <button type="button" style="background: #28a745; color: #fff; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; display: flex; align-items: center; justify-content: center;">
+              <i class="fa fa-microphone"></i>
+            </button>
+            <span style="font-size: 14px; color: #333;">Hold to record audio</span>
+          </div>
+          <div style="text-align: right; margin-top: 10px;">
+            <button type="button" style="background-color: #007bff; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;">
+              <i class="fa fa-send"></i>
+            </button>
+          </div>
+        </div>
+      </a>
+
+      <a
+      href="#"
+      title="Add Remark"
+      class="remark-tooltip-trigger"
+      style="display: inline-flex; align-items: center; height: 20px; margin-left: 5px; position: relative; cursor: pointer;"
+    >
+      <img
+        src="{% static 'assets/icons/chat1.png' %}"
+        alt="Chat"
+        style="width: 20px; height: 20px"
+      />
+      <div
+        class="remark-tooltip"
+        style="position: absolute; top: 110%; left: 50%; transform: translateX(-50%); width: 300px; background: #fff; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; padding: 15px; z-index: 1000;"
+      >
+        <div
+          style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 10px solid #fff;"
+        ></div>
+        <textarea
+          placeholder="Type your remark..."
+          style="width: 85%; height: 40px; resize: vertical; border: 1px solid #ccc; padding: 5px; border-radius: 4px; font-family: Arial, sans-serif; font-size: 14px;"
+          {% if data.dp_pick_remarks %}readonly{% endif %}
+        >{{ data.dp_pick_remarks|default_if_none:"" }}</textarea>
+        <div style="text-align: right; margin-top: -35px">
+          {% if not data.dp_pick_remarks %}
+          <button
+            type="button"
+            style="background-color: #007bff; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;"
+          >
+            <i class="fa fa-send"></i>
+          </button>
+          {% else %}
+          <div style="margin-top: 40px; color: #31708f; background: #d9edf7; border: 1px solid #bce8f1; border-radius: 4px; padding: 8px 12px; font-size: 10px; text-align: left;">
+            <i class="fa fa-info-circle" style="margin-right: 6px;"></i>
+            Remark already saved and cannot be edited.
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </a>
+    {% else %}
+      <!-- Audio Remark Icon (disabled) -->
+      <span title="Disabled after moved" style="display: inline-flex; align-items: center; height: 28px; margin-left: 0; opacity: 0.5; pointer-events: none;">
+        <img src="{% static 'assets/icons/rec.png' %}" alt="VoiceRec Disabled" style="width: 20px; height: 20px; filter: grayscale(1) opacity(0.5);" />
+      </span>
+      <!-- Chat Remark Icon (disabled) -->
+      <span title="Disabled after moved" style="display: inline-flex; align-items: center; height: 20px; margin-left: 5px; opacity: 0.5; pointer-events: none;">
+        <img src="{% static 'assets/icons/chat1.png' %}" alt="Chat Disabled" style="width: 20px; height: 20px; filter: grayscale(1) opacity(0.5);" />
+      </span>
+    {% endif %}
+  {% else %}
+    <!-- Normal users: Show view-only remark icon if there are remarks -->
+    {% if data.dp_pick_remarks %}
+      <span title="View Remark: {{ data.dp_pick_remarks }}" style="display: inline-flex; align-items: center; height: 20px; margin-left: 5px; cursor: pointer;">
+        <img src="{% static 'assets/icons/chat1.png' %}" alt="View Remark" style="width: 20px; height: 20px; opacity: 0.7;" />
+      </span>
+    {% endif %}
+  {% endif %}
+</td>
+
+  </tr>
+  {% empty %}
+  <tr>
+    <td colspan="15" class="text-center">No data available</td>
+  </tr>
+  {% endfor %}
+</tbody>
+              </table>
+
+
+            <div
+            id="trayScanModal"
+            class="tray-scan-modal active"
+            id="trayScanModal"
+          >
+            <div class="tray-scan-modal-content">
+              <span id="closeTrayScanModal" class="tray-scan-close"
+                >&times;</span
+              >
+
+              <!-- New top header container: title + user profile aligned left -->
+<!-- Header Section -->
+    <div class="modal-top-header" style="display: flex; align-items: center; gap: 24px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+      <img src="/static/assets/images/imagePlaceholder.png" alt="User Profile" style="border-radius: 50%; width: 44px; height: 44px; object-fit: cover;" />
+      
+      <div style="font-weight: 600; color: #222; font-size: 17px;">
+        Model No:
+        <span id="modalModelNo" style="color: #028084; font-weight: 700;">(Fetch Dynamically)</span>
+      </div>
+
+      <div style="font-weight: 600; color: #222; font-size: 17px;">
+        Input Qty:
+        <span id="modalTrayQty" style="color: #028084; font-weight: 700;">(Fetch Dynamically)</span>
+      </div>
+    </div>
+
+              
+                                <!-- Redo icon for clearing "tray ID" -->
+ <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <h5 style="margin: 0; font-weight: 600; color: #595959;">Day Planning - Tray Scan</h5>
+      <div style="display: flex; align-items: center; gap: 16px;">
+<div id="trayScanSummary" style="font-weight: 600; font-size: 15px; color: #028084; margin-bottom: 0; white-space: nowrap;">
+  Qty to Scan: 0/0
+</div>
+        <img src="{% static 'assets/icons/redo2.png' %}" alt="Redo" id="trayIDRedoBtn" title="Clear Tray IDs" style="width: 24px; height: 24px; cursor: pointer;" />
+      </div>
+    </div>
+
+              <!-- trayScanDetails will be a scrollable 3-column grid with headers and unlimited rows -->
+              <div id="trayScanDetails" class="table-grid">
+                <!-- Headers -->
+                <div>S.no</div>
+                <div>Tray ID</div>
+                <div>Tray Quantity</div>
+<div class="tray-validation-status-header">Tray Validation Status
+<span style="margin-left: 10px;">
+    <img src="{% static 'assets/icons/fail.png' %}" alt="Cross" title="Fail" style="width:18px; height:18px; margin-right:6px; vertical-align:middle;" />
+    <img src="{% static 'assets/icons/pass.png' %}" alt="Pass" title="Pass" style="width:18px; height:18px; vertical-align:middle;" />
+  </span>
+
+</div>
+
+                <!-- Example rows (replace with dynamic content) -->
+              </div>
+              <!-- âœ… NEW BUTTONS SECTION -->
+              
+              <div class="tray-scan-modal-buttons"
+                style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
+                <button id="trayScanDraftBtn" type="button" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 30px;">Draft</button>
+                <button id="trayScanSubmitBtn" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 30px;">Submit</button>
+                <button id="trayScanCancelBtn" style="padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 30px;">Cancel</button>
+              </div>
+              <div id="trayQtyErrorFooter" style="color: red; font-size: 14px; text-align: center; min-height: 22px; margin-top: 8px;"></div>
+              
+            </div>
+            <div
+              id="trayScanModal_DayPlanning"
+              class="tray-scan-modal-DayPlanning"
+            >
+              <div class="tray-scan-modal-DayPlanning-content">
+                <span id="closeTrayScanModal_DayPlanning" class="tray-scan-close-readonly"
+                  >&times;</span
+                >
+                <!-- New top header container: title + user profile aligned left -->
+                <div
+                  class="modal-top-header"
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 20px;
+                    padding-bottom: 10px;
+                  "
+                >
+                  <div
+                    class="user-profile"
+                    style="display: flex; align-items: center; gap: 8px"
+                  >
+                    <img
+                      src="/static/assets/images/imagePlaceholder.png"
+                      alt="User Profile"
+                      style="
+                        border-radius: 50%;
+                        width: 50px;
+                        height: 50px;
+                        object-fit: cover;
+                      "
+                    />
+                    <span>Model No:</span>
+                    <h6 id="modalModelNo_DayPlanning">(Fetch Dynamically)</h6>
+                  </div>
+                </div>
+                <!-- Redo icon for clearing "tray ID" -->
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                  <h5 style="text-align: center; margin: 0; flex: 1; font-weight: 600; color:#595959">
+                    Day Planning - Tray Scan (Read Only)
+                  </h5>
+                  <button id="trayValidateBtn" type="button" style="display: flex; align-items: center; gap: 6px; background: #f5faff; border: 1px solid #023E4DCC; color: #023E4DCC; border-radius: 20px; padding: 4px 14px; font-size: 13px; font-weight: 500; cursor: pointer;">
+                      <img src="{% static 'assets/icons/validate.png' %}" alt="Validate" style="width: 20px; height: 20px; margin-right: 4px;" />
+                      Tray Validate
+                  </button>
+
+                  <!-- Hidden input field - completely invisible to users -->
+                  <input id="trayValidateInput" type="text" placeholder="Enter validation info..." style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" />
+
+                  <img
+                      src="{% static 'assets/icons/redo2.png' %}"
+                      alt="Redo"
+                      id="trayScanRedoBtn"
+                      style="width: 24px; height: 24px; cursor: pointer; margin-left: 8px;"
+                      title="Clear Tray IDs"
+                  />
+                </div>
+                
+                <!-- Error message container - initially hidden -->
+                <div id="trayErrorMessage" style="display: none; background-color: #ffebee; border: 1px solid #f44336; color: #c62828; padding: 8px 12px; border-radius: 4px; margin-bottom: 10px; font-size: 14px; text-align: center;">
+                  <span id="trayErrorText"></span>
+                </div>
+                
+                <!-- trayScanDetails_DayPlanning will be a scrollable 3-column grid with headers and unlimited rows -->
+                <div id="trayScanDetails_DayPlanning" class="table-grid">
+                  <!-- Headers -->
+                  <div>S.no</div>
+                  <div>Tray ID</div>
+                  <div>Tray Quantity</div>
+                  <div class="tray-validation-status-header">Tray Validation Status
+                    <span style="margin-left: 10px;">
+            <img src="{% static 'assets/icons/fail.png' %}" alt="Cross" title="Fail" style="width:18px; height:18px; margin-right:6px; vertical-align:middle;" />
+            <img src="{% static 'assets/icons/pass.png' %}" alt="Pass" title="Pass" style="width:18px; height:18px; vertical-align:middle;" />
+            </span>
+                  </div>
+                  <!-- Example rows (replace with dynamic content) -->
+                </div>
+                <!-- No buttons for read-only modal -->
+              </div>
+            </div>
+                        <!-- End of Tray Scan Modal Window -->
+
+            </div> 
+
+                    <div id="holdRemarkModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.18); z-index:20000; align-items:center; justify-content:center;">
+            <div style="background:#fff; border-radius:10px; padding:28px 32px 18px 32px; min-width:320px; max-width:90vw; box-shadow:0 4px 24px rgba(0,0,0,0.18); position:relative;">
+              <span id="closeHoldRemarkModal" style="position:absolute; top:8px; right:16px; font-size:22px; font-weight:bold; color:#d9534f; cursor:pointer;">&times;</span>
+              <h5 style="margin-bottom:16px; color:#028084;">Row Hold Remark</h5>
+              <textarea id="holdRemarkInput" maxlength="50" style="width:100%; height:60px; border:1px solid #ccc; border-radius:6px; padding:8px; font-size:15px; resize:none;" placeholder="Enter remark (max 50 chars)"></textarea>
+              <div style="text-align:right; margin-top:10px;">
+                <button id="saveHoldRemarkBtn" style="background:#007bff; color:#fff; border:none; border-radius:20px; padding:6px 18px; font-size:15px; cursor:pointer;">Save</button>
+              </div>
+              <div id="holdRemarkError" style="color:red; font-size:13px; min-height:18px; margin-top:6px;"></div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+
+            <!-- Pagination Section -->
+
+ <div class="pagination-wrapper">
+              <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-end mb-0">
+                  {# Previous button #}
+                  {% if page_obj.has_previous %}
+                    <li>
+                      <a href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true"><i class="fa fa-chevron-left"></i></span>
+                      </a>
+                    </li>
+                  {% else %}
+                    <li class="disabled">
+                      <span aria-hidden="true"><i class="fa fa-chevron-left"></i></span>
+                    </li>
+                  {% endif %}
+                
+                  {# Always show first page #}
+                  {% if page_obj.number > 3 %}
+                    <li><a href="?page=1">1</a></li>
+                    {% if page_obj.number > 4 %}
+                      <li class="disabled"><span>…</span></li>
+                    {% endif %}
+                  {% endif %}
+                
+                  {# Show pages around current page #}
+                  {% for num in page_obj.paginator.page_range %}
+                    {% if num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+                      {% if num == page_obj.number %}
+                        <li class="active"><span>{{ num }}</span></li>
+                      {% else %}
+                        <li><a href="?page={{ num }}">{{ num }}</a></li>
+                      {% endif %}
+                    {% endif %}
+                  {% endfor %}
+                
+                  {# Show ellipsis and last page if needed #}
+                  {% if page_obj.number < page_obj.paginator.num_pages|add:'-2' %}
+                    {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                      <li class="disabled"><span>…</span></li>
+                    {% endif %}
+                    <li><a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a></li>
+                  {% endif %}
+                
+                  {# Next button #}
+                  {% if page_obj.has_next %}
+                    <li>
+                      <a href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true"><i class="fa fa-chevron-right"></i></span>
+                      </a>
+                    </li>
+                  {% else %}
+                    <li class="disabled">
+                      <span aria-hidden="true"><i class="fa fa-chevron-right"></i></span>
+                    </li>
+                  {% endif %}
+                </ul>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script for Sorting the Table for each rows -->
+  {% block script %}
+
+
+<script nonce="{{ csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function () {
+  const trayIDRedoBtn = document.getElementById("trayIDRedoBtn");
+  if (trayIDRedoBtn) {
+    trayIDRedoBtn.addEventListener("click", function () {
+      const detailsDiv = document.getElementById("trayScanDetails");
+      if (!detailsDiv) return;
+
+      // Clear all Tray ID fields ONLY
+      detailsDiv.querySelectorAll('input[type="text"]').forEach(input => {
+        input.value = "";
+      });
+
+      // Remove all tray-id-error messages
+      detailsDiv.querySelectorAll('.tray-id-error').forEach(el => el.remove());
+
+      // DON'T RESET TRAY QUANTITIES - Only reset if user has manually edited them
+      // The quantities should remain as they were loaded from data
+      
+      // Reset checkbox to unchecked and enabled (only if not permanently verified)
+      const verifyCheckbox = document.querySelector('.tray-verify-checkbox');
+      if (verifyCheckbox && !verifyCheckbox.disabled) {
+        verifyCheckbox.checked = false;
+      }
+
+      // Update validation state
+      updateUIElements();
+      
+      // Update Tray Scan Summary
+      updateTrayScanSummary();
+    });
+  }
+});
+
+// Fixed updateTrayScanSummary function
+function updateTrayScanSummary() {
+  const detailsDiv = document.getElementById("trayScanDetails");
+  const summaryDiv = document.getElementById("trayScanSummary");
+  if (!detailsDiv || !summaryDiv) return;
+
+  // Find all qty and tray id inputs
+  const qtyInputs = detailsDiv.querySelectorAll('input[type="number"]');
+  const trayIdInputs = detailsDiv.querySelectorAll('input[type="text"]');
+
+  // If no rows yet, show 0/0
+  if (qtyInputs.length === 0 || trayIdInputs.length === 0) {
+    summaryDiv.textContent = `Qty to Scan: 0/0`;
+    return;
+  }
+
+  let total = 0;
+  let scanned = 0; // Count of filled tray IDs
+
+  for (let i = 0; i < qtyInputs.length; i++) {
+    const qty = parseInt(qtyInputs[i].value, 10) || 0;
+    total += qty;
+    
+    // If Tray ID is filled, add its qty to scanned
+    if (trayIdInputs[i] && trayIdInputs[i].value.trim()) {
+      scanned += qty;
+    }
+  }
+
+  // Show: scanned quantity / total quantity
+  summaryDiv.textContent = `Qty to Scan: ${scanned}/${total}`;
+}
+
+// Updated validation function to not reset quantities
+function validateAllTrayIds() {
+  const detailsDiv = document.getElementById("trayScanDetails");
+  if (!detailsDiv) return false;
+  
+  const trayIdInputs = detailsDiv.querySelectorAll('input[type="text"]');
+  let allFilled = true;
+  
+  trayIdInputs.forEach((input, index) => {
+    if (!input.value.trim()) {
+      allFilled = false;
+      console.log(`Tray ID ${index + 1} is empty:`, input.value);
+    } else {
+      console.log(`Tray ID ${index + 1} is filled:`, input.value);
+    }
+  });
+  
+  console.log('All Tray IDs filled:', allFilled, 'Total inputs:', trayIdInputs.length);
+  return allFilled && trayIdInputs.length > 0;
+}
+
+// Listen for changes in tray ID fields only (not quantities unless manually edited)
+document.addEventListener("DOMContentLoaded", function () {
+  const detailsDiv = document.getElementById("trayScanDetails");
+  if (detailsDiv) {
+    detailsDiv.addEventListener("input", function (e) {
+      // Only update when tray ID fields change, not quantity fields automatically
+      if (e.target.matches('input[type="text"]')) {
+        updateTrayScanSummary();
+        updateUIElements();
+      }
+      // For quantity fields, only update if user manually changes them
+      if (e.target.matches('input[type="number"]') && !e.target.readOnly) {
+        updateTrayScanSummary();
+      }
+    });
+  }
+});
+</script>
+
+  <script nonce="{{ csp_nonce }}">
+    document.addEventListener("DOMContentLoaded", function () {
+
+      const cancelBtn = document.getElementById("trayScanCancelBtn");
+      if (cancelBtn) {
+        cancelBtn.addEventListener("click", function () {
+          const modal = document.getElementById("trayScanModal");
+          if (modal) modal.classList.remove("open");
+        });
+      }
+
+       // DELETE BUTTON HANDLER
+      document.querySelectorAll('a[title="Delete"]').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const row = btn.closest('tr');
+          if (!row) return;
+          const trayScanLink = row.querySelector('.tray-scan-btn');
+          if (!trayScanLink) return;
+          const batchId = trayScanLink.getAttribute('data-batch-id');
+          if (!batchId) {
+            Swal.fire('Error', 'Batch ID not found!', 'error');
+            return;
+          }
+          Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you really want to delete this batch?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              fetch('/dayplanning/delete_batch/', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ batch_id: batchId })
+              })
+              .then(res => res.json())
+              .then(data => {
+                if (data.success) {
+                  row.remove();
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Deleted!',
+                    text: 'Batch has been deleted.',
+                    timer: 1200,
+                    showConfirmButton: false
+                  });                  
+                } else {
+                  Swal.fire('Error', data.error || 'Delete failed', 'error');
+                }
+              });
+            }
+          });
+        });
+      });
+
+// REPLACE the entire edit button section (around lines 640-780) with this COMPLETE FIXED VERSION:
+
+// REPLACE the entire edit button section with this INDIVIDUAL SAVE VERSION:
+
+document.querySelectorAll('.edit-qty-btn').forEach(function(btn) {
+  btn.addEventListener('click', async function(e) {
+    e.preventDefault();
+    const row = btn.closest('tr');
+    if (!row) return;
+    const qtyCell = row.querySelector('td:nth-child(12)');
+    const colorCell = row.querySelector('td:nth-child(5)');
+    const batchId = btn.getAttribute('data-batch-id');
+    const oldQty = qtyCell.textContent.trim();
+    const oldColor = colorCell.textContent.trim();
+
+    // Prevent multiple inputs
+    if (qtyCell.querySelector('input') || colorCell.querySelector('.color-arrow-up')) return;
+
+    // Fetch plating colors from API
+    let platingColors = [];
+    try {
+      const res = await fetch('/dayplanning/get_plating_colors/');
+      const data = await res.json();
+      if (data.success && Array.isArray(data.plating_colors)) {
+        platingColors = data.plating_colors;
+      }
+    } catch (e) {}
+
+    // Find current color index
+    let colorIdx = platingColors.findIndex(c => c === oldColor);
+    if (colorIdx === -1) colorIdx = 0;
+
+    // Track what user is editing
+    let isEditingColor = false;
+    let isEditingQuantity = false;
+    let colorChanged = false;
+    let quantityChanged = false;
+
+    // Build plating color arrows UI
+    colorCell.innerHTML = `
+      <div style="display:flex;align-items:center;gap:4px;">
+        <button type="button" class="color-arrow-up" style="border:none;background:none;font-size:18px;">&#9650;</button>
+        <input type="text" class="form-control color-input" value="${platingColors[colorIdx] || ''}" style="width:90px;text-align:center;background:#f8f8f8;" readonly />
+        <button type="button" class="color-arrow-down" style="border:none;background:none;font-size:18px;">&#9660;</button>
+      </div>
+    `;
+
+    qtyCell.innerHTML = `<input type="number" min="1" class="form-control qty-input" value="${oldQty}" style="width: 80px; display:inline-block;" />`;
+    
+    const qtyInput = qtyCell.querySelector('.qty-input');
+    const colorInput = colorCell.querySelector('.color-input');
+    const upBtn = colorCell.querySelector('.color-arrow-up');
+    const downBtn = colorCell.querySelector('.color-arrow-down');
+
+// FIND the arrow button handlers in your code and REPLACE with this:
+
+// Arrow navigation - automatically focus color input after click
+upBtn.onclick = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  if (colorIdx > 0) {
+    colorIdx -= 1;
+    colorInput.value = platingColors[colorIdx];
+    isEditingColor = true;
+    colorChanged = true;
+    console.log('Color changed to:', colorInput.value);
+    
+    // ✅ NEW: Auto-focus color input after arrow click
+    setTimeout(() => {
+      colorInput.focus();
+    }, 10);
+  }
+};
+
+downBtn.onclick = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  if (colorIdx < platingColors.length - 1) {
+    colorIdx += 1;
+    colorInput.value = platingColors[colorIdx];
+    isEditingColor = true;
+    colorChanged = true;
+    console.log('Color changed to:', colorInput.value);
+    
+    // ✅ NEW: Auto-focus color input after arrow click
+    setTimeout(() => {
+      colorInput.focus();
+    }, 10);
+  }
+};
+
+    // Quantity input events - marks quantity as being edited
+    qtyInput.addEventListener('input', function() {
+      isEditingQuantity = true;
+      quantityChanged = true;
+      console.log('Quantity changed to:', qtyInput.value);
+    });
+
+    qtyInput.addEventListener('focus', function() {
+      isEditingQuantity = true;
+    });
+
+    colorInput.addEventListener('focus', function() {
+      isEditingColor = true;
+    });
+
+    // INDIVIDUAL SAVE FUNCTIONS
+
+    function saveQuantityOnly() {
+      if (!quantityChanged) {
+        console.log('No quantity changes to save');
+        return;
+      }
+
+      const newQty = qtyInput.value.trim();
+      if (!newQty || isNaN(newQty) || parseInt(newQty) <= 0) {
+        Swal.fire('Error', 'Enter a valid quantity.', 'error');
+        qtyInput.focus();
+        return;
+      }
+
+      console.log('Saving ONLY quantity:', newQty);
+      
+      fetch('/dayplanning/update_batch_quantity_and_color/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+          batch_id: batchId,
+          total_batch_quantity: newQty,
+          // Don't send plating_color - keep original
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          qtyCell.textContent = newQty;
+          colorCell.textContent = oldColor; // Keep original color
+          Swal.fire({
+            icon: 'success',
+            title: 'Quantity Updated!',
+            text: `Quantity changed to ${newQty}`,
+            timer: 1000,
+            showConfirmButton: false
+          }).then(() => location.reload());
+        } else {
+          Swal.fire('Error', data.error || 'Update failed', 'error');
+          revertChanges();
+        }
+      })
+      .catch(() => {
+        Swal.fire('Error', 'Network error', 'error');
+        revertChanges();
+      });
+    }
+
+    function saveColorOnly() {
+      if (!colorChanged) {
+        console.log('No color changes to save');
+        return;
+      }
+
+      const newColor = colorInput.value;
+      console.log('Saving ONLY color:', newColor);
+      
+      fetch('/dayplanning/update_batch_quantity_and_color/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+          batch_id: batchId,
+          plating_color: newColor,
+          // Don't send total_batch_quantity - keep original
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          colorCell.textContent = newColor;
+          qtyCell.textContent = oldQty; // Keep original quantity
+          Swal.fire({
+            icon: 'success',
+            title: 'Color Updated!',
+            text: `Color changed to ${newColor}`,
+            timer: 1000,
+            showConfirmButton: false
+          }).then(() => location.reload());
+        } else {
+          Swal.fire('Error', data.error || 'Update failed', 'error');
+          revertChanges();
+        }
+      })
+      .catch(() => {
+        Swal.fire('Error', 'Network error', 'error');
+        revertChanges();
+      });
+    }
+
+    // INDIVIDUAL ENTER KEY HANDLERS
+
+    // Quantity input - Enter saves ONLY quantity
+    qtyInput.addEventListener('keydown', function(ev) {
+      if (ev.key === 'Enter') {
+        ev.preventDefault();
+        saveQuantityOnly();
+      }
+      if (ev.key === 'Escape') {
+        revertChanges();
+      }
+    });
+
+    // Color input - Enter saves ONLY color  
+    colorInput.addEventListener('keydown', function(ev) {
+      if (ev.key === 'ArrowUp') {
+        ev.preventDefault();
+        upBtn.click(); // Trigger arrow click
+      } else if (ev.key === 'ArrowDown') {
+        ev.preventDefault();
+        downBtn.click(); // Trigger arrow click
+      } else if (ev.key === 'Enter') {
+        ev.preventDefault();
+        saveColorOnly();
+      } else if (ev.key === 'Escape') {
+        revertChanges();
+      }
+    });
+
+    // Revert function
+    function revertChanges() {
+      qtyCell.textContent = oldQty;
+      colorCell.textContent = oldColor;
+    }
+
+    // Blur handlers - revert only if no changes made
+    qtyInput.addEventListener('blur', function() {
+      setTimeout(() => {
+        const activeEl = document.activeElement;
+        if (!activeEl || (!qtyCell.contains(activeEl) && !colorCell.contains(activeEl))) {
+          if (!quantityChanged && !colorChanged) {
+            revertChanges();
+          }
+        }
+      }, 150);
+    });
+
+    colorInput.addEventListener('blur', function() {
+      setTimeout(() => {
+        const activeEl = document.activeElement;
+        if (!activeEl || (!qtyCell.contains(activeEl) && !colorCell.contains(activeEl))) {
+          if (!quantityChanged && !colorChanged) {
+            revertChanges();
+          }
+        }
+      }, 150);
+    });
+
+    // Initial focus on quantity input
+    qtyInput.focus();
+    qtyInput.select();
+  });
+});
+
+      const table = document.getElementById("order-listing");
+      if (!table) {
+        console.warn("Table with ID 'order-listing' not found.");
+        return;
+      }
+
+      const headers = table.querySelectorAll("thead th");
+      const tbody = table.querySelector("tbody");
+
+      let sortDirection = {};
+
+      headers.forEach((header, index) => {
+        header.style.cursor = "pointer";
+
+        header.addEventListener("click", function () {
+          const rows = Array.from(tbody.querySelectorAll("tr"));
+          const dir = sortDirection[index] === "asc" ? "desc" : "asc";
+          sortDirection[index] = dir;
+
+          rows.sort((a, b) => {
+            const cellA = a.children[index].textContent.trim();
+            const cellB = b.children[index].textContent.trim();
+            const valA = isNaN(cellA) ? cellA : parseFloat(cellA);
+            const valB = isNaN(cellB) ? cellB : parseFloat(cellB);
+
+            if (valA < valB) return dir === "asc" ? -1 : 1;
+            if (valA > valB) return dir === "asc" ? 1 : -1;
+            return 0;
+          });
+
+          tbody.innerHTML = "";
+          rows.forEach((row) => tbody.appendChild(row));
+        });
+      });
+    });
+  </script>
+
+
+
+ <script nonce="{{ csp_nonce }}">
+    document.addEventListener("DOMContentLoaded", function () {
+      var triggers = document.querySelectorAll(".remark-tooltip-trigger");
+      triggers.forEach(function (trigger) {
+        var tooltip = trigger.querySelector(".remark-tooltip");
+        var sendButton = tooltip ? tooltip.querySelector("button") : null;
+        function showTooltip() {
+          tooltip.style.opacity = "1";
+          tooltip.style.visibility = "visible";
+          var rect = tooltip.getBoundingClientRect();
+          if (rect.right > window.innerWidth) {
+            tooltip.style.left = "auto";
+            tooltip.style.right = "0";
+            tooltip.style.transform = "none";
+          }
+          if (rect.left < 0) {
+            tooltip.style.left = "0";
+            tooltip.style.transform = "none";
+          }
+          var textarea = tooltip.querySelector("textarea");
+          if (textarea) {
+            textarea.focus();
+          }
+        }
+        function hideTooltip() {
+          tooltip.style.opacity = "0";
+          tooltip.style.visibility = "hidden";
+        }
+        trigger.addEventListener("mouseenter", showTooltip);
+        trigger.addEventListener("mouseleave", function () {
+          setTimeout(function () {
+            if (!trigger.matches(":hover") && !tooltip.matches(":hover")) {
+              hideTooltip();
+            }
+          }, 100);
+        });
+        tooltip.addEventListener("mouseleave", function () {
+          setTimeout(function () {
+            if (!tooltip.matches(":hover") && !trigger.matches(":hover")) {
+              hideTooltip();
+            }
+          }, 100);
+        });
+        trigger.addEventListener("click", function (e) {
+          e.preventDefault();
+        });
+        if (sendButton) {
+          sendButton.addEventListener("click", function (e) {
+            e.preventDefault();
+            // Find the textarea and get its value
+            var textarea = tooltip.querySelector("textarea");
+            var remark = textarea ? textarea.value.trim() : "";
+            if (!remark) {
+              Swal.fire('Error', 'Please enter a remark before sending.', 'error');
+              return;
+            }
+            // Find the batch_id from the row (tr) data attribute or from a hidden field
+            var row = trigger.closest("tr");
+            var trayScanLink = row ? row.querySelector('.tray-scan-btn') : null;
+            var batchId = trayScanLink ? trayScanLink.getAttribute('data-batch-id') : null;
+            if (!batchId) {
+              Swal.fire('Error', 'Batch ID not found.', 'error');
+              return;
+            }
+            fetch('/dayplanning/save_dp_pick_remark/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+              },
+              body: JSON.stringify({
+                batch_id: batchId,
+                remark: remark
+              })
+            })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Remark saved!',
+                  timer: 1200,
+                  showConfirmButton: false
+                }).then(() => {
+                  // Make the textarea readonly
+                  if (textarea) {
+                    textarea.setAttribute("readonly", true);
+                  }
+
+                  // Replace send button with info message
+                  if (sendButton && tooltip) {
+                    const infoDiv = document.createElement("div");
+                    infoDiv.style.marginTop = "40px";
+                    infoDiv.style.color = "#31708f";
+                    infoDiv.style.background = "#d9edf7";
+                    infoDiv.style.border = "1px solid #bce8f1";
+                    infoDiv.style.borderRadius = "4px";
+                    infoDiv.style.padding = "8px 12px";
+                    infoDiv.style.fontSize = "10px";
+                    infoDiv.style.textAlign = "left";
+                    infoDiv.innerHTML = `
+                      <i class="fa fa-info-circle" style="margin-right: 6px;"></i>
+                      Remark already saved and cannot be edited.
+                    `;
+                    sendButton.parentNode.replaceChild(infoDiv, sendButton);
+                  }
+
+                  hideTooltip(); // optional if you still want to hide the tooltip
+                });
+
+              } else {
+                Swal.fire('Error', data.error || 'Failed to save remark', 'error');
+              }
+            })
+            .catch(() => {
+              Swal.fire('Error', 'Network error', 'error');
+            });
+          });
+        }
+      });
+    });
+  </script>
+
+
+
+  <!-- Script for Tray Scan - Modal Popup -->
+<script nonce="{{ csp_nonce }}">
+// ===== CROSS-BROWSER AUTO-SAVE FUNCTIONALITY =====
+const TrayModalCrossBrowserAutoSave = {
+    currentBatchId: null,
+    saveTimeout: null,
+    isInitialized: false,
+    
+    init(batchId) {
+        this.currentBatchId = batchId;
+        this.isInitialized = true;
+        console.log(`🔄 Cross-browser auto-save initialized for batch: ${batchId}`);
+        this.setupEventListeners();
+    },
+    
+    async saveData() {
+        if (!this.currentBatchId || !this.isInitialized) return;
+        
+        const detailsDiv = document.getElementById("trayScanDetails");
+        if (!detailsDiv) return;
+        
+        const trayData = [];
+        const trayIdInputs = detailsDiv.querySelectorAll('input[type="text"]');
+        const trayQtyInputs = detailsDiv.querySelectorAll('input[type="number"]');
+        
+        for (let i = 0; i < Math.max(trayIdInputs.length, trayQtyInputs.length); i++) {
+            trayData.push({
+                position: i,
+                trayId: trayIdInputs[i] ? trayIdInputs[i].value.trim() : '',
+                trayQty: trayQtyInputs[i] ? trayQtyInputs[i].value : '',
+                draftId: trayIdInputs[i] ? trayIdInputs[i].getAttribute('data-draft-id') : ''
+            });
+        }
+        
+        const modalData = {};
+        const verifyCheckbox = document.querySelector('.tray-verify-checkbox');
+        modalData.topTrayVerified = verifyCheckbox ? verifyCheckbox.checked : false;
+        modalData.checkboxDisabled = verifyCheckbox ? verifyCheckbox.disabled : false;
+        
+        try {
+            const response = await fetch('/dayplanning/tray_auto_save/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    batch_id: this.currentBatchId,
+                    tray_data: trayData,
+                    modal_data: modalData
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                console.log(`💾 Cross-browser auto-save successful for batch ${this.currentBatchId}`);
+                this.showAutoSaveIndicator();
+            } else {
+                console.warn('⚠️ Auto-save failed:', result.error);
+            }
+            
+        } catch (error) {
+            console.warn('⚠️ Auto-save network error:', error);
+            // Fallback to localStorage if server is unavailable
+            this.fallbackToLocalStorage(trayData, modalData);
+        }
+    },
+    
+    fallbackToLocalStorage(trayData, modalData) {
+        try {
+            const fallbackData = {
+                timestamp: Date.now(),
+                batchId: this.currentBatchId,
+                trayData: trayData,
+                modalData: modalData,
+                isFallback: true
+            };
+            localStorage.setItem(`tray_scan_fallback_${this.currentBatchId}`, JSON.stringify(fallbackData));
+            console.log('📦 Fallback to localStorage successful');
+        } catch (e) {
+            console.warn('⚠️ Fallback to localStorage failed:', e);
+        }
+    },
+    
+    showAutoSaveIndicator() {
+        let indicator = document.getElementById('crossBrowserAutoSaveIndicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'crossBrowserAutoSaveIndicator';
+            indicator.style.cssText = `
+                position: fixed; top: 80px; right: 20px; background: #17a2b8; color: white;
+                padding: 8px 12px; border-radius: 4px; font-size: 12px; z-index: 99999;
+                opacity: 0; transition: opacity 0.3s; font-weight: 600;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            `;
+            indicator.innerHTML = '<i class="fa fa-cloud"></i> Auto-saved to server';
+            document.body.appendChild(indicator);
+        }
+        
+        indicator.style.opacity = '1';
+        setTimeout(() => {
+            indicator.style.opacity = '0';
+        }, 2000);
+    },
+    
+    async restoreData() {
+        if (!this.currentBatchId) return false;
+        
+        try {
+            // First try to get data from server
+            const response = await fetch(`/dayplanning/tray_auto_save/?batch_id=${encodeURIComponent(this.currentBatchId)}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success && result.has_data) {
+                const data = result.data;
+                
+                // Check if data has valid tray information
+                const hasValidData = data.tray_data && data.tray_data.some(tray => 
+                    tray.trayId.trim() !== '' || tray.trayQty !== ''
+                );
+                
+                if (hasValidData) {
+                    setTimeout(() => this.performRestore(data, 'server'), 300);
+                    return true;
+                }
+            }
+            
+            // Fallback to localStorage if no server data
+            return this.restoreFromLocalStorage();
+            
+        } catch (error) {
+            console.warn('⚠️ Failed to restore from server, trying localStorage:', error);
+            return this.restoreFromLocalStorage();
+        }
+    },
+    
+    restoreFromLocalStorage() {
+        try {
+            const fallbackData = localStorage.getItem(`tray_scan_fallback_${this.currentBatchId}`);
+            if (!fallbackData) return false;
+            
+            const data = JSON.parse(fallbackData);
+            
+            // Check if data is recent (24 hours)
+            const isRecent = (Date.now() - data.timestamp) < (24 * 60 * 60 * 1000);
+            if (!isRecent) {
+                localStorage.removeItem(`tray_scan_fallback_${this.currentBatchId}`);
+                return false;
+            }
+            
+            const hasValidData = data.trayData && data.trayData.some(tray => 
+                tray.trayId.trim() !== '' || tray.trayQty !== ''
+            );
+            
+            if (hasValidData) {
+                // Convert localStorage format to server format
+                const serverFormatData = {
+                    tray_data: data.trayData,
+                    modal_data: data.modalData
+                };
+                setTimeout(() => this.performRestore(serverFormatData, 'localStorage'), 300);
+                return true;
+            }
+            
+            return false;
+            
+        } catch (e) {
+            console.warn('⚠️ Failed to restore from localStorage:', e);
+            return false;
+        }
+    },
+    
+    performRestore(data, source) {
+        const detailsDiv = document.getElementById("trayScanDetails");
+        if (!detailsDiv) return;
+        
+        const trayIdInputs = detailsDiv.querySelectorAll('input[type="text"]');
+        const trayQtyInputs = detailsDiv.querySelectorAll('input[type="number"]');
+        let restoredCount = 0;
+        
+        // Restore tray data
+        data.tray_data.forEach((trayInfo, index) => {
+            if (trayIdInputs[index] && trayInfo.trayId.trim() !== '') {
+                trayIdInputs[index].value = trayInfo.trayId;
+                restoredCount++;
+            }
+            if (trayQtyInputs[index] && trayInfo.trayQty !== '') {
+                trayQtyInputs[index].value = trayInfo.trayQty;
+            }
+            if (trayIdInputs[index] && trayInfo.draftId) {
+                trayIdInputs[index].setAttribute('data-draft-id', trayInfo.draftId);
+            }
+        });
+        
+        // Restore checkbox state
+        const verifyCheckbox = document.querySelector('.tray-verify-checkbox');
+        if (verifyCheckbox && data.modal_data && !verifyCheckbox.disabled) {
+            verifyCheckbox.checked = data.modal_data.topTrayVerified || false;
+        }
+        
+        if (restoredCount > 0) {
+            this.showRestorationNotification(restoredCount, source);
+            setTimeout(() => {
+                if (typeof updateUIElements === 'function') updateUIElements();
+                if (typeof updateTrayScanSummary === 'function') updateTrayScanSummary();
+            }, 100);
+        }
+    },
+    
+    showRestorationNotification(count, source) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed; top: 120px; left: 50%; transform: translateX(-50%);
+            background: #28a745; color: white; padding: 15px 25px; border-radius: 8px;
+            font-size: 14px; font-weight: 600; z-index: 99999;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            max-width: 90vw; text-align: center;
+        `;
+        
+        const sourceText = source === 'server' ? 'from any browser/device' : 'from this browser';
+        const icon = source === 'server' ? '🌐' : '💾';
+        
+        notification.innerHTML = `
+            ${icon} <strong>Auto-saved data restored</strong><br>
+            <small>${count} tray ID${count > 1 ? 's' : ''} restored ${sourceText}</small>
+        `;
+        
+        document.body.appendChild(notification);
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 4000);
+    },
+    
+    async clearData() {
+        if (!this.currentBatchId) return;
+        
+        try {
+            // Clear from server
+            const response = await fetch(`/dayplanning/tray_auto_save/?batch_id=${encodeURIComponent(this.currentBatchId)}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                console.log(`🗑️ Server auto-save cleared for batch ${this.currentBatchId}`);
+            }
+            
+        } catch (error) {
+            console.warn('⚠️ Failed to clear server auto-save:', error);
+        }
+        
+        // Also clear localStorage fallback
+        try {
+            localStorage.removeItem(`tray_scan_fallback_${this.currentBatchId}`);
+            console.log(`🗑️ LocalStorage fallback cleared for batch ${this.currentBatchId}`);
+        } catch (e) {
+            console.warn('⚠️ Failed to clear localStorage fallback:', e);
+        }
+    },
+    
+    setupEventListeners() {
+        const detailsDiv = document.getElementById("trayScanDetails");
+        if (!detailsDiv) {
+            setTimeout(() => this.setupEventListeners(), 100);
+            return;
+        }
+        
+        // Auto-save on input changes (debounced)
+        detailsDiv.addEventListener('input', (e) => {
+            if (e.target.matches('input[type="text"], input[type="number"]')) {
+                clearTimeout(this.saveTimeout);
+                this.saveTimeout = setTimeout(() => this.saveData(), 1000); // 1 second debounce for server calls
+            }
+        });
+        
+        // Auto-save on checkbox changes (immediate)
+        detailsDiv.addEventListener('change', (e) => {
+            if (e.target.matches('input[type="checkbox"]')) {
+                // Immediate save for checkbox changes
+                clearTimeout(this.saveTimeout);
+                this.saveTimeout = setTimeout(() => this.saveData(), 100);
+            }
+        });
+        
+        // Auto-save on blur (when user moves away from input)
+        detailsDiv.addEventListener('blur', (e) => {
+            if (e.target.matches('input[type="text"], input[type="number"]')) {
+                clearTimeout(this.saveTimeout);
+                this.saveTimeout = setTimeout(() => this.saveData(), 200);
+            }
+        }, true);
+        
+        // Save on beforeunload (tab close/refresh)
+        this.beforeUnloadHandler = () => {
+            // Use sendBeacon for reliable saving on page unload
+            if (navigator.sendBeacon && this.currentBatchId) {
+                const detailsDiv = document.getElementById("trayScanDetails");
+                if (detailsDiv) {
+                    const trayData = [];
+                    const trayIdInputs = detailsDiv.querySelectorAll('input[type="text"]');
+                    const trayQtyInputs = detailsDiv.querySelectorAll('input[type="number"]');
+                    
+                    for (let i = 0; i < Math.max(trayIdInputs.length, trayQtyInputs.length); i++) {
+                        trayData.push({
+                            position: i,
+                            trayId: trayIdInputs[i] ? trayIdInputs[i].value.trim() : '',
+                            trayQty: trayQtyInputs[i] ? trayQtyInputs[i].value : '',
+                            draftId: trayIdInputs[i] ? trayIdInputs[i].getAttribute('data-draft-id') : ''
+                        });
+                    }
+                    
+                    const modalData = {};
+                    const verifyCheckbox = document.querySelector('.tray-verify-checkbox');
+                    modalData.topTrayVerified = verifyCheckbox ? verifyCheckbox.checked : false;
+                    modalData.checkboxDisabled = verifyCheckbox ? verifyCheckbox.disabled : false;
+                    
+                    const payload = JSON.stringify({
+                        batch_id: this.currentBatchId,
+                        tray_data: trayData,
+                        modal_data: modalData
+                    });
+                    
+                    // Use sendBeacon for reliable saving on page unload
+                    const formData = new FormData();
+                    formData.append('data', payload);
+                    formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+                    
+                    navigator.sendBeacon('/dayplanning/tray_auto_save/', formData);
+                }
+            }
+        };
+        
+        window.addEventListener('beforeunload', this.beforeUnloadHandler);
+    },
+    
+    cleanup() {
+        if (this.saveTimeout) {
+            clearTimeout(this.saveTimeout);
+        }
+        if (this.beforeUnloadHandler) {
+            window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+        }
+        this.currentBatchId = null;
+        this.isInitialized = false;
+    }
+};
+
+// ===== UTILITY FUNCTIONS =====
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    console.log(`🔐 CSRF Token: ${cookieValue ? 'Found' : 'Not Found'}`);
+    return cookieValue;
+}
+
+function clearTrayVerificationMessage() {
+    const footer = document.getElementById('trayQtyErrorFooter');
+    if (footer) {
+        footer.textContent = '';
+        footer.style.color = '';
+    }
+}
+
+function handleNetworkError(error, context = '') {
+    console.error(`❌ Network Error in ${context}:`, error);
+    
+    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Connection Error',
+            text: 'Unable to connect to server. Please check your internet connection and try again.',
+            confirmButtonColor: '#007bff'
+        });
+    } else if (error.status === 403) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Permission Denied',
+            text: 'You do not have permission to perform this action. Please refresh the page and try again.',
+            confirmButtonColor: '#007bff'
+        });
+    } else if (error.status === 404) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Not Found',
+            text: 'The requested resource was not found. Please refresh the page.',
+            confirmButtonColor: '#007bff'
+        });
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: 'Network Error',
+            text: `An error occurred: ${error.message || 'Unknown error'}. Please try again.`,
+            confirmButtonColor: '#007bff'
+        });
+    }
+}
+
+function validateAllTrayIds() {
+    const detailsDiv = document.getElementById("trayScanDetails");
+    if (!detailsDiv) return false;
+    
+    const trayIdInputs = detailsDiv.querySelectorAll('input[type="text"]');
+    let allFilled = true;
+    
+    trayIdInputs.forEach((input, index) => {
+        if (!input.value.trim()) {
+            allFilled = false;
+            console.log(`Tray ID ${index + 1} is empty:`, input.value);
+        } else {
+            console.log(`Tray ID ${index + 1} is filled:`, input.value);
+        }
+    });
+    
+    console.log('All Tray IDs filled:', allFilled, 'Total inputs:', trayIdInputs.length);
+    return allFilled && trayIdInputs.length > 0;
+}
+
+function updateUIElements() {
+    const allTrayIdsFilled = validateAllTrayIds();
+    const verifyCheckbox = document.querySelector('.tray-verify-checkbox');
+    const submitBtn = document.getElementById('trayScanSubmitBtn');
+    const isCheckboxChecked = verifyCheckbox && verifyCheckbox.checked;
+
+    if (verifyCheckbox) {
+        const isAlreadyVerified = verifyCheckbox.checked && verifyCheckbox.disabled;
+        if (!isAlreadyVerified) {
+            if (allTrayIdsFilled) {
+                verifyCheckbox.disabled = false;
+                verifyCheckbox.style.opacity = '1';
+                verifyCheckbox.style.cursor = 'pointer';
+            } else {
+                verifyCheckbox.disabled = true;
+                verifyCheckbox.checked = false;
+                verifyCheckbox.style.opacity = '0.5';
+                verifyCheckbox.style.cursor = 'not-allowed';
+            }
+        }
+    }
+
+    if (submitBtn) {
+        let tooltipMsg = "";
+        if (!allTrayIdsFilled && !isCheckboxChecked) {
+            tooltipMsg = "Fill all Tray IDs and verify the top tray quantity to enable Submit.";
+        } else if (!allTrayIdsFilled) {
+            tooltipMsg = "Please fill all Tray IDs to enable Submit.";
+        } else if (!isCheckboxChecked) {
+            tooltipMsg = "Please verify the top tray quantity to enable Submit.";
+        } else {
+            tooltipMsg = "";
+        }
+
+        if (allTrayIdsFilled && isCheckboxChecked) {
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+            submitBtn.style.cursor = 'pointer';
+            submitBtn.style.backgroundColor = '#28a745';
+            submitBtn.removeAttribute('title');
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.5';
+            submitBtn.style.cursor = 'not-allowed';
+            submitBtn.style.backgroundColor = '#6c757d';
+            submitBtn.setAttribute('title', tooltipMsg);
+        }
+    }
+
+    updateTrayScanSummary();
+}
+
+function handleQuantityChange(qtyInput, position) {
+    const quantity = parseInt(qtyInput.value, 10) || 0;
+    const row = qtyInput.closest('tr') || qtyInput.closest('div[style*="display:"]');
+    
+    if (quantity === 0) {
+        if (row) {
+            row.style.opacity = '0.5';
+            row.style.backgroundColor = '#ffebee';
+            row.title = 'This tray will be delinked (quantity = 0)';
+        }
+        console.log(`Position ${position}: Marked for delinking (qty = 0)`);
+    } else {
+        if (row) {
+            row.style.opacity = '1';
+            row.style.backgroundColor = '';
+            row.title = '';
+        }
+        console.log(`Position ${position}: Active tray (qty = ${quantity})`);
+    }
+    
+    updateTrayScanSummary();
+    updateUIElements();
+}
+
+function updateTrayScanSummary() {
+    const detailsDiv = document.getElementById("trayScanDetails");
+    const summaryDiv = document.getElementById("trayScanSummary");
+    if (!detailsDiv || !summaryDiv) return;
+
+    const qtyInputs = detailsDiv.querySelectorAll('input[type="number"]');
+    const trayIdInputs = detailsDiv.querySelectorAll('input[type="text"]');
+
+    if (qtyInputs.length === 0 || trayIdInputs.length === 0) {
+        summaryDiv.textContent = `Qty to Scan: 0/0`;
+        return;
+    }
+
+    let totalQuantity = 0;
+    let scannedQuantity = 0;
+
+    for (let i = 0; i < qtyInputs.length; i++) {
+        const qty = parseInt(qtyInputs[i].value, 10) || 0;
+        
+        if (qty > 0) {
+            totalQuantity += qty;
+            
+            if (trayIdInputs[i] && trayIdInputs[i].value.trim()) {
+                scannedQuantity += qty;
+            }
+        }
+    }
+
+    summaryDiv.textContent = `Qty to Scan: ${scannedQuantity}/${totalQuantity}`;
+    
+    const modalTrayQty = document.getElementById("modalTrayQty");
+    if (modalTrayQty && totalQuantity > 0) {
+        modalTrayQty.textContent = totalQuantity;
+    }
+}
+
+// ===== MAIN MODAL LOGIC =====
+document.addEventListener("DOMContentLoaded", () => {
+    const trayScanLinks = document.querySelectorAll(".tray-scan-btn");
+    const modal = document.getElementById("trayScanModal");
+    const closeBtn = document.getElementById("closeTrayScanModal");
+    const detailsDiv = document.getElementById("trayScanDetails");
+    const modalModelNo = document.getElementById("modalModelNo");
+
+    trayScanLinks.forEach((link) => {
+        link.addEventListener("click", async (event) => {
+            event.preventDefault();
+            
+            // ✅ CROSS-BROWSER AUTO-SAVE: Initialize for this batch
+            window.currentTrayScanBatchId = event.target.getAttribute("data-batch-id");
+            TrayModalCrossBrowserAutoSave.init(window.currentTrayScanBatchId);
+            
+            clearTrayVerificationMessage();
+
+            const row = event.target.closest("tr");
+            if (!row) return;
+            document.querySelectorAll("tbody tr").forEach((row) => {
+                row.classList.remove("highlighted-tray-scan");
+            });
+            row.classList.add("highlighted-tray-scan");
+
+            // Get dynamic data from the clicked row
+            const batchId = event.target.getAttribute("data-batch-id");
+            const modelNo = event.target.getAttribute("data-model-no");
+            const noOfTrays = parseInt(event.target.getAttribute("data-no-of-trays")) || 0;
+            const trayCapacity = event.target.getAttribute("data-tray-capacity") || "";
+            const topTrayQtyVerified = event.target.getAttribute("data-top-tray-qty-verified") === "True";
+            const draftSaved = event.target.getAttribute("data-draft-saved") === "True";
+            const movedToDPicker = event.target.getAttribute("data-moved-to-d-picker") === "True";
+
+            // Update modal with dynamic model number
+            if (modalModelNo && modelNo) {
+                modalModelNo.textContent = modelNo;
+            }
+
+            // Update model image
+            const modalUserImg = modal.querySelector('.modal-top-header img');
+            const modelImage = link.getAttribute('data-model-image');
+            if (modalUserImg) {
+                if (modelImage) {
+                    modalUserImg.src = modelImage;
+                } else {
+                    modalUserImg.src = "/static/assets/images/imagePlaceholder.png";
+                }
+            }
+
+            const modalTrayQty = document.getElementById("modalTrayQty");
+            const totalBatchQty = event.target.getAttribute("data-total-batch-quantity");
+            if (modalTrayQty && totalBatchQty) {
+                modalTrayQty.textContent = totalBatchQty;
+            }
+
+            // Try to fetch DraftTrayId data first, fallback to TrayId
+            let traysData = [];
+            let isDraft = false;
+            try {
+                const draftResp = await fetch(`/dayplanning/draft_tray_id_list/?batch_id=${encodeURIComponent(batchId)}`);
+                const draftResult = await draftResp.json();
+                if (draftResult.success && Array.isArray(draftResult.trays) && draftResult.trays.length > 0) {
+                    traysData = draftResult.trays;
+                    isDraft = true;
+                } else {
+                    const resp = await fetch(`/dayplanning/tray_id_list/?batch_id=${encodeURIComponent(batchId)}`);
+                    const result = await resp.json();
+                    if (result.success && Array.isArray(result.trays) && result.trays.length > 0) {
+                        traysData = result.trays;
+                        isDraft = false;
+                    }
+                }
+            } catch (e) {
+                // Ignore fetch errors, fallback to default
+            }
+
+            let html = `
+                <div style="min-height:32px;">S.no</div>
+                <div style="min-height:32px;">Tray ID</div>
+                <div style="min-height:32px;">Tray Quantity</div>
+            `;
+
+            let showButtons = true;
+            let trayQtyList = [];
+            try {
+                trayQtyList = JSON.parse(event.target.getAttribute("data-tray-qty-list") || "[]");
+            } catch (e) {
+                trayQtyList = [];
+            }
+            let totalRows = noOfTrays;
+            
+            const traysByPosition = {};
+            if (isDraft) {
+                traysData.forEach(tray => {
+                    if (tray.position !== undefined) {
+                        traysByPosition[tray.position] = tray;
+                    }
+                });
+                console.log('🔍 Draft trays mapped by position:', traysByPosition);
+            }
+            
+            for (let i = 0; i < totalRows; i++) {
+                let tray = {};
+                
+                if (isDraft) {
+                    tray = traysByPosition[i] || {};
+                    console.log(`Position ${i}:`, tray);
+                } else {
+                    tray = traysData[i] || {};
+                }
+                
+                const trayQty = tray.tray_quantity || trayQtyList[i] || trayCapacity;
+                
+                html += `
+                    <div style="min-height:32px;">${i === 0 ? '1 (Top Tray)' : (i + 1)}</div>
+                    <div style="min-height:32px;">
+                        <input type="text" class="form-control tray-id-input" value="${tray.tray_id || ''}" data-draft-id="${tray.id || ''}" data-position="${i}" style="width: 100%;" />
+                    </div>
+                    <div style="min-height:32px;">
+                        ${
+                          i === 0
+                            ? `<div style="display: flex; align-items: center; justify-content: space-between;">
+                              <input type="number" class="form-control tray-qty-input" value="${trayQty}" style="width: 60px;" readonly />
+                              <div style="display: flex; align-items: center; gap: 27px;">
+                                  <input type="checkbox" class="tray-verify-checkbox" style="width: 18px; height: 18px; cursor: pointer;" ${topTrayQtyVerified ? 'checked disabled' : ''} />
+                                  <img src="{% static 'assets/icons/edit2.png' %}" alt="Edit" class="tray-edit-btn" style="width: 18px; height: 18px; cursor: pointer;${topTrayQtyVerified ? 'opacity:0.5;pointer-events:none;' : ''}" />
+                              </div>
+                              </div>`
+                            : `<input type="number" class="form-control" value="${trayQty}" style="width: 100%;" readonly />`
+                        }
+                    </div>
+                `;
+            }
+            
+            showButtons = isDraft || traysData.length === 0;
+            detailsDiv.innerHTML = html;
+
+            // Initialize UI validation after rendering
+            setTimeout(() => {
+                const trayIdInputs = detailsDiv.querySelectorAll('.tray-id-input');
+                trayIdInputs.forEach(input => {
+                    input.addEventListener('input', updateUIElements);
+                    input.addEventListener('blur', updateUIElements);
+                });
+                
+                updateUIElements();
+                
+                const editBtn = detailsDiv.querySelector('.tray-edit-btn');
+                const qtyInput = detailsDiv.querySelector('.tray-qty-input');
+                const errorFooter = document.getElementById('trayQtyErrorFooter');
+                const trayCapacity = parseInt(event.target.getAttribute("data-tray-capacity")) || 0;
+            
+                if (editBtn && qtyInput) {
+                    if (!topTrayQtyVerified) {
+                        editBtn.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            qtyInput.removeAttribute('readonly');
+                            qtyInput.focus();
+                            qtyInput.select();
+                        });
+                    }
+            
+                    qtyInput.addEventListener('input', function () {
+                        if (errorFooter) errorFooter.textContent = '';
+                        let val = parseInt(qtyInput.value, 10) || 0;
+                        if (val > trayCapacity) {
+                            qtyInput.value = trayCapacity;
+                            if (errorFooter) errorFooter.textContent = `Tray Qty cannot exceed Tray Capacity (${trayCapacity})`;
+                        } else if (val < 0) {
+                            qtyInput.value = 0;
+                        }
+                        updateUIElements();
+                    });
+            
+                    qtyInput.addEventListener('keydown', function (ev) {
+                        if (ev.key === 'Enter') {
+                            qtyInput.setAttribute('readonly', 'readonly');
+                            qtyInput.blur();
+                        }
+                    });
+                    qtyInput.addEventListener('blur', function () {
+                        qtyInput.setAttribute('readonly', 'readonly');
+                        if (errorFooter) errorFooter.textContent = '';
+                    });
+                }
+            }, 100);
+            
+            // Checkbox handler for verification
+            const verifyCheckbox = detailsDiv.querySelector('input[type="checkbox"]');
+            if (verifyCheckbox) {
+                verifyCheckbox.addEventListener('change', function() {
+                    if (verifyCheckbox.checked) {
+                        if (!validateAllTrayIds()) {
+                            verifyCheckbox.checked = false;
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Incomplete Data',
+                                text: 'Please fill all Tray IDs before verifying.',
+                                confirmButtonColor: '#007bff'
+                            });
+                            return;
+                        }
+                        
+                        const trayQtyInputs = detailsDiv.querySelectorAll('input[type="number"]');
+                        let totalQty = 0;
+                        trayQtyInputs.forEach(input => {
+                            totalQty += parseInt(input.value, 10) || 0;
+                        });
+                        
+                        const batchId = window.currentTrayScanBatchId || '';
+                        
+                        console.log(`🚀 Sending verification request:`);
+                        console.log(`   Batch ID: ${batchId}`);
+                        console.log(`   Total Qty: ${totalQty}`);
+                        console.log(`   CSRF Token: ${getCookie('csrftoken')}`);
+                        
+                        fetch('/dayplanning/verify_top_tray_qty/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken'),
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({
+                                batch_id: batchId,
+                                verified_tray_qty: totalQty
+                            })
+                        })
+                        .then(response => {
+                            console.log(`📡 Response status: ${response.status}`);
+                            console.log(`📡 Response ok: ${response.ok}`);
+                            
+                            if (!response.ok) {
+                                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log(`✅ Response data:`, data);
+                            
+                            if (data.success) {
+                                const trayScanBtn = document.querySelector(`.tray-scan-btn[data-batch-id="${batchId}"]`);
+                                if (trayScanBtn) {
+                                    trayScanBtn.setAttribute('data-top-tray-qty-verified', 'True');
+                                    const trayQtyInputs = detailsDiv.querySelectorAll('input[type="number"]');
+                                    const updatedQtyList = Array.from(trayQtyInputs).map(input => parseInt(input.value, 10) || 0);
+                                    trayScanBtn.setAttribute('data-tray-qty-list', JSON.stringify(updatedQtyList));
+                                }
+                                
+                                verifyCheckbox.checked = true;
+                                verifyCheckbox.disabled = true;
+                                const editBtn = detailsDiv.querySelector('.tray-edit-btn');
+                                if (editBtn) {
+                                    editBtn.style.opacity = "0.5";
+                                    editBtn.style.pointerEvents = "none";
+                                    editBtn.style.filter = "grayscale(1) opacity(0.5)";
+                                }
+                                
+                                const footer = document.getElementById('trayQtyErrorFooter');
+                                if (footer) {
+                                    footer.textContent = 'Top tray quantity verified!';
+                                    footer.style.color = 'green';
+                                }
+
+                                updateUIElements();
+                                
+                                const submitBtn = document.getElementById('trayScanSubmitBtn');
+                                if (submitBtn) {
+                                    submitBtn.disabled = false;
+                                    submitBtn.style.opacity = '1';
+                                    submitBtn.style.cursor = 'pointer';
+                                    submitBtn.style.backgroundColor = '#28a745';
+                                }
+
+                                const currentRow = document.querySelector(`.tray-scan-btn[data-batch-id="${batchId}"]`)?.closest('tr');
+                                if (currentRow) {
+                                    const qtyCell = currentRow.querySelector('td:nth-child(12)');
+                                    if (qtyCell) {
+                                        qtyCell.textContent = data.total_batch_quantity;
+                                    }
+                                    const statusCell = currentRow.querySelector('td:nth-child(15)');
+                                    if (statusCell) {
+                                        statusCell.innerHTML = `
+                                            <div class="d-inline-block px-3 fw-semibold text-center rounded-pill" style="border: 2px solid #4997ac; background-color: #d1f2f3; color: #03425d; font-size: clamp(0.75rem, 2vw, 0.875rem); white-space: nowrap; padding-top: 0.5rem; padding-bottom: 0.5rem;">
+                                                Draft
+                                            </div>
+                                        `;
+                                    }
+                                    const processStatusCell = currentRow.querySelector('td:nth-child(13)');
+                                    if (processStatusCell) {
+                                        processStatusCell.innerHTML = `
+                                            <div title="Tray Scan" class="d-flex align-items-center justify-content-center rounded-circle ms-1" style="width: 28px; height: 28px; background: linear-gradient(to right, #0c8249 50%, #bfbfbf 50%); color: white; font-weight: bold; line-height: 20px; text-align: center; padding-top: 1px; padding-right: 1px;">
+                                                T
+                                            </div>
+                                        `;
+                                    }
+                                }
+                            } else {
+                                console.error(`❌ API Error:`, data.error);
+                                verifyCheckbox.checked = false;
+                                
+                                const footer = document.getElementById('trayQtyErrorFooter');
+                                if (footer) {
+                                    footer.textContent = data.error || 'Failed to verify';
+                                    footer.style.color = 'red';
+                                }
+                                
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Verification Failed',
+                                    text: data.error || 'Failed to verify top tray quantity. Please try again.',
+                                    confirmButtonColor: '#007bff'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error(`❌ Fetch Error:`, error);
+                            verifyCheckbox.checked = false;
+                            
+                            const footer = document.getElementById('trayQtyErrorFooter');
+                            if (footer) {
+                                footer.textContent = 'Network error occurred';
+                                footer.style.color = 'red';
+                            }
+                            
+                            handleNetworkError(error, 'Top Tray Verification');
+                        });
+                    }
+                });
+            }
+
+            // Auto-focus the first Tray ID input when modal opens
+            const firstTrayIdInput = detailsDiv.querySelector('input[type="text"]:not([readonly])');
+            if (firstTrayIdInput) {
+                firstTrayIdInput.focus();
+                firstTrayIdInput.select();
+            }
+
+            const isReleased = event.target.getAttribute("data-moved-to-d-picker") === "True";
+            
+            if (isReleased) {
+                detailsDiv.querySelectorAll('input').forEach(inp => inp.setAttribute('readonly', 'readonly'));
+            }
+            
+            const buttonSection = modal.querySelector('.tray-scan-modal-content > div[style*="justify-content: center"]');
+            if (buttonSection) {
+                buttonSection.style.display = isReleased ? "none" : (showButtons ? "flex" : "none");
+            }
+
+            modal.classList.add("open");
+
+            // ✅ CROSS-BROWSER AUTO-SAVE: Try to restore data after modal is loaded
+            setTimeout(async () => {
+                const wasRestored = await TrayModalCrossBrowserAutoSave.restoreData();
+                if (wasRestored) {
+                    console.log('📋 Cross-browser auto-save data restored');
+                }
+            }, 500);
+
+            // Tray ID validation logic
+            if (!isReleased) {
+                const trayIdInputs = detailsDiv.querySelectorAll('input[type="text"]:not([readonly])');
+                trayIdInputs.forEach((input, idx, allInputs) => {
+                    input.addEventListener('input', function () {
+                        let prevError = input.parentNode.querySelector('.tray-id-error');
+                        if (prevError) prevError.remove();
+                        
+                        input.style.borderColor = '';
+                        input.style.backgroundColor = '';
+                        
+                        updateUIElements();
+                    });
+
+                    input.addEventListener('blur', async function () {
+                        let prevError = input.parentNode.querySelector('.tray-id-error');
+                        if (prevError) prevError.remove();
+
+                        const trayId = input.value.trim();
+                        if (!trayId) {
+                            updateUIElements();
+                            return;
+                        }
+
+                        // Check for duplicates in modal
+                        let duplicateInModal = false;
+                        allInputs.forEach((otherInput, otherIdx) => {
+                            if (otherIdx !== idx && otherInput.value.trim() === trayId) {
+                                duplicateInModal = true;
+                            }
+                        });
+                        if (duplicateInModal) {
+                            const errorDiv = document.createElement('div');
+                            errorDiv.className = 'tray-id-error';
+                            errorDiv.style.color = 'red';
+                            errorDiv.style.fontSize = '12px';
+                            errorDiv.textContent = 'Already scanned in a row!';
+                            input.parentNode.appendChild(errorDiv);
+                            input.focus();
+                            input.select();
+                            updateUIElements();
+                            return;
+                        }
+
+                        // Backend validation
+                        try {
+                            const currentBatchId = window.currentTrayScanBatchId || '';
+                            const resp = await fetch(`/dayplanning/tray_id_unique_check/?tray_id=${encodeURIComponent(trayId)}&batch_id=${encodeURIComponent(currentBatchId)}`);
+                            const result = await resp.json();
+                            
+                            if (result.tray_not_in_system) {
+                                const errorDiv = document.createElement('div');
+                                errorDiv.className = 'tray-id-error';
+                                errorDiv.style.color = '#d32f2f';
+                                errorDiv.style.fontSize = '11px';
+                                errorDiv.style.fontWeight = 'bold';
+                                errorDiv.style.backgroundColor = '#ffebee';
+                                errorDiv.style.padding = '4px 6px';
+                                errorDiv.style.borderRadius = '4px';
+                                errorDiv.style.marginTop = '4px';
+                                
+                                errorDiv.innerHTML = `
+                                    <div style="color: #d32f2f;">❌ Not in System</div>
+                                    <div style="font-size: 10px; margin-top: 2px;">
+                                        Only pre-configured trays allowed.<br>
+                                        Contact admin to add this tray.
+                                    </div>
+                                `;
+                                
+                                input.parentNode.appendChild(errorDiv);
+                                input.style.borderColor = '#d32f2f';
+                                input.style.backgroundColor = '#ffebee';
+                                input.focus();
+                                input.select();
+                                
+                            } else if (result.already_scanned) {
+                                const errorDiv = document.createElement('div');
+                                errorDiv.className = 'tray-id-error';
+                                errorDiv.style.color = '#d32f2f';
+                                errorDiv.style.fontSize = '11px';
+                                errorDiv.style.fontWeight = 'bold';
+                                errorDiv.style.backgroundColor = '#ffebee';
+                                errorDiv.style.padding = '4px 6px';
+                                errorDiv.style.borderRadius = '4px';
+                                errorDiv.style.marginTop = '4px';
+                                
+                                errorDiv.innerHTML = `<div style="color: #d32f2f;">❌ Already Scanned</div>`;
+                                
+                                input.parentNode.appendChild(errorDiv);
+                                input.style.borderColor = '#d32f2f';
+                                input.style.backgroundColor = '#ffebee';
+                                input.focus();
+                                input.select();
+                                
+                            } else if (result.tray_type_error) {
+                                const errorDiv = document.createElement('div');
+                                errorDiv.className = 'tray-id-error';
+                                errorDiv.style.color = 'red';
+                                errorDiv.style.fontSize = '11px';
+                                errorDiv.style.fontWeight = 'bold';
+                                errorDiv.style.backgroundColor = '#ffebee';
+                                errorDiv.style.padding = '4px 6px';
+                                errorDiv.style.borderRadius = '4px';
+                                errorDiv.style.marginTop = '4px';
+                                
+                                errorDiv.innerHTML = `
+                                    <div style="color: #d32f2f;">❌ Tray Type Mismatch</div>
+                                    <div style="font-size: 10px; margin-top: 2px;">
+                                        Batch Type: <strong>${result.batch_tray_type || 'Not Set'}</strong><br>
+                                        Scanned Type: <strong>${result.scanned_tray_type || 'Not Set'}</strong>
+                                    </div>
+                                `;
+                                
+                                input.parentNode.appendChild(errorDiv);
+                                input.style.borderColor = '#ff5722';
+                                input.style.backgroundColor = '#fff3e0';
+                                input.focus();
+                                input.select();
+                                
+                            } else if (!result.available) {
+                                const errorDiv = document.createElement('div');
+                                errorDiv.className = 'tray-id-error';
+                                errorDiv.style.color = 'red';
+                                errorDiv.style.fontSize = '12px';
+                                errorDiv.textContent = result.error || 'Tray not available!';
+                                input.parentNode.appendChild(errorDiv);
+                                
+                                input.style.borderColor = '#d32f2f';
+                                input.style.backgroundColor = '#ffebee';
+                                input.focus();
+                                input.select();
+                                
+                            } else if (result.available) {
+                                input.style.borderColor = '#4caf50';
+                                input.style.backgroundColor = '#f1f8e9';
+                                
+                                if (result.status === 'pre_configured') {
+                                    const successDiv = document.createElement('div');
+                                    successDiv.className = 'tray-id-success';
+                                    successDiv.style.color = '#2e7d32';
+                                    successDiv.style.fontSize = '11px';
+                                    successDiv.style.fontWeight = 'bold';
+                                    successDiv.innerHTML = `✅ Available (${result.tray_type || 'Type not set'})`;
+                                    input.parentNode.appendChild(successDiv);
+                                    
+                                    setTimeout(() => {
+                                        if (successDiv.parentNode) {
+                                            successDiv.parentNode.removeChild(successDiv);
+                                        }
+                                    }, 2000);
+                                }
+                            }
+                        } catch (e) {
+                            console.error('Tray validation error:', e);
+                            const errorDiv = document.createElement('div');
+                            errorDiv.className = 'tray-id-error';
+                            errorDiv.style.color = '#ff5722';
+                            errorDiv.style.fontSize = '12px';
+                            errorDiv.textContent = 'Validation error - please try again';
+                            input.parentNode.appendChild(errorDiv);
+                        }
+                        updateUIElements();
+                    });
+                    
+                    input.addEventListener('keydown', async function (e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            input.blur();
+                            setTimeout(() => {
+                                if (!input.parentNode.querySelector('.tray-id-error')) {
+                                    const nextInput = allInputs[idx + 1];
+                                    if (nextInput) {
+                                        nextInput.focus();
+                                        nextInput.select();
+                                    }
+                                } else {
+                                    input.focus();
+                                    input.select();
+                                }
+                            }, 50);
+                        }
+                    });
+                });
+            }
+
+            modal.addEventListener("click", (event) => {
+                if (event.target === modal) {
+                    TrayModalCrossBrowserAutoSave.cleanup(); // ✅ CROSS-BROWSER AUTO-SAVE: Cleanup on close
+                    modal.classList.remove("open");
+                    clearTrayVerificationMessage();
+                }
+            });
+
+            // ✅ CROSS-BROWSER AUTO-SAVE: Enhanced draft button with auto-save clearing
+            const draftBtn = document.getElementById('trayScanDraftBtn');
+            if (draftBtn) {
+                draftBtn.onclick = function() {
+                    if (detailsDiv.querySelector('.tray-id-error')) {
+                        Swal.fire('Error', 'Please fix duplicate Tray IDs before saving draft.', 'error');
+                        return;
+                    }
+                    detailsDiv.querySelectorAll('.tray-id-error').forEach(el => el.remove());
+              
+                    const trayRows = [];
+                    const trayIdInputs = detailsDiv.querySelectorAll('input[type="text"]');
+                    const trayQtyInputs = detailsDiv.querySelectorAll('input[type="number"]');
+              
+                    for (let i = 0; i < trayIdInputs.length; i++) {
+                        const tray_id = trayIdInputs[i].value;
+                        const tray_quantity = trayQtyInputs[i].value;
+                        const draft_id = trayIdInputs[i].getAttribute('data-draft-id') || null;
+                        
+                        trayRows.push({
+                            tray_id,
+                            tray_quantity,
+                            position: i,
+                            id: draft_id
+                        });
+                    }
+                    const batchId = window.currentTrayScanBatchId || '';
+              
+                    console.log('🚀 Saving draft with positions:', trayRows);
+              
+                    fetch('/dayplanning/draft_tray/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            batch_id: batchId,
+                            trays: trayRows
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            // ✅ CROSS-BROWSER AUTO-SAVE: Clear auto-saved data on successful draft save
+                            TrayModalCrossBrowserAutoSave.clearData();
+                            
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: 'Draft saved!',
+                                timer: 1200,
+                                showConfirmButton: false
+                            }).then(() => {
+                                location.reload();
+                            });
+                            modal.classList.remove("open");
+                            clearTrayVerificationMessage();
+                        } else {
+                            Swal.fire('Error', data.error || 'Failed to save draft', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire('Error', 'Network error occurred', 'error');
+                    });
+                };
+            }
+          
+            // ✅ CROSS-BROWSER AUTO-SAVE: Enhanced submit button with auto-save clearing
+            const submitBtn = document.getElementById('trayScanSubmitBtn');
+            if (submitBtn) {
+                submitBtn.onclick = function() {
+                    const verifyCheckbox = document.querySelector('.tray-verify-checkbox');
+                    const isCheckboxChecked = verifyCheckbox && verifyCheckbox.checked;
+                    
+                    if (!isCheckboxChecked) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Verification Required',
+                            text: 'Please verify the top tray quantity before submitting.',
+                            confirmButtonColor: '#007bff'
+                        });
+                        return;
+                    }
+                    
+                    if (!validateAllTrayIds()) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Incomplete Data',
+                            text: 'Please fill all Tray IDs before submitting.',
+                            confirmButtonColor: '#007bff'
+                        });
+                        return;
+                    }
+                    
+                    if (detailsDiv.querySelector('.tray-id-error')) {
+                        Swal.fire('Error', 'Please fix all validation errors before submitting.', 'error');
+                        return;
+                    }
+                    detailsDiv.querySelectorAll('.tray-id-error').forEach(el => el.remove());
+
+                    const trayRows = [];
+                    const trayIdInputs = detailsDiv.querySelectorAll('input[type="text"]');
+                    const trayQtyInputs = detailsDiv.querySelectorAll('input[type="number"]');
+                    
+                    for (let i = 0; i < trayIdInputs.length; i++) {
+                        const tray_id = trayIdInputs[i].value.trim();
+                        const tray_quantity = trayQtyInputs[i].value;
+                        
+                        trayRows.push({
+                            tray_id,
+                            tray_quantity
+                        });
+                    }
+                    
+                    const batchId = window.currentTrayScanBatchId || '';
+
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Processing...';
+
+                    fetch('/dayplanning/tray_scan/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            batch_id: batchId,
+                            trays: trayRows
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            // ✅ CROSS-BROWSER AUTO-SAVE: Clear auto-saved data on successful submit
+                            TrayModalCrossBrowserAutoSave.clearData();
+                            
+                            if (data.top_tray_scan_required) {
+                                console.log('🔍 Top tray scan required - keeping modal open and showing scan UI');
+                                showTopTrayScanUIInModal(batchId);
+                                return;
+                            }
+                            
+                            console.log('✅ Normal tray scan success - closing modal');
+                            
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: 'Tray scan saved successfully!',
+                                timer: 1200,
+                                showConfirmButton: false
+                            }).then(() => {
+                                const modal = document.getElementById("trayScanModal");
+                                if (modal) modal.classList.remove("open");
+                                clearTrayVerificationMessage();
+                                location.reload();
+                            });
+                            
+                        } else if (data.tray_not_in_system_errors) {
+                            console.log('Trays not in system errors found:', data.tray_not_in_system_errors);
+                            
+                            data.tray_not_in_system_errors.forEach(error => {
+                                const problematicInput = trayIdInputs[error.position - 1];
+                                if (problematicInput) {
+                                    problematicInput.style.borderColor = '#d32f2f';
+                                    problematicInput.style.backgroundColor = '#ffebee';
+                                    
+                                    let existingError = problematicInput.parentNode.querySelector('.tray-id-error');
+                                    if (!existingError) {
+                                        const errorDiv = document.createElement('div');
+                                        errorDiv.className = 'tray-id-error';
+                                        errorDiv.style.color = '#d32f2f';
+                                        errorDiv.style.fontSize = '11px';
+                                        errorDiv.style.fontWeight = 'bold';
+                                        errorDiv.innerHTML = `
+                                            <div>❌ Not in System</div>
+                                            <div style="font-size: 10px; margin-top: 2px;">
+                                                Contact admin to add this tray
+                                            </div>
+                                        `;
+                                        problematicInput.parentNode.appendChild(errorDiv);
+                                    }
+                                }
+                            });
+                            
+                        } else if (data.already_scanned_errors) {
+                            console.log('Already scanned errors found:', data.already_scanned_errors);
+                            
+                            data.already_scanned_errors.forEach(error => {
+                                const problematicInput = trayIdInputs[error.position - 1];
+                                if (problematicInput) {
+                                    problematicInput.style.borderColor = '#d32f2f';
+                                    problematicInput.style.backgroundColor = '#ffebee';
+                                    
+                                    let existingError = problematicInput.parentNode.querySelector('.tray-id-error');
+                                    if (!existingError) {
+                                        const errorDiv = document.createElement('div');
+                                        errorDiv.className = 'tray-id-error';
+                                        errorDiv.style.color = '#d32f2f';
+                                        errorDiv.style.fontSize = '11px';
+                                        errorDiv.style.fontWeight = 'bold';
+                                        errorDiv.innerHTML = `
+                                            <div>❌ Already Scanned</div>
+                                            <div style="font-size: 10px; margin-top: 2px;">
+                                                ${error.scan_date} in ${error.batch_info}
+                                            </div>
+                                        `;
+                                        problematicInput.parentNode.appendChild(errorDiv);
+                                    }
+                                }
+                            });
+                            
+                        } else if (data.tray_type_errors) {
+                            console.log('Tray type errors found:', data.tray_type_errors);
+                            
+                            data.tray_type_errors.forEach(error => {
+                                const problematicInput = trayIdInputs[error.position - 1];
+                                if (problematicInput) {
+                                    problematicInput.style.borderColor = '#ff5722';
+                                    problematicInput.style.backgroundColor = '#fff3e0';
+                                    
+                                    let existingError = problematicInput.parentNode.querySelector('.tray-id-error');
+                                    if (!existingError) {
+                                        const errorDiv = document.createElement('div');
+                                        errorDiv.className = 'tray-id-error';
+                                        errorDiv.style.color = '#ff5722';
+                                        errorDiv.style.fontSize = '11px';
+                                        errorDiv.style.fontWeight = 'bold';
+                                        errorDiv.innerHTML = `
+                                            <div>❌ Type Mismatch</div>
+                                            <div style="font-size: 10px; margin-top: 2px;">
+                                                Need: ${error.batch_tray_type}<br>
+                                                Scanned: ${error.scanned_tray_type}
+                                            </div>
+                                        `;
+                                        problematicInput.parentNode.appendChild(errorDiv);
+                                    }
+                                }
+                            });
+                            
+                        } else if (data.duplicate_tray_ids) {
+                            trayIdInputs.forEach((input, idx) => {
+                                if (data.duplicate_tray_ids.includes(input.value)) {
+                                    const errorDiv = document.createElement('div');
+                                    errorDiv.className = 'tray-id-error';
+                                    errorDiv.style.color = 'red';
+                                    errorDiv.style.fontSize = '12px';
+                                    errorDiv.textContent = 'Tray ID already exists!';
+                                    input.parentNode.appendChild(errorDiv);
+                                }
+                            });
+                            Swal.fire('Error', 'Duplicate Tray ID(s) found. Please correct.', 'error');
+                        } else {
+                            Swal.fire('Error', data.error || 'Failed to save tray scan', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire('Error', 'Network error occurred', 'error');
+                    })
+                    .finally(() => {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Submit';
+                    });
+                };
+            }
+
+            // Top tray scan UI function
+            function showTopTrayScanUIInModal(batchId) {
+                console.log('🔍 Showing top tray scan UI within same modal for batch:', batchId);
+                
+                const modal = document.getElementById("trayScanModal");
+                if (modal) {
+                    modal.classList.add("open");
+                }
+                
+                const detailsDiv = document.getElementById("trayScanDetails");
+                const buttonSection = document.querySelector('.tray-scan-modal-buttons');
+                const errorFooter = document.getElementById('trayQtyErrorFooter');
+                
+                if (detailsDiv) {
+                    detailsDiv.querySelectorAll('input, button, checkbox').forEach(element => {
+                        element.disabled = true;
+                        element.style.opacity = '0.5';
+                        element.style.pointerEvents = 'none';
+                    });
+                }
+                
+                if (buttonSection) {
+                    buttonSection.style.display = 'none';
+                }
+                
+                if (errorFooter) {
+                    errorFooter.textContent = '';
+                    errorFooter.style.color = '';
+                }
+                
+                const existingSection = document.getElementById('topTrayScanSection');
+                if (existingSection) {
+                    existingSection.remove();
+                }
+                
+                const topTrayScanHTML = `
+                    <div id="topTrayScanSection" style="margin-top: 20px; padding: 20px; border: 2px solid #28a745; border-radius: 8px; background: #f0fff4;">
+                        <h6 style="color: #28a745; font-weight: 600; margin-bottom: 15px; text-align: center;">
+                            🔝 Top Tray Scan Required
+                        </h6>
+                        <p style="text-align: center; color: #666; margin-bottom: 15px; font-size: 14px;">
+                            The first tray quantity is 0. Please scan a tray ID from this batch to set as the top tray.
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 12px; justify-content: center; margin-bottom: 15px;">
+                            <input 
+                                type="text" 
+                                id="topTrayIdInput" 
+                                placeholder="Scan or enter top tray ID..." 
+                                style="width: 250px; padding: 10px; border: 2px solid #28a745; border-radius: 4px; font-size: 14px; text-align: center;"
+                            />
+                            <button 
+                                id="topTrayScanBtn" 
+                                style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 14px;"
+                                disabled
+                            >
+                                Set Top Tray
+                            </button>
+                        </div>
+                        <div id="topTrayError" style="color: red; font-size: 12px; text-align: center; margin-top: 8px; min-height: 20px;"></div>
+                        <div style="text-align: center; margin-top: 10px; font-size: 12px; color: #666;">
+                            ℹ️ Only non-delinked tray IDs from this batch are valid
+                        </div>
+                    </div>
+                `;
+                
+                if (detailsDiv) {
+                    detailsDiv.insertAdjacentHTML('afterend', topTrayScanHTML);
+                }
+                
+                const topTrayIdInput = document.getElementById('topTrayIdInput');
+                const topTrayScanBtn = document.getElementById('topTrayScanBtn');
+                const topTrayError = document.getElementById('topTrayError');
+                
+                if (topTrayIdInput) {
+                    setTimeout(() => {
+                        topTrayIdInput.focus();
+                    }, 100);
+                    
+                    topTrayIdInput.addEventListener('input', function() {
+                        validateTopTrayId(topTrayIdInput.value.trim(), topTrayError, topTrayScanBtn, batchId);
+                    });
+                    
+                    topTrayIdInput.addEventListener('blur', function() {
+                        validateTopTrayId(topTrayIdInput.value.trim(), topTrayError, topTrayScanBtn, batchId);
+                    });
+                    
+                    topTrayIdInput.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            if (!topTrayScanBtn.disabled) {
+                                topTrayScanBtn.click();
+                            }
+                        }
+                    });
+                }
+                
+                if (topTrayScanBtn) {
+                    topTrayScanBtn.onclick = function() {
+                        const scannedTrayId = topTrayIdInput.value.trim();
+                        
+                        if (!scannedTrayId) {
+                            topTrayError.textContent = 'Please enter a tray ID.';
+                            topTrayError.style.color = 'red';
+                            topTrayIdInput.focus();
+                            return;
+                        }
+                        
+                        topTrayError.textContent = '';
+                        topTrayScanBtn.disabled = true;
+                        topTrayScanBtn.textContent = 'Processing...';
+                        topTrayScanBtn.style.opacity = '0.6';
+                        
+                        fetch('/dayplanning/top_tray_scan/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify({
+                                batch_id: batchId,
+                                scanned_tray_id: scannedTrayId
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                // ✅ CROSS-BROWSER AUTO-SAVE: Clear auto-saved data on successful top tray scan
+                                TrayModalCrossBrowserAutoSave.clearData();
+                                
+                                topTrayError.style.color = 'green';
+                                topTrayError.style.fontSize = '14px';
+                                topTrayError.style.fontWeight = 'bold';
+                                topTrayError.textContent = '✅ ' + data.message + ' - Closing...';
+                                
+                                setTimeout(() => {
+                                    if (modal) modal.classList.remove("open");
+                                    clearTrayVerificationMessage();
+                                    location.reload();
+                                }, 2000);
+                                
+                            } else {
+                                topTrayError.style.color = 'red';
+                                topTrayError.style.fontSize = '12px';
+                                topTrayError.style.fontWeight = 'normal';
+                                topTrayError.textContent = '❌ ' + (data.error || 'Failed to set top tray.');
+                                topTrayIdInput.focus();
+                                topTrayIdInput.select();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            topTrayError.style.color = 'red';
+                            topTrayError.style.fontSize = '12px';
+                            topTrayError.style.fontWeight = 'normal';
+                            topTrayError.textContent = '❌ Network error occurred.';
+                            topTrayIdInput.focus();
+                        })
+                        .finally(() => {
+                            if (!data || !data.success) {
+                                topTrayScanBtn.disabled = false;
+                                topTrayScanBtn.textContent = 'Set Top Tray';
+                                topTrayScanBtn.style.opacity = '1';
+                            }
+                        });
+                    };
+                }
+                
+                console.log('✅ Top tray scan UI added to modal successfully');
+            }
+
+            async function validateTopTrayId(trayId, errorElement, buttonElement, batchId) {
+                errorElement.textContent = '';
+                errorElement.style.color = '';
+                
+                if (!trayId) {
+                    buttonElement.disabled = true;
+                    buttonElement.style.opacity = '0.5';
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`/dayplanning/validate_top_tray/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            batch_id: batchId,
+                            tray_id: trayId
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success && result.valid) {
+                        errorElement.style.color = 'green';
+                        errorElement.textContent = '✅ Valid tray ID';
+                        buttonElement.disabled = false;
+                        buttonElement.style.opacity = '1';
+                    } else {
+                        errorElement.style.color = 'red';
+                        errorElement.textContent = '❌ ' + (result.error || 'Invalid tray ID');
+                        buttonElement.disabled = true;
+                        buttonElement.style.opacity = '0.5';
+                    }
+                    
+                } catch (error) {
+                    console.error('Validation error:', error);
+                    errorElement.style.color = 'red';
+                    errorElement.textContent = '❌ Unable to validate tray ID';
+                    buttonElement.disabled = true;
+                    buttonElement.style.opacity = '0.5';
+                }
+            }
+        });
+    });
+
+    // ✅ CROSS-BROWSER AUTO-SAVE: Enhanced close button handler
+    closeBtn.addEventListener("click", () => {
+        TrayModalCrossBrowserAutoSave.cleanup();
+        modal.classList.remove("open");
+        clearTrayVerificationMessage();
+    });
+
+    modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+            TrayModalCrossBrowserAutoSave.cleanup();
+            modal.classList.remove("open");
+            clearTrayVerificationMessage();
+        }
+    });
+    
+    // ✅ CROSS-BROWSER AUTO-SAVE: Enhanced cancel button handler with user choice
+    const cancelBtn = document.getElementById("trayScanCancelBtn");
+    if (cancelBtn) {
+        cancelBtn.addEventListener("click", async function () {
+            // Check if there's any auto-saved data
+            try {
+                const response = await fetch(`/dayplanning/tray_auto_save/?batch_id=${encodeURIComponent(window.currentTrayScanBatchId)}`, {
+                    method: 'GET',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const result = await response.json();
+                
+                if (result.success && result.has_data) {
+                    const keep = confirm("Keep your entered data for next time? (Available on any browser/device)");
+                    if (!keep) {
+                        await TrayModalCrossBrowserAutoSave.clearData();
+                    }
+                }
+            } catch (e) {
+                // If server check fails, ask anyway
+                const keep = confirm("Keep your entered data for next time?");
+                if (!keep) {
+                    await TrayModalCrossBrowserAutoSave.clearData();
+                }
+            }
+            
+            TrayModalCrossBrowserAutoSave.cleanup();
+            modal.classList.remove("open");
+            clearTrayVerificationMessage();
+        });
+    }
+});
+
+console.log('🌐 Cross-Browser Tray Modal Auto-Save system loaded');
+</script>
+
+    
+
+<!-- Active row to be highlighted & Restores the highlighted row to its original position and removes the highlight bg when the tray scan modal is closed. -->
+<script nonce="{{ csp_nonce }}">
+// Row highlight for Tray Scan (matches highlightWF.html logic) + Move active row to top and restore on close
+document.addEventListener("DOMContentLoaded", function() {
+  // Add highlight style if not present
+  if (!document.getElementById('dp-row-action-highlight-style')) {
+    var style = document.createElement('style');
+    style.id = 'dp-row-action-highlight-style';
+    style.innerHTML = `
+      .dp-row-action-highlight {
+        transition: box-shadow 1.3s;
+        background-color: #f0f8ff !important;
+        animation: highlightAnimation 2s ease-in-out;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  let originalRowIndex = null;
+  let movedRow = null;
+  let placeholderRow = null;
+
+  document.querySelectorAll('.tray-scan-btn').forEach(function(link) {
+    link.addEventListener('click', function(event) {
+      // Remove highlight from all rows
+      document.querySelectorAll('tbody tr').forEach(function(row) {
+        row.classList.remove('dp-row-action-highlight');
+      });
+      // Move the clicked row to the top and highlight
+      var row = event.target.closest('tr');
+      if (row && row.parentNode) {
+        const tbody = row.parentNode;
+        // Only move if not already at top
+        if (tbody.firstElementChild !== row) {
+          // If a previous move exists, restore it first
+          if (movedRow && placeholderRow && placeholderRow.parentNode) {
+            placeholderRow.parentNode.insertBefore(movedRow, placeholderRow);
+            placeholderRow.parentNode.removeChild(placeholderRow);
+            movedRow.classList.remove('dp-row-action-highlight');
+            movedRow = null;
+            placeholderRow = null;
+            originalRowIndex = null;
+          }
+          // Store original index and row
+          originalRowIndex = Array.from(tbody.children).indexOf(row);
+          movedRow = row;
+          // Insert a placeholder at the original position
+          placeholderRow = document.createElement('tr');
+          placeholderRow.style.display = 'none';
+          tbody.insertBefore(placeholderRow, tbody.children[originalRowIndex]);
+          // Move row to top
+          tbody.insertBefore(row, tbody.firstElementChild);
+        }
+        row.classList.add('dp-row-action-highlight');
+      }
+    });
+  });
+
+  // On modal close, restore row to original position and remove highlight for tray-scan-btn
+  var closeBtn = document.getElementById('closeTrayScanModal');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', function() {
+      if (movedRow && placeholderRow && placeholderRow.parentNode) {
+        placeholderRow.parentNode.insertBefore(movedRow, placeholderRow);
+        placeholderRow.parentNode.removeChild(placeholderRow);
+        movedRow.classList.remove('dp-row-action-highlight');
+        movedRow = null;
+        placeholderRow = null;
+        originalRowIndex = null;
+      }
+      // Also remove highlight from any row just in case
+      document.querySelectorAll('tbody tr').forEach(function(row) {
+        row.classList.remove('dp-row-action-highlight');
+        row.classList.remove('highlighted-tray-scan');
+      });
+    });
+  }
+
+
+  // On modal close for view icon, restore row to original position and remove highlight.
+  // FIX: Use the close button for the Day Planning modal ("closeTrayScanModal_DayPlanning")
+  var jigCloseBtn = document.getElementById('closeTrayScanModal_DayPlanning');
+  if (jigCloseBtn) {
+    jigCloseBtn.addEventListener('click', function() {
+      if (movedRowJig && placeholderRowJig && placeholderRowJig.parentNode) {
+        placeholderRowJig.parentNode.insertBefore(movedRowJig, placeholderRowJig);
+        placeholderRowJig.parentNode.removeChild(placeholderRowJig);
+        movedRowJig.classList.remove('dp-row-action-highlight');
+        movedRowJig = null;
+        placeholderRowJig = null;
+        originalRowIndexJig = null;
+      }
+      document.querySelectorAll('tbody tr').forEach(function(row) {
+        row.classList.remove('dp-row-action-highlight');
+        row.classList.remove('highlighted-tray-scan');
+      });
+    });
+  }
+});
+</script>
+
+<!-- New script appended below without altering existing lines -->
+<script nonce="{{ csp_nonce }}">
+// Append new block: Clear highlight and restore row when Draft, Submit, or Cancel is clicked
+document.addEventListener("DOMContentLoaded", function() {
+  function clearHighlightAndRestore() {
+    var closeBtn = document.getElementById('closeTrayScanModal');
+    if (closeBtn) {
+      closeBtn.click();
+    }
+    var jigCloseBtn = document.getElementById('closeTrayScanModal_DayPlanning');
+    if (jigCloseBtn) {
+      jigCloseBtn.click();
+    }
+  }
+  
+  var draftBtn = document.getElementById("trayScanDraftBtn");
+  if (draftBtn) {
+    draftBtn.addEventListener("click", function() {
+      clearHighlightAndRestore();
+    });
+  }
+  var submitBtn = document.getElementById("trayScanSubmitBtn");
+  if (submitBtn) {
+    submitBtn.addEventListener("click", function() {
+      clearHighlightAndRestore();
+    });
+  }
+  var cancelBtn = document.getElementById("trayScanCancelBtn");
+  if (cancelBtn) {
+    cancelBtn.addEventListener("click", function() {
+      clearHighlightAndRestore();
+    });
+  }
+});
+</script>
+
+<script nonce="{{ csp_nonce }}">
+// Updated JavaScript for hold toggle functionality
+document.addEventListener("DOMContentLoaded", function () {
+  let currentHoldCell = null;
+  let intendedState = null;
+  let currentBatchId = null;
+
+  // Attach batch_id to each row for easy access
+  document.querySelectorAll("tbody tr").forEach(function (row) {
+    const trayScanBtn = row.querySelector('.tray-scan-btn, .tray-scan-btn-Jig');
+    if (trayScanBtn) {
+      row.setAttribute('data-batch-id', trayScanBtn.getAttribute('data-batch-id'));
+    }
+  });
+
+  // Toggle click handler
+  document.querySelectorAll('.hold-toggle-btn').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      currentHoldCell = btn.closest('td');
+      intendedState = btn.checked;
+      const row = currentHoldCell.closest('tr');
+      currentBatchId = row.getAttribute('data-batch-id');
+      
+      document.getElementById('holdRemarkModal').querySelector('h5').textContent = 
+        intendedState ? 'Unholding Reason' : 'Holding Reason';
+      document.getElementById('holdRemarkInput').value = '';
+      document.getElementById('holdRemarkError').textContent = '';
+      document.getElementById('holdRemarkModal').style.display = 'flex';
+      document.getElementById('holdRemarkInput').focus();
+    });
+  });
+
+  // Save remark and update backend
+  document.getElementById('saveHoldRemarkBtn').onclick = function () {
+    const remark = document.getElementById('holdRemarkInput').value.trim();
+    if (!remark) {
+      document.getElementById('holdRemarkError').textContent = 'Remark required!';
+      return;
+    }
+    if (!currentHoldCell || !currentBatchId) return;
+    
+    const action = intendedState ? 'unhold' : 'hold';
+    
+    fetch('/dayplanning/save_hold_unhold_reason/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      body: JSON.stringify({
+        batch_id: currentBatchId,
+        remark: remark,
+        action: action
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        const row = currentHoldCell.closest('tr');
+        const toggle = currentHoldCell.querySelector('.hold-toggle-btn');
+        const icon = currentHoldCell.querySelector('.hold-remark-icon');
+        
+        if (action === 'hold') {
+          // Hold the row
+          toggle.checked = false;
+          row.classList.add('row-inactive');
+          
+          // Apply blur to all cells except the first one
+          row.querySelectorAll('td').forEach((td, idx) => {
+            if (idx > 0) {
+              td.classList.add('row-inactive-blur');
+            } else {
+              td.classList.remove('row-inactive-blur');
+            }
+          });
+          
+          // Show and update the remark icon
+          if (icon) {
+            icon.style.display = 'inline-block';
+            icon.innerHTML = `<img src="{% static 'assets/icons/view2.png' %}" alt="Remark" style="width:18px; height:18px;" />`;
+            icon.setAttribute('title', 'Holding Reason: ' + remark);          }
+        } else {
+          // Unhold the row
+          toggle.checked = true;
+          row.classList.remove('row-inactive');
+          
+          // Remove blur from all cells
+          row.querySelectorAll('td').forEach(td => {
+            td.classList.remove('row-inactive-blur');
+          });
+          
+          // Hide the remark icon
+          if (icon) {
+            icon.style.display = 'none';
+          }
+        }
+        
+        document.getElementById('holdRemarkModal').style.display = 'none';
+        location.reload(); // <-- Add this line to reload the page
+
+      } else {
+        document.getElementById('holdRemarkError').textContent = data.error || 'Failed to save reason!';
+      }
+    })
+    .catch(() => {
+      document.getElementById('holdRemarkError').textContent = 'Network error!';
+    });
+  };
+
+  // Modal close
+  document.getElementById('closeHoldRemarkModal').onclick = function () {
+    document.getElementById('holdRemarkModal').style.display = 'none';
+  };
+
+  // Helper for CSRF
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+});
+</script>
+
+<!-- /**
+  * Script for sorting the order listing table
+  * This script allows users to click on table headers to sort the rows based on the column data.
+  */   -->
+<script nonce="{{ csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function () {
+  const table = document.getElementById("order-listing");
+  if (!table) return;
+  const headers = table.querySelectorAll("thead th");
+  const tbody = table.querySelector("tbody");
+  let sortDirection = {};
+
+  headers.forEach((header, index) => {
+    header.style.cursor = "pointer";
+    header.addEventListener("click", function () {
+      const rows = Array.from(tbody.querySelectorAll("tr"));
+      const dir = sortDirection[index] === "asc" ? "desc" : "asc";
+      sortDirection[index] = dir;
+
+      rows.sort((a, b) => {
+        const cellA = a.children[index]?.textContent.trim() || "";
+        const cellB = b.children[index]?.textContent.trim() || "";
+        // Try numeric sort, fallback to string
+        const numA = parseFloat(cellA.replace(/,/g, ""));
+        const numB = parseFloat(cellB.replace(/,/g, ""));
+        if (!isNaN(numA) && !isNaN(numB)) {
+          return dir === "asc" ? numA - numB : numB - numA;
+        }
+        return dir === "asc"
+          ? cellA.localeCompare(cellB)
+          : cellB.localeCompare(cellA);
+      });
+
+      tbody.innerHTML = "";
+      rows.forEach((row) => tbody.appendChild(row));
+    });
+  });
+});
+</script>
+
+
+<!-- Sorting script (already present) -->
+<script nonce="{{ csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function () {
+  const table = document.getElementById("order-listing");
+  if (!table) return;
+  const headers = table.querySelectorAll("thead th");
+  const tbody = table.querySelector("tbody");
+  let sortDirection = {};
+
+  headers.forEach((header, index) => {
+    header.style.cursor = "pointer";
+    header.addEventListener("click", function () {
+      const rows = Array.from(tbody.querySelectorAll("tr"));
+      const dir = sortDirection[index] === "asc" ? "desc" : "asc";
+      sortDirection[index] = dir;
+
+      rows.sort((a, b) => {
+        const cellA = a.children[index]?.textContent.trim() || "";
+        const cellB = b.children[index]?.textContent.trim() || "";
+        // Try numeric sort, fallback to string
+        const numA = parseFloat(cellA.replace(/,/g, ""));
+        const numB = parseFloat(cellB.replace(/,/g, ""));
+        if (!isNaN(numA) && !isNaN(numB)) {
+          return dir === "asc" ? numA - numB : numB - numA;
+        }
+        return dir === "asc"
+          ? cellA.localeCompare(cellB)
+          : cellB.localeCompare(cellA);
+      });
+
+      tbody.innerHTML = "";
+      rows.forEach((row) => tbody.appendChild(row));
+    });
+  });
+});
+</script>
+
+<!-- Plating Stk - Image hover - fixed position while hitting the Plating Stk No -->
+<script nonce="{{ csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function () {
+  let openTooltip = null;
+
+  // 👉 Directly add a second button next to the red "Close" button
+  const redCloseButtons = document.querySelectorAll("button");
+
+  redCloseButtons.forEach(function (btn) {
+    if (
+      btn.textContent.trim().toLowerCase() === "close" &&
+      !btn.classList.contains("second-button-added")
+    ) {
+      // ✅ Create new blue button
+      const blueBtn = document.createElement("button");
+      blueBtn.textContent = "Info"; // ➕ New button text
+      blueBtn.style.cssText =
+        "margin-left: 10px; color: white; background-color: blue; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;";
+      
+      // ✅ Insert next to red Close button
+      btn.insertAdjacentElement("afterend", blueBtn);
+      btn.classList.add("second-button-added");
+    }
+  });
+
+  // Tooltip show/hide logic
+  document.querySelectorAll(".model-hover-trigger").forEach(function (trigger) {
+    const tooltip = trigger.querySelector(".model-image-tooltip");
+
+    trigger.addEventListener("mouseenter", function () {
+      if (tooltip) tooltip.style.display = "block";
+    });
+
+    trigger.addEventListener("mouseleave", function () {
+      if (tooltip && !tooltip.classList.contains("pinned")) {
+        tooltip.style.display = "none";
+      }
+    });
+
+    trigger.addEventListener("click", function (e) {
+      e.stopPropagation();
+
+      if (tooltip) {
+        document.querySelectorAll(".model-image-tooltip.pinned").forEach((tt) => {
+          tt.classList.remove("pinned");
+          tt.style.display = "none";
+        });
+
+        tooltip.classList.add("pinned");
+        tooltip.style.display = "block";
+        openTooltip = tooltip;
+      }
+    });
+  });
+
+  document.addEventListener("click", function () {
+    if (openTooltip) {
+      openTooltip.classList.remove("pinned");
+      openTooltip.style.display = "none";
+      openTooltip = null;
+    }
+  });
+
+  document.querySelectorAll(".model-image-tooltip").forEach(function (tooltip) {
+    tooltip.addEventListener("click", function (e) {
+      e.stopPropagation();
+    });
+  });
+});
+</script>
+
+
+<!-- Plating Stk - Image hover - Added Close & Info button -->
+<script nonce="{{ csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function () {
+  // Step 1: Show hover section when clicking on "Plating Stk No"
+  document.querySelectorAll(".model-hover-trigger").forEach(function (trigger) {
+    trigger.addEventListener("click", function () {
+      const tooltip = trigger.querySelector(".model-image-tooltip");
+      if (tooltip) {
+        tooltip.style.opacity = "1";
+        tooltip.style.pointerEvents = "auto";
+        tooltip.style.display = "flex";
+      }
+    });
+  });
+
+  // Step 2: Open clicked image in a modal for larger view
+  document.querySelectorAll(".model-image-tooltip img").forEach(function (img) {
+    img.addEventListener("click", function (event) {
+      event.stopPropagation(); // Prevent triggering parent click events
+
+      // Dynamically create a modal for viewing the clicked image
+      const modal = document.createElement("div");
+      modal.style.position = "fixed";
+      modal.style.top = "0";
+      modal.style.left = "0";
+      modal.style.width = "100vw";
+      modal.style.height = "100vh";
+      modal.style.background = "rgba(0, 0, 0, 0.8)";
+      modal.style.display = "flex";
+      modal.style.alignItems = "center";
+      modal.style.justifyContent = "center";
+      modal.style.zIndex = "10000";
+
+      // Add the clicked image to the modal
+      const largeImg = document.createElement("img");
+      largeImg.src = img.src; // Use the clicked image's source
+      largeImg.style.maxWidth = "90%";
+      largeImg.style.maxHeight = "90%";
+      largeImg.style.borderRadius = "8px";
+      modal.appendChild(largeImg);
+
+      // Add a close button
+      const closeBtn = document.createElement("button");
+      closeBtn.textContent = "Close";
+      closeBtn.style.position = "absolute";
+      closeBtn.style.top = "20px";
+      closeBtn.style.right = "20px";
+      closeBtn.style.padding = "10px 20px";
+      closeBtn.style.background = "#dc3545";
+      closeBtn.style.color = "#fff";
+      closeBtn.style.border = "none";
+      closeBtn.style.borderRadius = "4px";
+      closeBtn.style.cursor = "pointer";
+      closeBtn.style.fontSize = "16px";
+      closeBtn.addEventListener("click", function () {
+        modal.remove();
+      });
+      modal.appendChild(closeBtn);
+
+      // Add Info button next to Close
+const infoBtn = document.createElement("button");
+infoBtn.textContent = "Info";
+infoBtn.style.position = "absolute";
+infoBtn.style.top = "20px";
+infoBtn.style.right = "120px"; // Place it left of Close
+infoBtn.style.padding = "10px 20px";
+infoBtn.style.background = "#007bff";
+infoBtn.style.color = "#fff";
+infoBtn.style.border = "none";
+infoBtn.style.borderRadius = "4px";
+infoBtn.style.cursor = "pointer";
+infoBtn.style.fontSize = "16px";
+infoBtn.addEventListener("click", function () {
+  alert("Info button clicked!");
+});
+modal.appendChild(infoBtn);
+
+      // Append the modal to the body
+      document.body.appendChild(modal);
+    });
+  });
+
+  // Step 3: Hide hover section when clicking outside
+  document.addEventListener("click", function (event) {
+    document.querySelectorAll(".model-image-tooltip").forEach(function (tooltip) {
+      if (!tooltip.contains(event.target)) {
+        tooltip.style.opacity = "0";
+        tooltip.style.pointerEvents = "none";
+        tooltip.style.display = "none";
+      }
+    });
+  });
+});
+</script>
+
+
+<!-- Script for restrict multiple actions when any modal is open -->
+
+<script nonce="{{ csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function () {
+  function isAnyModalOpen() {
+    // Check for any open modal by class or style
+    return (
+      document.querySelector('.tray-scan-modal.open, .tray-scan-modal-DayPlanning.open, #holdRemarkModal[style*="display: flex"], #holdRemarkModal[style*="display: block"]')
+    );
+  }
+
+  // Block Tray Scan, View, Edit, Delete when any modal is open
+  document.body.addEventListener('click', function(e) {
+    if (isAnyModalOpen()) {
+      // Block Tray Scan button
+      if (
+        e.target.closest('.tray-scan-btn') ||
+        e.target.closest('.tray-scan-btn-Jig') ||
+        e.target.closest('.edit-qty-btn') ||
+        (e.target.closest('a[title="Delete"]')) ||
+        (e.target.cxlosest('img[alt="Edit"]')) ||
+        (e.target.closest('img[alt="Delete"]')) ||
+        (e.target.closest('img[alt="View"]'))
+      ) {
+        e.stopPropagation();
+        e.preventDefault();
+        return false;
+      }
+    }
+  }, true);
+});
+</script>
+
+
+
+  {% endblock %} {% endblock content %}
+</div>

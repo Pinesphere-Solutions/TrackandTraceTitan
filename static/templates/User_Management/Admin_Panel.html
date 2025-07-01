@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  .fullscreen-bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    overflow: hidden;
+    z-index: 0;
+  }
+  .fullscreen-bg img {
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    object-position: center;
+    position: absolute;
+    top: 0; left: 0;
+  }
+ .content-overlay {
+    min-height: 100vh;
+    min-width: 100vw;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    position: relative;
+    z-index: 1;
+    padding-right: 12vw; /* Increased from 10px to 15vw to move the box left */
+    padding-top: 5px;
+    box-sizing: border-box;
+}
+  .user-frame {
+    background: rgba(255,255,255,0.8);
+    padding: 3rem 2.5rem;
+    border-radius: 1.5rem;
+    max-width: min(500px, 90vw);
+    width: 100%;
+    min-width: 0;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    overflow-x: auto;
+    overflow-y: auto;
+
+  }
+  @media (max-width: 900px) {
+    .content-overlay {
+      justify-content: center;
+      padding-right: 0;
+      padding-left: 0;
+    }
+    .user-frame {
+      max-width: 90vw;
+      min-width: 0;
+      padding: 2rem 1rem;
+      min-height: 300px;
+    }
+  }
+</style>
+<div class="fullscreen-bg">
+  <img src="{% static 'assets/images/tealMetallic13.jpg' %}" alt="Background">
+</div>
+<div class="content-overlay">
+  <!-- User Options -->
+  <div class="user-frame">
+    <h2>User Management</h2>
+    <p>This is the user management page.</p>
+  </div>
+</div>
+{% endblock %}

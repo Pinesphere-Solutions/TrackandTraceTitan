@@ -1,0 +1,1708 @@
+/* Common styles */
+
+/* Start Jig Composition styles K*/
+.model-columns {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 1.5rem;
+  padding: 1rem 0;
+  margin-top: -40px; /* Move cards up */
+}
+/* Add below your existing .model-column and .case-badges styles, do not alter existing lines */
+.model-column {
+  height: 420px;
+  min-height: 320px;
+  max-height: 480px;
+  overflow: visible;
+}
+
+.case-badges {
+  height: 220px;
+  min-height: 180px;
+  max-height: 260px;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 0.5rem;
+}
+
+.case-badge {
+  box-shadow: none;
+  min-width: unset;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  background-color: #f0f0f0;
+  border-radius: 20px;
+  padding: 0.4rem 0.8rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+  text-align: center;
+  min-width: 60px;
+}
+
+@media (max-width: 900px) {
+  .card-body {
+    padding: 1rem 0.3rem;
+    width: 100vw;
+    max-width: 100vw;
+  }
+}
+
+.case-badge img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+@media (max-width: 600px) {
+  .model-column {
+    width: 98vw;
+    height: 98vw;
+    min-width: 120px;
+    min-height: 120px;
+    max-width: 99vw;
+    max-height: 99vw;
+  }
+}
+.model-header {
+  width: 100%;
+  font-weight: 700;
+  text-align: center;
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+  border-radius: 8px 8px 0 0;
+  padding: 0.7rem 0.5rem;
+  background: linear-gradient(90deg, #01524a 0%, #009688 100%);
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+h5.text-left.mt-0.mb-3 {
+  margin-top: -30px !important;
+  margin-bottom: 0.7rem !important;
+  padding-top: 0 !important;
+  font-weight: bold !important;
+}
+
+@media (max-width: 600px) {
+  h5.text-left.mt-0.mb-3 {
+    margin-top: -10px !important;
+    margin-bottom: 0.5rem !important;
+  }
+}
+
+/* Add below your existing styles, do not alter existing lines */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.case-badges .case-badge {
+  animation: fade-in-up 0.5s cubic-bezier(0.4, 2, 0.6, 1) both;
+}
+.case-badges .case-badge:nth-child(1) {
+  animation-delay: 0.03s;
+}
+.case-badges .case-badge:nth-child(2) {
+  animation-delay: 0.06s;
+}
+.case-badges .case-badge:nth-child(3) {
+  animation-delay: 0.09s;
+}
+.case-badges .case-badge:nth-child(4) {
+  animation-delay: 0.12s;
+}
+.case-badges .case-badge:nth-child(5) {
+  animation-delay: 0.15s;
+}
+.case-badges .case-badge:nth-child(6) {
+  animation-delay: 0.18s;
+}
+.case-badges .case-badge:nth-child(7) {
+  animation-delay: 0.21s;
+}
+.case-badges .case-badge:nth-child(8) {
+  animation-delay: 0.24s;
+}
+.case-badges .case-badge:nth-child(9) {
+  animation-delay: 0.27s;
+}
+.case-badges .case-badge:nth-child(10) {
+  animation-delay: 0.3s;
+}
+.case-badges .case-badge:nth-child(11) {
+  animation-delay: 0.33s;
+}
+.case-badges .case-badge:nth-child(12) {
+  animation-delay: 0.36s;
+}
+
+/* End Jig Composition styles K*/
+
+/* Start base.html styles K*/
+footer.footer span,
+footer.footer {
+  font-weight: 400 !important; /* Normal weight */
+}
+/* Fixed footer at the bottom of the viewport */
+footer.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  z-index: 100;
+  background: #f5f7ff;
+  box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.05);
+  height: 32px;
+  line-height: 32px;
+  font-size: 13px;
+  padding: 0 10px;
+  text-align: center; /* Center the copyright */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.barcode-icon {
+  height: 38px;
+  width: 38px;
+  max-width: 100%;
+  object-fit: contain;
+  display: inline-block;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+@media (max-width: 576px) {
+  .barcode-icon {
+    height: 35px;
+    width: 35px;
+  }
+}
+
+.barcode-modal {
+  display: none;
+  position: fixed;
+  z-index: 1050;
+  right: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.3);
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+.barcode-modal-content {
+  background: #fff;
+  width: 90vw; /* Increased responsive width */
+  max-width: 600px; /* Increased max width for laptop/desktop */
+  height: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+
+  margin: 40px 10px 0 20px;
+  padding: 24px 18px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  position: relative;
+  animation: slideInRight 0.3s;
+
+  padding-top: 44px !important; /* Ensures space for close icon */
+  margin-top: 20px !important; /* Move modal content up */
+}
+.barcode-modal-content::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+@media (min-width: 576px) {
+  .barcode-modal-close {
+    top: 18px;
+    left: 40px;
+  }
+}
+@media (max-width: 575.98px) {
+  .barcode-modal-close {
+    left: 30px;
+    font-size: 1.3rem;
+    top: 10px;
+  }
+}
+@media (max-width: 991.98px) {
+  .barcode-modal-close {
+    left: 32px;
+  }
+}
+@media (max-width: 991.98px) {
+  .barcode-modal-content {
+    border-radius: 30px !important;
+  }
+}
+@media (max-width: 575.98px) {
+  .barcode-modal-content {
+    border-radius: 30px !important;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .barcode-modal-content {
+    margin: 32px auto 0 auto !important; /* Center align and add space at top for tablet */
+    width: 70vw;
+    max-width: 80vw;
+    max-height: 98vh; /* Increased height for tablet */
+    margin: 32px auto 0 auto !important;
+    left: 0;
+    right: 0;
+  }
+}
+@media (max-width: 575.98px) {
+  .barcode-modal-content {
+    margin: 24px auto 0 auto !important; /* Center align and add space at top for mobile */
+    left: 0;
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 100vh; /* Increased height for mobile */
+    margin: 24px auto 0 auto !important;
+    left: 0;
+    right: 0;
+  }
+}
+
+/* Optional spacing between form rows */
+.barcode-modal-content table td,
+.barcode-modal-content table th {
+  padding: 8px 10px; /* Give cells some space */
+  vertical-align: middle;
+}
+
+.barcode-modal-content input.form-control {
+  height: 34px; /* Reduce input box height */
+  font-size: 14px;
+  padding: 4px 8px;
+}
+
+@media (max-width: 576px) {
+  .barcode-modal-content {
+    width: 95vw;
+    margin: 30px auto 0 auto;
+    padding: 16px 12px;
+  }
+
+  .barcode-modal-content input.form-control {
+    height: 30px;
+    font-size: 13px;
+  }
+}
+
+.barcode-modal-close {
+  position: absolute;
+  top: -7px;
+  left: 18px;
+  font-size: 1.5rem;
+  color: #888;
+  cursor: pointer;
+  z-index: 2;
+}
+/* Move close icon further right in tablet */
+@media (max-width: 991.98px) {
+  .barcode-modal .col-2 {
+    position: relative;
+  }
+  .barcode-modal-close {
+    left: 40px; /* Increase this value as needed */
+    top: -18px;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 991.98px) {
+  .barcode-modal-content {
+    max-width: 95vw;
+    padding: 14px 8px 8px 8px; /* ✅ Reduced padding */
+    border-radius: 0;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .barcode-modal-content {
+    max-width: 100vw;
+    padding: 10px 2vw 10px 2vw; /* ✅ Reduced padding */
+    border-radius: 0;
+    min-height: 120px;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Responsive fixes */
+@media (max-width: 991.98px) {
+  .barcode-modal-content {
+    max-width: 90vw;
+    min-width: 0;
+    border-radius: 0;
+    margin-top: 0;
+    padding: 18px 8px 8px 8px;
+  }
+}
+@media (max-width: 575.98px) {
+  .barcode-modal-content {
+    max-width: 100vw;
+    min-width: 0;
+    min-height: 120px;
+    border-radius: 0;
+    padding: 12px 2vw 12px 2vw;
+  }
+}
+
+.barcode-img-preview {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: zoom-in;
+}
+.barcode-img-preview:hover {
+  transform: scale(1.7);
+  z-index: 10;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  position: relative;
+}
+
+@media (max-width: 991.98px) {
+  .barcode-img-preview:hover {
+    transform: scale(1.3);
+  }
+}
+@media (max-width: 991.98px) {
+  .barcode-img-preview:hover {
+    transform: scale(1.3);
+    z-index: 10;
+  }
+}
+@media (max-width: 991.98px) {
+  .barcode-img-preview {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: zoom-in;
+  }
+  .barcode-img-preview.zoomed {
+    transform: scale(1.3);
+    z-index: 10;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    cursor: zoom-out;
+  }
+}
+.barcode-img-preview {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: zoom-in;
+}
+
+.barcode-img-preview:hover {
+  transform: scale(1.7);
+  z-index: 10;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  position: relative;
+}
+html,
+body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden; /* Allow browser to show scrollbars as needed */
+}
+
+.container-scroller,
+.page-body-wrapper,
+.main-panel {
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  overflow: scroll; /* Let browser handle overflow */
+}
+
+/* For modal content, allow scrolling if content overflows */
+.barcode-modal-content {
+  overflow: auto;
+  max-width: 100vw;
+  max-height: 100vh;
+}
+@media (max-width: 991.98px) {
+  .barcode-banner-img {
+    max-width: 40vw;
+    height: 120px;
+  }
+  .barcode-modal-content .row.align-items-center {
+    margin-top: -35px !important; /* Move title and close up in tablet */
+  }
+}
+
+@media (max-width: 575.98px) {
+  .barcode-banner-img {
+    max-width: 90vw;
+    height: 80px;
+  }
+  .barcode-modal-content .row.align-items-center {
+    margin-top: -36px !important; /* Move title and close up more on mobile */
+  }
+}
+.module-highlight.last-module {
+  background: #cef7c9;
+  color: #128329;
+  border: 0.5px solid #128329;
+  border-radius: 30px;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 8px 22px;
+  display: inline-block;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.module-highlight.next-module {
+  background: #e5bca3;
+  color: #b34500;
+  border: 0.5px solid #b34500;
+  border-radius: 30px;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 8px 22px;
+  display: inline-block;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 991.98px) {
+  .barcode-modal-content .row.align-items-center {
+    margin-top: -18px !important;
+  }
+}
+@media (max-width: 575.98px) {
+  .barcode-modal-content .row.align-items-center {
+    margin-top: -24px !important;
+  }
+}
+.barcode-banner-img-wrapper {
+  width: 100%;
+  margin-bottom: 16px;
+}
+.barcode-banner-img {
+  width: 100%;
+  max-width: 600px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 10px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (max-width: 991.98px) {
+  .barcode-banner-img {
+    max-width: 95vw;
+    height: 150px;
+  }
+}
+@media (max-width: 575.98px) {
+  .barcode-banner-img {
+    max-width: 98vw;
+    height: 90px;
+  }
+}
+.form-control {
+  padding: 8px 8px !important; /* Less padding */
+  font-size: 0.85rem !important; /* Smaller text */
+  height: auto !important; /* Let padding control height */
+  line-height: 1.4 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.barcode-icon {
+  height: 45px;
+  width: 45px;
+  max-width: 100%;
+  object-fit: contain;
+  display: inline-block;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+@media (max-width: 576px) {
+  .barcode-icon {
+    height: 35px;
+    width: 35px;
+  }
+}
+
+.barcode-modal {
+  display: none;
+  position: fixed;
+  z-index: 1050;
+  right: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.3);
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+.barcode-modal-content {
+  background: #fff;
+  width: 90vw; /* Increased responsive width */
+  max-width: 600px; /* Increased max width for laptop/desktop */
+  height: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+
+  margin: 40px 10px 0 20px;
+  padding: 24px 18px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  position: relative;
+  animation: slideInRight 0.3s;
+
+  padding-top: 44px !important; /* Ensures space for close icon */
+  margin-top: 20px !important; /* Move modal content up */
+}
+.barcode-modal-content::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+@media (min-width: 576px) {
+  .barcode-modal-close {
+    top: 18px;
+    left: 40px;
+  }
+}
+@media (max-width: 575.98px) {
+  .barcode-modal-close {
+    left: 30px;
+    font-size: 1.3rem;
+    top: 10px;
+  }
+}
+@media (max-width: 991.98px) {
+  .barcode-modal-close {
+    left: 32px;
+  }
+}
+@media (max-width: 991.98px) {
+  .barcode-modal-content {
+    border-radius: 30px !important;
+  }
+}
+@media (max-width: 575.98px) {
+  .barcode-modal-content {
+    border-radius: 30px !important;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .barcode-modal-content {
+    margin: 32px auto 0 auto !important; /* Center align and add space at top for tablet */
+    width: 70vw;
+    max-width: 80vw;
+    max-height: 98vh; /* Increased height for tablet */
+    margin: 32px auto 0 auto !important;
+    left: 0;
+    right: 0;
+  }
+}
+@media (max-width: 575.98px) {
+  .barcode-modal-content {
+    margin: 24px auto 0 auto !important; /* Center align and add space at top for mobile */
+    left: 0;
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 100vh; /* Increased height for mobile */
+    margin: 24px auto 0 auto !important;
+    left: 0;
+    right: 0;
+  }
+}
+
+/* Optional spacing between form rows */
+.barcode-modal-content table td,
+.barcode-modal-content table th {
+  padding: 8px 10px; /* Give cells some space */
+  vertical-align: middle;
+}
+
+.barcode-modal-content input.form-control {
+  height: 34px; /* Reduce input box height */
+  font-size: 14px;
+  padding: 4px 8px;
+}
+
+@media (max-width: 576px) {
+  .barcode-modal-content {
+    width: 95vw;
+    margin: 30px auto 0 auto;
+    padding: 16px 12px;
+  }
+
+  .barcode-modal-content input.form-control {
+    height: 30px;
+    font-size: 13px;
+  }
+}
+
+.barcode-modal-close {
+  position: absolute;
+  top: -7px;
+  left: 18px;
+  font-size: 1.5rem;
+  color: #888;
+  cursor: pointer;
+  z-index: 2;
+}
+/* Move close icon further right in tablet */
+@media (max-width: 991.98px) {
+  .barcode-modal .col-2 {
+    position: relative;
+  }
+  .barcode-modal-close {
+    left: 40px; /* Increase this value as needed */
+    top: -18px;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 991.98px) {
+  .barcode-modal-content {
+    max-width: 95vw;
+    padding: 14px 8px 8px 8px; /* ✅ Reduced padding */
+    border-radius: 0;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .barcode-modal-content {
+    max-width: 100vw;
+    padding: 10px 2vw 10px 2vw; /* ✅ Reduced padding */
+    border-radius: 0;
+    min-height: 120px;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Responsive fixes */
+@media (max-width: 991.98px) {
+  .barcode-modal-content {
+    max-width: 90vw;
+    min-width: 0;
+    border-radius: 0;
+    margin-top: 0;
+    padding: 18px 8px 8px 8px;
+  }
+}
+@media (max-width: 575.98px) {
+  .barcode-modal-content {
+    max-width: 100vw;
+    min-width: 0;
+    min-height: 120px;
+    border-radius: 0;
+    padding: 12px 2vw 12px 2vw;
+  }
+}
+
+/* End base.html styles K */
+
+/* Start Day Planning Completed Table Styles K*/
+#order-listing thead th {
+  height: 38px !important; /* Increase as needed */
+  background: #028084 !important; /* existing bg */
+  color: #e5fcff !important; /* existing color */
+  vertical-align: middle !important;
+}
+.content-wrapper > h5 {
+  margin-top: -35px !important;
+  margin-bottom: 5px !important;
+  font-size: 18px;
+  font-weight: 700;
+}
+/* Table heading font size */
+#order-listing th {
+  font-size: 13px !important;
+  font-weight: 600;
+}
+/* Table data font size */
+#order-listing td {
+  font-size: 12px !important;
+  font-weight: 400;
+}
+
+.pagination-wrapper {
+  background: #fff;
+  padding: 8px 0 0 0;
+  position: relative;
+  z-index: 2;
+}
+/* Table and play/pause toggle styles */
+#order-listing {
+  border-collapse: collapse;
+}
+#order-listing th,
+#order-listing td {
+  border-right: 1px solid #d1d1d1;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 14px;
+}
+#order-listing th:last-child,
+#order-listing td:last-child {
+  border-right: none;
+}
+#order-listing tr,
+#order-listing td,
+#order-listing th {
+  height: 20px !important;
+  padding: 4px 8px !important;
+}
+.table-responsive {
+  max-height: 100%;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+/* Allow tooltip to overflow outside the cell */
+#order-listing td[style*="position: relative"] {
+  overflow: visible !important;
+}
+
+/* Ensure tooltip is always on top */
+.model-image-tooltip {
+  z-index: 99999 !important;
+}
+
+/* Make sure the parent cell allows overflow */
+#order-listing td[style*="position: relative"] {
+  overflow: visible !important;
+  position: relative;
+}
+thead th {
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 10;
+}
+.playpause-toggle:checked ~ .play-icon {
+  display: none !important;
+}
+.playpause-toggle:checked ~ .pause-icon {
+  display: inline !important;
+}
+.play-icon,
+.pause-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* End Day Planning Completed Table Styles K */
+
+/* Start Day Planning Bulk Upload Styles KK */
+@media (max-width: 900px) {
+  .card-body {
+    padding: 1rem 0.3rem;
+    width: 100vw;
+    max-width: 100%;
+    overflow-y: hidden;
+  }
+}
+:root {
+  --clr-primary: #126a83; /* Teal */
+  --clr-secondary: #023e4d; /* Deep Navy */
+  --clr-tertiary: #ff6b6b; /* Soft Coral */
+  --clr-bg: #f5f9fa; /* Light background */
+  --clr-surface: #ffffff; /* Surface white */
+  --clr-text: #212529; /* Default text */
+  --clr-muted: #6c757d; /* Muted text */
+}
+/* Full page layout */
+body {
+  margin: 0;
+  background: var(--clr-bg);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--clr-text);
+  overflow-x: hidden;
+}
+/* Main card container */
+.bulk-card {
+  background: var(--clr-surface);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  margin: 2rem auto;
+  max-width: 1200px;
+  overflow: hidden;
+  animation: slideIn 0.8s ease-out;
+}
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+/* Header with animated background */
+.card-header {
+  background: var(--clr-secondary);
+  color: var(--clr-surface);
+  padding: 0.5rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.card-header h1 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+.card-header::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 45deg,
+    var(--clr-tertiary),
+    var(--clr-secondary)
+  );
+  animation: spin 10s linear infinite;
+  opacity: 0.15;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* Lottie animation in header */
+.header-lottie {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  width: 60px;
+  height: 60px;
+  opacity: 0.35;
+}
+
+.action-area {
+  display: flex;
+  justify-content: flex-end;
+}
+.btn {
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--clr-primary);
+  color: var(--clr-primary);
+}
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+.btn svg.icon {
+  margin-right: 0.5rem;
+}
+/* Split area: Upload area & File list */
+.upload-file-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+.file-upload-area {
+  flex: 1 1 460px;
+  border: 2px dashed var(--clr-muted);
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.3s, border-color 0.3s;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 70px;
+}
+.file-upload-area:hover {
+  background: rgba(18, 106, 131, 0.05);
+}
+.file-upload-area p {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--clr-muted);
+}
+.upload-link {
+  color: var(--clr-primary);
+  font-weight: 600;
+  text-decoration: underline;
+}
+.lottie-upload {
+  width: 80px;
+  height: 80px;
+}
+.file-upload-area.dragover {
+  background: rgba(18, 106, 131, 0.1);
+  border-color: var(--clr-primary);
+}
+/* File List styling */
+.file-list {
+  flex: 1 1 300px;
+  display: grid;
+  gap: 1rem;
+}
+.file-card {
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-muted);
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: box-shadow 0.3s;
+  animation: fadeIn 0.5s ease-in;
+}
+.file-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.file-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--clr-bg);
+  color: var(--clr-primary);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.file-details {
+  overflow: hidden;
+}
+.file-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+.file-size {
+  font-size: 0.8rem;
+  color: var(--clr-muted);
+  margin-top: 2px;
+}
+.remove-file {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--clr-bg);
+  color: var(--clr-text);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+}
+.remove-file:hover {
+  background: var(--clr-tertiary);
+  color: var(--clr-surface);
+}
+/* Data Table Section */
+.data-table-card {
+  margin: 0rem 5px 0.5rem 3px;
+  animation: slideIn 0.8s ease-out;
+}
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.table-header h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  color: var(--clr-text);
+  margin: 0;
+}
+.table-header h2 .icon {
+  margin-right: 0.5rem;
+}
+.table-container {
+  overflow-y: hidden;
+  max-height: 320px;
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse; /* Collapse borders for grid view */
+  background: var(--clr-bg);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.data-table th,
+.data-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border: 1px solid var(--clr-muted); /* Grid lines for rows and columns */
+}
+.data-table th {
+  font-weight: 600;
+  background: var(--clr-surface);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.data-table .actions {
+  width: 80px;
+  text-align: right;
+}
+/* Redesigned Delete Button */
+.btn-delete {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--clr-bg);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+.btn-delete:hover {
+  background: var(--clr-tertiary);
+  transform: scale(1.1);
+}
+.btn-delete .icon {
+  width: 18px;
+  height: 18px;
+  stroke: var(--clr-text);
+  stroke-width: 2;
+}
+.cell-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--clr-primary);
+  border-radius: 6px;
+}
+.cell-input:focus {
+  outline: none;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.table-row-animation {
+  animation: fadeIn 0.5s ease-in;
+}
+
+/* Override any row gutter padding for the card-header so it touches the bulk-card edges */
+.bulk-card > .card-header {
+  margin-left: -14px !important;
+  margin-right: -14px !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Then add inner padding if desired to the header-content */
+.header-content {
+  padding: 1rem 1rem; /* Adjust as needed */
+}
+@media (max-width: 425px) {
+  .card-header h1 {
+    font-size: 12px !important;
+  }
+  .btn-outline {
+    padding: 0.5rem 0.5rem !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+  }
+}
+
+/* End Day Planning Bulk Upload Styles KK */
+
+/* Start Day Planning Pick Table Styles K */
+/* Center and style the tray scan table title */
+.tray-scan-modal h5 {
+  text-align: center !important;
+  margin: 0 auto 8px auto !important;
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  width: 100%;
+  display: block;
+}
+#trayScanDetails.table-grid > div.tray-validation-status-header {
+  background-color: #e0f7fa !important;
+  font-weight: bold !important;
+  color: #028084 !important;
+}
+#trayScanDetails.table-grid > div.tray-validation-status-cell {
+  background-color: #f1fcff !important;
+  font-weight: bold !important;
+  color: #028084 !important;
+}
+#order-listing thead th {
+  height: 38px !important; /* Increase as needed */
+  background: #028084 !important; /* existing bg */
+  color: #e5fcff !important; /* existing color */
+  vertical-align: middle !important;
+}
+/* --- DP_PickTable: Match DP_Completed_Table style --- */
+#order-listing {
+  border-collapse: collapse;
+}
+#order-listing th,
+#order-listing td {
+  border-right: 1px solid #d1d1d1;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 12px;
+}
+#order-listing th:last-child,
+#order-listing td:last-child {
+  border-right: none;
+}
+#order-listing tr,
+#order-listing td,
+#order-listing th {
+  height: 20px !important;
+  padding: 4px 8px !important;
+}
+
+.pagination-wrapper {
+  background: #fff;
+  padding: 8px 0 0 0;
+  position: relative;
+  z-index: 2;
+}
+/* Tooltip for model images */
+.model-image-tooltip {
+  position: absolute;
+  z-index: 99999;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  padding: 10px;
+  min-width: 220px;
+  max-width: 350px;
+  max-height: 220px;
+  display: none;
+  overflow: hidden;
+}
+.model-image-tooltip .image-slider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.model-image-tooltip img {
+  max-width: 180px;
+  max-height: 180px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+.model-image-tooltip .slider-btn {
+  background: #eee;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 18px;
+  cursor: pointer;
+}
+.model-image-tooltip.static {
+  display: block !important;
+  position: fixed !important;
+  top: 80px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 100000;
+}
+.model-image-tooltip .close-btn {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  font-size: 18px;
+  color: #888;
+  cursor: pointer;
+}
+
+/* Reduce row height for .row class */
+.row {
+  --bs-gutter-x: 30px;
+  --bs-gutter-y: 0;
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: calc(-1 * var(--bs-gutter-y));
+  margin-right: calc(-0.5 * var(--bs-gutter-x));
+  margin-left: calc(-0.5 * var(--bs-gutter-x));
+  min-height: 10px; /* Add this line to reduce minimum row height */
+  padding-top: 2px; /* Optional: reduce vertical padding */
+  padding-bottom: 2px; /* Optional: reduce vertical padding */
+  overflow-y: auto !important;
+  overflow-x: auto !important;
+  scrollbar-width: thin; /* For Firefox */
+  -ms-overflow-style: auto; /* For IE/Edge */
+}
+
+/* Move the main title a little up and make it responsive */
+.content-wrapper > h5 {
+  margin-top: -35px !important;
+  margin-bottom: 5px !important;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  .content-wrapper > h5 {
+    font-size: 1.05rem;
+    margin-top: 0.2rem !important;
+    margin-bottom: 0.7rem !important;
+  }
+}
+/* Move the modalModelNo element a little down in the modal header */
+#modalModelNo {
+  margin-top: 12px;
+  display: inline-block;
+  vertical-align: middle;
+  font-weight: 600;
+  color: #028084;
+}
+
+.dp-row-action-highlight {
+  background-color: #f0f8ff !important; /* Light blue, or pick your color */
+  transition: background 0.3s;
+}
+
+/* Floating alert style */
+.dp-float-alert {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #222;
+  color: #fff;
+  padding: 8px 8px;
+  border-radius: 30px;
+  font-size: 1rem;
+  z-index: 99999;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.dp-float-alert.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.disabled-remark {
+  cursor: not-allowed !important;
+  opacity: 0.5 !important;
+  pointer-events: none !important; /* <-- Add this line to fully disable hover/click */
+}
+/* Center all action icons in their cell */
+#order-listing td {
+  vertical-align: middle !important;
+}
+#order-listing td a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px; /* or match your row height */
+  vertical-align: middle;
+}
+#order-listing td a img {
+  display: block;
+  height: 22px;
+  width: 22px;
+  object-fit: contain;
+  margin: 0 2px;
+}
+
+.image-slider-modal {
+  display: none;
+  position: fixed;
+  top: 40px;
+  right: 20px;
+  width: 600px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 20px;
+  z-index: 10000;
+  transition: right 0.3s ease;
+}
+.image-slider-modal.open {
+  display: block;
+}
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+}
+.slider {
+  position: relative;
+  overflow: hidden;
+  height: 350px;
+}
+.slides {
+  display: flex;
+  transition: transform 0.5s ease;
+  width: 100%;
+}
+.slide {
+  flex: 0 0 100%;
+  box-sizing: border-box;
+  display: none;
+}
+.slide.active {
+  display: block;
+}
+.slide img {
+  width: 100%;
+  height: 350px;
+  object-fit: cover;
+  display: block;
+}
+.prev,
+.next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: #fff;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 50%;
+  user-select: none;
+}
+.prev {
+  left: 10px;
+}
+.next {
+  right: 10px;
+}
+@media (max-width: 767px) {
+  .image-slider-modal {
+    width: 100%;
+    right: 0;
+    top: 0;
+    border-radius: 0;
+    padding: 10px;
+  }
+  .slider {
+    height: 250px;
+  }
+  .slide img {
+    height: 250px;
+  }
+}
+
+/* Make sure borders are continuous for the whole table */
+#order-listing {
+  border-collapse: collapse;
+}
+
+#order-listing th,
+#order-listing td {
+  border-right: 1px solid #d1d1d1;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+#order-listing th:last-child,
+#order-listing td:last-child {
+  border-right: none;
+}
+/* Overall Table Shrink */
+#order-listing tr,
+#order-listing td,
+#order-listing th {
+  height: 20px !important;
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+}
+/* Table heading font size */
+#order-listing th {
+  font-size: 13px !important;
+  font-weight: 500;
+}
+
+/* Table data font size */
+#order-listing td {
+  font-size: 12px !important;
+  font-weight: 400;
+}
+.content-wrapper {
+  transition: opacity 0.3s ease;
+  padding-bottom: 70px !important; /* Reduce space above footer */
+}
+
+/* When modal is active, dim the content */
+.tray-scan-modal.active ~ .content-wrapper {
+  opacity: 0.3;
+  pointer-events: none; /* Optional: disable interaction */
+}
+span {
+  font-weight: bold;
+  color: #2a2a2a;
+}
+
+h6 {
+  color: grey;
+  margin-top: 6px; /* moves it down a bit */
+  font-weight: normal; /* optional: make font lighter if needed */
+}
+
+/* New top header container: flex left aligned, no interference with existing styles */
+.modal-top-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 12px;
+}
+
+/* TrayScanDetails 3-column grid with scroll */
+#trayScanDetails.table-grid {
+  display: grid !important; /* override any existing grid or flex */
+  grid-template-columns: repeat(4, 1fr) !important; /* Table column max limit */
+  gap: 0px !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+  padding-right: 10px; /* prevent scrollbar overlay */
+  margin-top: 10px;
+}
+
+/* Styling individual grid cells, only inside trayScanDetails */
+#trayScanDetails.table-grid > div {
+  background: #f7f7f7;
+  padding: 8px 12px;
+
+  font-size: 12px;
+  border: 1px solid #ddd;
+  margin: 0; /* reset any margin from <p> or others */
+}
+
+/* Sticky header row: first 3 divs inside trayScanDetails */
+#trayScanDetails.table-grid > div:nth-child(-n + 3) {
+  background-color: #e0e0e0;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  align-items: center;
+}
+
+/* Override only when modal is open */
+.tray-scan-modal.open {
+  width: 600px; /* your desired expanded width */
+  margin-right: 20px;
+}
+
+/* Keep it hidden with negative offset matching default width */
+.tray-scan-modal {
+  right: -500px; /* must match the new width above to stay hidden properly */
+}
+
+#trayScanModal {
+  border-radius: 12px;
+  max-height: 90vh;
+  top: 40px; /* Moves the entire modal down from the top of the viewport */
+  height: calc(100% - 40px); /* Keeps height correct */
+}
+
+#trayScanDetails {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding-top: 10px;
+}
+
+/* Make each <p> act like a table cell */
+#trayScanDetails p {
+  margin: 0;
+  padding: 4px 8px;
+  background: #f7f7f7;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.highlighted-tray-scan {
+  background: #e6f7ff !important;
+  transition: background 0.3s;
+}
+.tray-scan-modal {
+  position: fixed;
+  top: 0;
+  right: -400px; /* Hidden by default */
+  width: 400px;
+  height: 100%;
+  background: white;
+  box-shadow: -3px 0 10px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+  transition: right 0.3s ease;
+  z-index: 9999;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.tray-scan-modal.open {
+  right: 0; /* Slide in */
+}
+
+.tray-scan-modal-content {
+  position: relative;
+  height: 100%;
+}
+
+.tray-scan-close {
+  position: absolute;
+  top: -10px;
+  right: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Ensure table is scrollable if data exceeds visible area */
+.table-responsive {
+  max-height: 250px;
+  overflow-y: auto !important;
+  overflow-x: auto !important;
+  scrollbar-width: thin;
+  -ms-overflow-style: auto;
+  margin-bottom: 4px;
+}
+
+.table-responsive::-webkit-scrollbar {
+  display: block;
+  height: 8px;
+  width: 8px;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* hide scroll for full screen */
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.content-wrapper {
+  flex: 1;
+  overflow-y: auto; /* enable scroll only for content section */
+  padding-bottom: 20px;
+}
+
+footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 40px;
+}
+
+/* Reduce table height for web view (desktop only) */
+@media (min-width: 1025px) {
+  .table-responsive {
+    max-height: 300px; /* reduced height for large screens */
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .table-responsive {
+    max-height: 600px; /* Increased height for tablets */
+  }
+}
+
+/* Make the table header sticky */
+thead th {
+  position: sticky;
+  top: 0;
+  background-color: white; /* or your table header bg color */
+  z-index: 10; /* ensure it stays above the table rows */
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* optional shadow for better separation */
+}
+
+/* End Day Planning Pick Table Styles K */
