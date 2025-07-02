@@ -82,9 +82,7 @@
     justify-content: center;
     line-height: 1;
   }
-  .sidebar .nav .sub-menu .nav-link {
-  color: #e7e3e3 !important;
-}
+
 .sidebar .nav .nav-item:not(.active) > .nav-link,
   .sidebar .nav .menu-title,
   .sidebar .nav .sub-menu .nav-link {
@@ -126,6 +124,21 @@
 .sidebar .nav .menu-title,
 .sidebar .nav .sub-menu .nav-link {
   color: #000 !important;
+}
+/* Make active sub-menu links white with teal background */
+.sidebar .nav .sub-menu .nav-link.active {
+  color: #fff !important;
+  font-weight: 700 !important;
+  background: #028084 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(2, 128, 132, 0.3) !important;
+  transform: translateX(2px) !important;
+}
+
+/* Override any existing white text styling for inactive submenus */
+.sidebar .nav .sub-menu .nav-link:not(.active) {
+  color: #000 !important;
+  background: transparent !important;
 }
   
 footer.footer span,
@@ -1671,6 +1684,216 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
+<!-- script for custom tooltips on navbar icons -->
+<script nonce="{{ csp_nonce }}">
+// Custom tooltip implementation for navbar icons with proper z-index
+document.addEventListener("DOMContentLoaded", function() {
+  // Define tooltip data
+  const tooltipData = [
+    { selector: '#settingsDropdown i.ti-settings', text: 'Settings - User Creation & Model Master' },
+    { selector: '#reportStatus i.ti-eye', text: 'Visual Aid - View Reports & Analytics' },
+    { selector: '.barcode-icon', text: 'Tray Identification - Scan Barcode' },
+    { selector: '#notificationDropdown i.ti-bell', text: 'Notifications - System Alerts' },
+    { selector: '#profileDropdown i.ti-user', text: 'User Profile - Account Settings' },
+    { selector: '.nav-item i.ti-file', text: 'Documents - File Management' }
+  ];
+
+  // Create tooltip elements and add event listeners
+  tooltipData.forEach(function(item) {
+    const element = document.querySelector(item.selector);
+    if (element) {
+      // Create tooltip element
+      const tooltip = document.createElement('div');
+      tooltip.className = 'custom-navbar-tooltip';
+      tooltip.textContent = item.text;
+      tooltip.style.cssText = `
+        position: fixed !important;
+        background: #333 !important;
+        color: white !important;
+        padding: 8px 12px !important;
+        border-radius: 6px !important;
+        font-size: 12px !important;
+        white-space: nowrap !important;
+        z-index: 99999 !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        transition: opacity 0.3s ease, visibility 0.3s ease !important;
+        pointer-events: none !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+        max-width: 250px !important;
+        text-align: center !important;
+        font-family: Arial, sans-serif !important;
+        font-weight: 500 !important;
+        letter-spacing: 0.3px !important;
+      `;
+      
+      // Add arrow
+      const arrow = document.createElement('div');
+      arrow.className = 'tooltip-arrow';
+      arrow.style.cssText = `
+        position: absolute !important;
+        top: -4px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 0 !important;
+        height: 0 !important;
+        border-left: 4px solid transparent !important;
+        border-right: 4px solid transparent !important;
+        border-bottom: 4px solid #333 !important;
+        z-index: 99999 !important;
+      `;
+      tooltip.appendChild(arrow);
+      
+      // Append tooltip to body (not parent) to avoid z-index issues
+      document.body.appendChild(tooltip);
+      
+      // Add hover events with proper positioning
+      element.addEventListener('mouseenter', function() {
+        const rect = element.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+        
+        // Position tooltip below the icon
+        const left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+        const top = rect.bottom + 8;
+        
+        // Ensure tooltip stays within viewport
+        const adjustedLeft = Math.max(10, Math.min(left, window.innerWidth - tooltipRect.width - 10));
+        
+        tooltip.style.left = adjustedLeft + 'px';
+        tooltip.style.top = top + 'px';
+        tooltip.style.opacity = '1';
+        tooltip.style.visibility = 'visible';
+      });
+      
+      element.addEventListener('mouseleave', function() {
+        tooltip.style.opacity = '0';
+        tooltip.style.visibility = 'hidden';
+      });
+    }
+  });
+});
+</script>
+
+<!-- Script for active menu highlighting with proper collapse behavior -->
+<script nonce="{{ csp_nonce }}">
+// Single comprehensive script for active menu highlighting with proper collapse behavior
+document.addEventListener("DOMContentLoaded", function() {
+  var currentUrl = window.location.pathname;
+  console.log('Current URL:', currentUrl); // Debug log
+  
+  // Define URL patterns for better matching
+  const menuPatterns = [
+    { pattern: '/dp_pick_table', element: 'a[href*="dp_pick_table"]', parentId: 'ui-basic' },
+    { pattern: '/dp_completed_table', element: 'a[href*="dp_completed_table"]', parentId: 'ui-basic' },
+    { pattern: '/bulk_upload', element: 'a[href*="bulk_upload"]', parentId: 'ui-basic' },
+    { pattern: '/rec_bulk_upload', element: 'a[href*="rec_bulk_upload"]', parentId: 'recovery-onboard' },
+    { pattern: '/rec_dp_pick_table', element: 'a[href*="rec_dp_pick_table"]', parentId: 'recovery-onboard' },
+    { pattern: '/rec_completed_table', element: 'a[href*="rec_completed_table"]', parentId: 'recovery-onboard' },
+    { pattern: '/IS_PickTable', element: 'a[href*="IS_PickTable"]', parentId: 'ui-advanced' },
+    { pattern: '/IS_Completed_Table', element: 'a[href*="IS_Completed_Table"]', parentId: 'ui-advanced' },
+    { pattern: '/IS_AcceptTable', element: 'a[href*="IS_AcceptTable"]', parentId: 'ui-advanced' },
+    { pattern: '/IS_RejectTable', element: 'a[href*="IS_RejectTable"]', parentId: 'ui-advanced' },
+    { pattern: '/BrassPickTableView', element: 'a[href*="BrassPickTableView"]', parentId: 'editors' },
+    { pattern: '/BrassCompletedView', element: 'a[href*="BrassCompletedView"]', parentId: 'editors' },
+    { pattern: '/iqf_picktable', element: 'a[href*="iqf_picktable"]', parentId: 'editors' },
+    { pattern: '/iqf_completed_table', element: 'a[href*="iqf_completed_table"]', parentId: 'editors' },
+    { pattern: '/iqf_rejection_table', element: 'a[href*="iqf_rejection_table"]', parentId: 'editors' }
+  ];
+  
+  // First, collapse ALL menus and remove ALL active classes
+  document.querySelectorAll('.sidebar .collapse').forEach(function(collapse) {
+    collapse.classList.remove('show');
+  });
+  
+  document.querySelectorAll('.sidebar .nav-link').forEach(function(link) {
+    link.classList.remove('active');
+    link.setAttribute('aria-expanded', 'false');
+    // Reset any inline styles
+    link.style.cssText = '';
+  });
+  
+  let activeMenuFound = false;
+  let activeParentId = null;
+  
+  // Find the current active menu item
+  document.querySelectorAll('.sidebar .nav-link').forEach(function(link) {
+    const linkHref = link.getAttribute('href');
+    
+    // Skip if already found active menu
+    if (activeMenuFound) return;
+    
+    // Check for exact URL match or pattern match
+    const isCurrentPage = linkHref && (
+      linkHref === currentUrl || 
+      currentUrl.includes(linkHref.replace(/^\/+|\/+$/g, '')) ||
+      menuPatterns.some(pattern => {
+        const isMatch = currentUrl.includes(pattern.pattern) && link.matches(pattern.element);
+        if (isMatch) {
+          activeParentId = pattern.parentId;
+        }
+        return isMatch;
+      })
+    );
+    
+    if (isCurrentPage) {
+      activeMenuFound = true;
+      console.log('Active menu found:', linkHref); // Debug log
+      
+      // Add active class to the matched link
+      link.classList.add('active');
+      
+      // Handle parent menu expansion for submenus
+      var parentCollapse = link.closest('.collapse');
+      if (parentCollapse) {
+        // Show only this parent menu
+        parentCollapse.classList.add('show');
+        var parentNav = parentCollapse.previousElementSibling;
+        if (parentNav && parentNav.classList.contains('nav-link')) {
+          parentNav.classList.add('active');
+          parentNav.setAttribute('aria-expanded', 'true');
+        }
+        console.log('Parent menu expanded:', parentCollapse.id); // Debug log
+      } else if (activeParentId) {
+        // Handle specific parent menu by ID
+        const specificParent = document.querySelector('#' + activeParentId);
+        if (specificParent) {
+          specificParent.classList.add('show');
+          const specificParentNav = specificParent.previousElementSibling;
+          if (specificParentNav && specificParentNav.classList.contains('nav-link')) {
+            specificParentNav.classList.add('active');
+            specificParentNav.setAttribute('aria-expanded', 'true');
+          }
+        }
+      }
+      
+      // Special styling for submenu items
+      if (link.closest('.sub-menu')) {
+        link.style.cssText = `
+          color: #fff !important;
+          font-weight: 700 !important;
+          background: #028084 !important;
+          border-radius: 8px !important;
+          box-shadow: 0 2px 8px rgba(2, 128, 132, 0.3) !important;
+          transform: translateX(2px) !important;
+        `;
+      }
+    }
+  });
+  
+  // If no specific submenu found, check for main menu items
+  if (!activeMenuFound) {
+    document.querySelectorAll('.sidebar .nav-link:not(.sub-menu .nav-link)').forEach(function(link) {
+      const linkHref = link.getAttribute('href');
+      if (linkHref && currentUrl.includes(linkHref.replace(/^\/+|\/+$/g, ''))) {
+        link.classList.add('active');
+        activeMenuFound = true;
+      }
+    });
+  }
+  
+  console.log('Active menu setup complete. Found:', activeMenuFound); // Debug log
+});
+</script>
 </body>
 
 </html>

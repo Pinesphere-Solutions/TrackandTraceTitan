@@ -2,6 +2,168 @@
 {% load static %}
 {% block content %}
 <style nonce="{{ csp_nonce }}">
+
+  
+/* Count display styling for submit button area */
+.table-actions .data-count {
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--clr-primary);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(18, 106, 131, 0.3);
+  border: 2px solid white;
+}
+
+.table-actions .data-count::before {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid var(--clr-primary);
+}
+
+/* Responsive count display */
+@media (max-width: 768px) {
+  .table-actions .data-count {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    top: -32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .table-actions .data-count {
+    position: relative;
+    top: 0;
+    margin-bottom: 10px;
+    transform: none;
+  }
+  
+  .table-actions .data-count::before {
+    display: none;
+  }
+}
+  
+    /* Sticky submit/cancel buttons at bottom */
+  .table-actions {
+    position: fixed !important;
+    bottom: 45px !important; /* Above footer */
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 1000 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid var(--clr-muted) !important;
+    border-radius: 12px !important;
+    padding: 1rem 2rem !important;
+    margin: 0 !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15) !important;
+    display: flex !important;
+    justify-content: center !important;
+    gap: 1rem !important;
+    min-width: 300px !important;
+      pointer-events: auto !important;
+
+  }
+  
+  /* Adjust for sidebar when expanded */
+  body:not(.sidebar-icon-only) .table-actions {
+    left: calc(50% + 112px) !important; /* Center with sidebar offset */
+  }
+  
+  /* Adjust for collapsed sidebar */
+  .sidebar-icon-only .table-actions {
+    left: calc(50% + 27px) !important; /* Center with collapsed sidebar offset */
+  }
+  
+  /* Enhanced button styling for sticky position */
+  .table-actions .btn {
+    min-width: 120px !important;
+    padding: 0.875rem 2rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  /* Enhanced hover effects for sticky buttons */
+  .table-actions .btn:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2) !important;
+  }
+  
+  /* Submit button specific styling */
+  .table-actions .btn:first-child {
+    background: var(--clr-primary) !important;
+    color: white !important;
+    border: 2px solid var(--clr-primary) !important;
+  }
+  
+  .table-actions .btn:first-child:hover {
+    background: var(--clr-secondary) !important;
+    border-color: var(--clr-secondary) !important;
+  }
+  
+  /* Cancel button specific styling (red) */
+  .table-actions .btn:last-child {
+    background: transparent !important;
+    color: #dc3545 !important;
+    border: 2px solid #dc3545 !important;
+  }
+  
+  .table-actions .btn:last-child:hover {
+    background: #dc3545 !important;
+    color: white !important;
+  }
+  
+ 
+  /* Responsive adjustments for sticky buttons */
+  @media (max-width: 768px) {
+    .table-actions {
+      left: 50% !important;
+      min-width: 280px !important;
+      padding: 0.75rem 1.5rem !important;
+      bottom: 35px !important;
+    }
+    
+    body:not(.sidebar-icon-only) .table-actions,
+    .sidebar-icon-only .table-actions {
+      left: 50% !important; /* Full center on mobile */
+    }
+    
+    .table-actions .btn {
+      min-width: 100px !important;
+      padding: 0.75rem 1.5rem !important;
+      font-size: 0.9rem !important;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .table-actions {
+      flex-direction: column !important;
+      gap: 0.5rem !important;
+      min-width: 250px !important;
+    }
+    
+    .table-actions .btn {
+      width: 100% !important;
+      min-width: auto !important;
+    }
+  }
   :root {
     --clr-primary: #126a83;      /* Teal */
     --clr-secondary: #023E4D;    /* Deep Navy */
@@ -240,7 +402,40 @@
     overflow-x: auto; /* Changed to auto for horizontal scrolling */
     overflow-y: auto;
     max-height: 320px;
+    margin-bottom: 35px !important; /* Additional margin to ensure scroll visibility */
+    padding-bottom: 20px !important; /* Space for sticky buttons */
+    position: relative !important;
+    z-index: 1 !important; /* Ensure table content is below buttons but scroll is visible */
+   
   }
+
+/* Ensure table scroll track is visible above buttons */
+.table-container::-webkit-scrollbar {
+  width: 8px !important;
+  height: 1px !important; /* Add this for horizontal scrollbar */
+  z-index: 999 !important;
+}
+
+.table-container::-webkit-scrollbar:horizontal {
+  height: 3px !important;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1 !important;
+  border-radius: 6px !important;
+  z-index: 999 !important;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #888 !important;
+  border-radius: 6px !important;
+  z-index: 999 !important;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #555 !important;
+}
+
   .data-table {
     width: 100%;
     min-width: 1100px; /* Reduced minimum width since we removed one column */
@@ -249,6 +444,8 @@
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      margin-bottom: 5px !important;
+
   }
   .data-table th,
   .data-table td {
@@ -370,6 +567,17 @@
     font-weight: 600 !important;
   }
   }
+/* Place this at the very end of your <style> block */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  body .bulk-card .data-table-card .table-container {
+    margin-bottom: 260px !important;
+  }
+  .table-actions {
+    bottom: 80px !important;
+  }
+  
+}
+
 </style>
 
 <div class="bulk-card">
@@ -1336,7 +1544,8 @@ function renderTable() {
   const addRowTR = document.createElement('tr');
   const addRowTD = document.createElement('td');
   addRowTD.colSpan = columns.length + 1;
-  addRowTD.style.textAlign = 'center';
+    addRowTD.style.textAlign = 'left';
+  addRowTD.style.paddingLeft = '2rem'; // Optional: add some left padding for spacing
   addRowTD.style.cursor = 'pointer';
   addRowTD.innerHTML = `
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
@@ -1358,6 +1567,19 @@ function renderTable() {
 
   // Add Submit and Cancel buttons below the table
   const tableActionsContainer = document.createElement('div');
+    // Add count display above submit/cancel buttons
+  const dataCount = document.createElement('div');
+  dataCount.className = 'data-count';
+  const validRowCount = tableData.filter(row => {
+    const hasData = Object.keys(row).some(key => {
+      if (key === 'S.NO' || key === '_fileSource' || key === '_autoFilled') return false;
+      return row[key] && row[key].toString().trim() !== '';
+    });
+    return hasData;
+  }).length;
+  dataCount.textContent = `${validRowCount} ${validRowCount === 1 ? 'Record' : 'Records'} Exists`;
+  tableActionsContainer.style.position = 'relative';
+  tableActionsContainer.appendChild(dataCount);
   tableActionsContainer.className = 'table-actions';
   tableActionsContainer.style.display = 'flex';
   tableActionsContainer.style.justifyContent = 'center';

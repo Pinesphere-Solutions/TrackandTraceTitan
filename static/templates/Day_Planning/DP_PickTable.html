@@ -1,10 +1,27 @@
 {% extends "base.html" %} 
-
 {% load static %} 
 {% load stock_filters %} 
 {% block content %}
 <style>
-  /* Zoom animation for modal user profile image */
+  
+    /* Add this CSS at the end of your style block */
+  
+  /* Hide the small tooltip completely for Plating Stk No hover */
+  .model-hover-trigger .model-image-tooltip {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+  
+  /* Remove hover effects that show tooltip */
+  .model-hover-trigger:hover .model-image-tooltip {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+/* Zoom animation for modal user profile image */
 .modal-top-header img {
   transition: transform 0.3s cubic-bezier(.4,2,.3,1), box-shadow 0.3s;
   will-change: transform;
@@ -16,7 +33,7 @@
   box-shadow: 0 4px 24px rgba(2,128,132,0.18);
   z-index: 10;
 }
-    /* Only header cell is sticky for Plating Stk No */
+/* Only header cell is sticky for Plating Stk No */
   #order-listing th:nth-child(3) {
     position: sticky;
     left: 180px;
@@ -24,7 +41,7 @@
     background: #fff;
     min-width: 100px;
   }
-  /* Remove sticky from td, make it relative for tooltip stacking */
+/* Remove sticky from td, make it relative for tooltip stacking */
   #order-listing td:nth-child(3) {
     position: relative;
     z-index: 31; /* higher than sticky th */
@@ -999,22 +1016,65 @@ padding-right: 6px !important;
 /* Table heading font size */
 /* Add this at the end of your <style> block in DP_PickTable.html */
 
-/* Force all table headers to wrap onto two lines */
+/* Professional table header styling with proper text wrapping */
 #order-listing th {
-  white-space: normal !important;
-  line-height: 1 !important;
-  word-break: break-word !important;
-  min-width: 70px;
-  max-width: 120px;
+  position: relative;
+  padding: 8px 12px 8px 16px !important;
   text-align: left !important;
-  vertical-align: middle;
-  padding-top: 5px !important;
-  padding-bottom: 5px !important;
-  padding-left: 16px !important;
+  vertical-align: middle !important;
+  white-space: normal !important;
+  line-height: 1.3 !important;
+  word-break: keep-all !important;
+  hyphens: none !important;
   font-size: 13px !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
+  background: #028084 !important;
+  color: #e5fcff !important;
+  border-bottom: 2.5px solid #bdbdbd !important;
+  min-width: 80px;
+  max-width: 140px;
 }
 
+/* Specific width adjustments for better text wrapping */
+/* Reduce S.No column width */
+#order-listing th:nth-child(1) { min-width: 60px; max-width: 60px; }   /* S.No - Reduced width */
+#order-listing th:nth-child(3) { min-width: 100px; max-width: 120px; } /* Plating Stk No */
+#order-listing th:nth-child(4) { min-width: 100px; max-width: 120px; } /* Polishing Stk No */
+#order-listing th:nth-child(5) { min-width: 90px; max-width: 110px; }  /* Plating Color */
+#order-listing th:nth-child(6) { min-width: 100px; max-width: 100px; }  /* Category */
+#order-listing th:nth-child(7) { min-width: 90px; max-width: 110px; }  /* Polish Finish */
+#order-listing th:nth-child(8) { min-width: 90px; max-width: 90px; }   /* Version */
+#order-listing th:nth-child(9) { min-width: 110px; max-width: 140px; } /* Tray Cate-Capacity */
+#order-listing th:nth-child(10) { min-width: 90px; max-width: 90px; }  /* Source */
+#order-listing th:nth-child(11) { min-width: 80px; max-width: 100px; } /* No of Tray */
+#order-listing th:nth-child(12) { min-width: 80px; max-width: 100px; } /* Input Qty */
+#order-listing th:nth-child(13) { min-width: 90px; max-width: 110px; } /* Process Status */
+#order-ling th:nth-child(14) { min-width: 80px; max-width: 100px; } /* Action */
+#order-listing th:nth-child(15) { min-width: 90px; max-width: 110px; } /* Lot Status */
+#order-listing th:nth-child(16) { min-width: 100px; max-width: 120px; } /* Current Stage */
+#order-listing th:nth-child(17) { min-width: 90px; max-width: 100px; } /* Remarks */
+ 
+/* Right-align filter icons */
+#order-listing th .fa-filter {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+#order-listing th .fa-filter:hover {
+  opacity: 1;
+}
+
+/* Better text wrapping for specific headers */
+#order-listing th {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
 /* Table data font size */
 #order-listing td {
 font-size: 12px !important;
@@ -1272,28 +1332,29 @@ box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* optional shadow for better sep
             <!-- Table Section -->
             <div class="table-responsive">
 <table id="order-listing" class="table">
-                <thead>
+               <thead>
                   <tr>
                     <th>
-                      S.No <i class="fa fa-filter" aria-hidden="true"></i>
-                    </th>
-                    <th>
-                      Last<br>Updated
+                      S.No
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Plating Stk No
+                      Last Updated
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Polishing Stk No
+                      Plating Stock No
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Polishing Stock No
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
                       Plating Color
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
-                     <th>
+                    <th>
                       Category
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
@@ -1302,9 +1363,9 @@ box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* optional shadow for better sep
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Version <i class="fa fa-filter" aria-hidden="true"></i>
+                      Version
+                      <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
-                    
                     <th>
                       Tray Cate-Capacity
                       <i class="fa fa-filter" aria-hidden="true"></i>
@@ -1314,7 +1375,8 @@ box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* optional shadow for better sep
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      No of Tray <i class="fa fa-filter" aria-hidden="true"></i>
+                      No of Trays
+                      <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
                       Input Qty
@@ -1325,7 +1387,8 @@ box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* optional shadow for better sep
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Action <i class="fa fa-filter" aria-hidden="true"></i>
+                      Action
+                      <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
                       Lot Status
@@ -1336,7 +1399,8 @@ box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* optional shadow for better sep
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Remarks <i class="fa fa-filter" aria-hidden="true"></i>
+                      Remarks
+                      <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                   </tr>
                 </thead>
@@ -4823,6 +4887,172 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 
+<!-- Script for Plating Stk No hover - no tooltip, direct modal display -->
+<script nonce="{{ csp_nonce }}">
+// Direct modal display for Plating Stk No hover - no tooltip
+document.addEventListener("DOMContentLoaded", function () {
+  let hoverTimeout;
+  
+  document.querySelectorAll(".model-hover-trigger").forEach(function (trigger) {
+    const tooltip = trigger.querySelector(".model-image-tooltip");
+    
+    // Remove existing hover event listeners by cloning
+    const newTrigger = trigger.cloneNode(true);
+    trigger.parentNode.replaceChild(newTrigger, trigger);
+    
+    // Add new hover behavior - direct modal
+    newTrigger.addEventListener("mouseenter", function () {
+      hoverTimeout = setTimeout(() => {
+        // Get the first image from tooltip
+        const firstImg = newTrigger.querySelector(".model-image-tooltip img");
+        if (firstImg) {
+          showDirectImageModal(firstImg.src);
+        }
+      }, 200); // Small delay to prevent accidental triggers
+    });
+    
+    newTrigger.addEventListener("mouseleave", function () {
+      clearTimeout(hoverTimeout);
+    });
+    
+    // Also trigger on click
+    newTrigger.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const firstImg = newTrigger.querySelector(".model-image-tooltip img");
+      if (firstImg) {
+        showDirectImageModal(firstImg.src);
+      }
+    });
+  });
+  
+  function showDirectImageModal(imageSrc) {
+    // Remove any existing modal
+    const existingModal = document.getElementById('directImageModal');
+    if (existingModal) {
+      existingModal.remove();
+    }
+    
+    // Create modal
+    const modal = document.createElement("div");
+    modal.id = 'directImageModal';
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100000;
+      backdrop-filter: blur(2px);
+    `;
+    
+    // Add the image
+    const largeImg = document.createElement("img");
+    largeImg.src = imageSrc;
+    largeImg.style.cssText = `
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      object-fit: contain;
+    `;
+    modal.appendChild(largeImg);
+    
+    // Add close button
+    const closeBtn = document.createElement("button");
+    closeBtn.innerHTML = "&times;";
+    closeBtn.style.cssText = `
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+      transition: all 0.3s ease;
+    `;
+    closeBtn.addEventListener("click", function () {
+      modal.remove();
+    });
+    closeBtn.addEventListener("mouseenter", function () {
+      closeBtn.style.transform = "scale(1.1)";
+      closeBtn.style.background = "#c82333";
+    });
+    closeBtn.addEventListener("mouseleave", function () {
+      closeBtn.style.transform = "scale(1)";
+      closeBtn.style.background = "#dc3545";
+    });
+    modal.appendChild(closeBtn);
+    
+    // Add info button
+    const infoBtn = document.createElement("button");
+    infoBtn.innerHTML = "ℹ";
+    infoBtn.style.cssText = `
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 50px;
+      height: 50px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+      transition: all 0.3s ease;
+    `;
+    infoBtn.addEventListener("click", function () {
+      alert("Model information will be displayed here.");
+    });
+    infoBtn.addEventListener("mouseenter", function () {
+      infoBtn.style.transform = "scale(1.1)";
+      infoBtn.style.background = "#0056b3";
+    });
+    infoBtn.addEventListener("mouseleave", function () {
+      infoBtn.style.transform = "scale(1)";
+      infoBtn.style.background = "#007bff";
+    });
+    modal.appendChild(infoBtn);
+    
+    // Close on outside click
+    modal.addEventListener("click", function (e) {
+      if (e.target === modal) {
+        modal.remove();
+      }
+    });
+    
+    // Close on Escape key
+    const escapeHandler = function(e) {
+      if (e.key === 'Escape') {
+        modal.remove();
+        document.removeEventListener('keydown', escapeHandler);
+      }
+    };
+    document.addEventListener('keydown', escapeHandler);
+    
+    // Append to body
+    document.body.appendChild(modal);
+  }
+});
+</script>
 
   {% endblock %} {% endblock content %}
 </div>

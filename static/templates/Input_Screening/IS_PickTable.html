@@ -1,38 +1,299 @@
 {% extends "base.html" %} {% load static %} {% block content %}
 <style>
-   .pagination-wrapper {
-    position: fixed;
-    bottom: 0; /* Fix it to the bottom of the screen */
-    left: 0;
-    width: 100%;
-    background: #f5f7ff; /* Optional: Background color */
-    z-index: 1000; /* Ensure it stays above other elements */
-    display: flex;
-    justify-content: center;
-    padding: 10px 0; /* Add padding for better spacing */
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Optional shadow for better separation */
-  }
+/* Professional table header styling with proper text wrapping */
+#order-listing th {
+  position: relative;
+  padding: 8px 12px 8px 16px !important;
+  text-align: left !important;
+  vertical-align: middle !important;
+  white-space: normal !important;
+  line-height: 1.3 !important;
+  word-break: keep-all !important;
+  hyphens: none !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  background: #028084 !important;
+  color: #e5fcff !important;
+  border-bottom: 2.5px solid #bdbdbd !important;
+  min-width: 80px;
+  max-width: 140px;
+}
 
-  .pagination .page-link {
-    padding: 2px 8px !important;
-    font-size: 13px !important;
-    min-width: 28px !important;
-    min-height: 28px !important;
-  }
 
-  @media (max-width: 600px) {
-    .pagination-wrapper {
-      padding: 5px 0;
-    }
-  }
+/* Specific width adjustments for better text wrapping */
+#order-listing th:nth-child(1) { min-width: 50px; max-width: 60px; }   /* S.No */
+#order-listing th:nth-child(2) { min-width: 90px; max-width: 110px; }  /* Last Updated */
+#order-listing th:nth-child(3) { min-width: 100px; max-width: 120px; } /* Plating Stk No */
+#order-listing th:nth-child(4) { min-width: 115px; max-width: 130px; } /* Polishing Stk No */
+#order-listing th:nth-child(5) { min-width: 90px; max-width: 110px; }  /* Plating Color */
+#order-listing th:nth-child(6) { min-width: 80px; max-width: 100px; }  /* Category */
+#order-listing th:nth-child(7) { min-width: 90px; max-width: 110px; }  /* Polish Finish */
+#order-listing th:nth-child(8) { min-width: 110px; max-width: 140px; } /* Tray Cate-Capacity */
+#order-listing th:nth-child(9) { min-width: 90px; max-width: 110px; }  /* Input Source */
+#order-listing th:nth-child(10) { min-width: 80px; max-width: 100px; } /* No of Trays */
+#order-listing th:nth-child(11) { min-width: 70px; max-width: 90px; }  /* LOT Qty */
+#order-listing th:nth-child(12) { min-width: 90px; max-width: 100px; } /* Physical Qty */
+#order-listing th:nth-child(13) { min-width: 80px; max-width: 100px; } /* IPA Wiping */
+#order-listing th:nth-child(14) { min-width: 80px; max-width: 100px; } /* Accept Qty */
+#order-listing th:nth-child(15) { min-width: 80px; max-width: 100px; } /* Reject Qty */
+#order-listing th:nth-child(16) { min-width: 120px; max-width: 130px; } /* Process Status */
+#order-listing th:nth-child(17) { min-width: 80px; max-width: 100px; } /* Action */
+#order-listing th:nth-child(18) { min-width: 90px; max-width: 110px; } /* Lot Status */
+#order-listing th:nth-child(19) { min-width: 100px; max-width: 120px; } /* Current Stage */
+#order-listing th:nth-child(20) { min-width: 90px; max-width: 100px; } /* Remarks */
+ 
+/* Right-align filter icons */
+#order-listing th .fa-filter {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
 
-  
-  /* Freeze S.No (first column) data */
+#order-listing th .fa-filter:hover {
+  opacity: 1;
+}
+/* Special handling for Process Status column to prevent overlap */
+#order-listing th:nth-child(16) {
+  padding-right: 25px !important; /* Extra padding for filter icon */
+  position: relative;
+}
+
+#order-listing th:nth-child(16) .fa-filter {
+  right: 4px; /* Closer to edge */
+  top: 15px; /* Move to top instead of center */
+  transform: none; /* Remove centering transform */
+}
+
+/* Ensure Process Status column content doesn't overlap with filter */
+#order-listing td:nth-child(16) .process-status-group {
+  margin-right: 20px; /* Space for filter icon */
+}
+
+/* Better text wrapping for specific headers */
+#order-listing th {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+/* Add backdrop overlay when tooltip is visible */
+.model-hover-trigger:hover::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 100000 !important;
+  pointer-events: none;
+}
+ /* Hide frozen columns when tooltip is visible */
+.model-hover-trigger:hover ~ * #order-listing th:nth-child(1),
+.model-hover-trigger:hover ~ * #order-listing td:nth-child(1),
+.model-hover-trigger:hover ~ * #order-listing th:nth-child(3),
+.model-hover-trigger:hover ~ * #order-listing td:nth-child(3) {
+  z-index: 1 !important;
+}
+/* Override tooltip to show at center of screen with full image view */
+.model-hover-trigger .model-image-tooltip {
+  position: fixed !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 50vw !important;
+  height: 50vh !important;
+  max-width: 400px !important;
+  max-height: 300px !important;
+  background: rgba(243, 243, 243, 0.95) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  padding: 20px !important;
+  z-index: 100001 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0 !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+  pointer-events: auto !important;
+}
+/* Lower z-index of frozen columns during hover */
+.model-hover-trigger:hover {
+  position: relative;
+  z-index: 100002 !important;
+}
+
+/* Force all sticky elements to have lower z-index when hovering */
+.model-hover-trigger:hover ~ * [style*="position: sticky"],
+.model-hover-trigger:hover ~ * [style*="z-index"] {
+  z-index: 1 !important;
+}
+
+/* Ensure close and info buttons are above everything */
+.model-image-tooltip::before {
+  content: '×';
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 40px;
+  height: 40px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 24px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100001 !important; /* Higher than tooltip */
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+  transition: all 0.3s ease;
+}
+/* Adjust close and info buttons for smaller tooltip */
+.model-image-tooltip::before,
+.model-image-tooltip::after {
+  width: 30px !important;
+  height: 30px !important;
+  font-size: 18px !important;
+  top: 10px !important;
+   z-index: 100002 !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+.model-image-tooltip::after {
+  content: 'ℹ';
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  width: 40px;
+  height: 40px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100001 !important; /* Higher than tooltip */
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+  transition: all 0.3s ease;
+}
+.model-image-tooltip {
+  padding: 15px !important;
+}
+.model-hover-trigger:hover .model-image-tooltip {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  z-index: 100003 !important;
+}
+
+/* Reduce visibility of table background during hover */
+.model-hover-trigger:hover ~ tr,
+.model-hover-trigger:hover ~ td {
+  opacity: 0.3 !important;
+}
+
+/* Hide sticky elements during hover */
+tbody tr:has(.model-hover-trigger:hover) ~ tr {
+  opacity: 0.2 !important;
+}
+/* Hide scroll buttons in tooltip */
+.model-image-tooltip .img-scroll-left,
+.model-image-tooltip .img-scroll-right {
+  display: none !important;
+}
+
+/* Style the image gallery for center display */
+.model-image-tooltip .img-gallery {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: calc(100% - 60px) !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+/* Show only first image and make it full size */
+.model-image-tooltip .img-gallery img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1) !important;
+  display: none !important;
+}
+
+.model-image-tooltip .img-gallery img:first-child {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* Hover effects for buttons */
+.model-image-tooltip:hover::before {
+  background: #c82333;
+  transform: scale(1.1);
+}
+
+.model-image-tooltip:hover::after {
+  background: #0056b3;
+  transform: scale(1.1);
+}
+
+/* Hide tooltip when clicking close area */
+.model-hover-trigger.tooltip-closed .model-image-tooltip {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.pagination-wrapper {
+  position: fixed;
+  bottom: 30px; /* Adjust to place it above the footer */
+  left: 0;
+  width: 100%;
+  background: #f5f7ff; /* Optional: Background color */
+  z-index: 1000; /* Ensure it stays above other elements */
+  display: flex;
+  justify-content: center;
+  padding: 10px 0; /* Add padding for better spacing */
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Optional shadow for better separation */
+}
+
+@media (max-width: 600px) {
+  .pagination-wrapper {
+    bottom: 50px; /* Adjust for smaller screens */
+    padding: 5px 0;
+    margin-left: 4px !important;
+  }
+}
+
+.pagination .page-link {
+  padding: 2px 8px !important;
+  font-size: 13px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+}
+
+/* Freeze S.No (first column) data */
 #order-listing tbody td:nth-child(1) {
   position: sticky !important;
   left: 0 !important;
-  z-index: 20 !important; /* Ensure it stays above other rows */
-  background: inherit !important; /* Match the background color dynamically */
+  z-index:1 !important; /* Ensure it stays above other rows */
 }
 
 /* Freeze Plating Stk No (third column) data */
@@ -42,15 +303,20 @@
   z-index: 15; /* Ensure it stays above other rows */
   background: #fff; /* Match the background color */
 }
+
 /* Freeze S.No (first column) */
 #order-listing th:nth-child(1),
 #order-listing td:nth-child(1) {
   position: sticky;
   left: 0;
-  z-index: 30;
+  z-index: 20;
   background: #fff;
   min-width: 80px;
   box-shadow: 2px 0 2px -1px rgba(0, 0, 0, 0.04);
+}
+
+#order-listing th:nth-child(2){
+  z-index: 25 !important ;
 }
 
 /* Freeze Date and Time (second column) */
@@ -58,7 +324,7 @@
 #order-listing td:nth-child(2) {
   position: sticky;
   left: 80px; /* width of col 1 */
-  z-index: 25;
+  z-index: 0;
   background: #fff;
   min-width: 100px;
   box-shadow: 2px 0 2px -1px rgba(0, 0, 0, 0.03);
@@ -75,8 +341,7 @@
   z-index: 20;
   background: #fff;
   min-width: 100px;
-    box-shadow: -1px 0 2px rgba(0, 0, 0, 0.1); /* Optional shadow for better separation */
-
+  box-shadow: -1px 0 2px rgba(0, 0, 0, 0.1); /* Optional shadow for better separation */
 }
 
 /* Sticky Header Row */
@@ -86,48 +351,18 @@ thead th {
   background-color: white; /* or your table header bg color */
   z-index: 10; /* ensure it stays above the table rows */
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* optional shadow for better separation */
+  height: 38px !important; /* Increase as needed */
+  background: #028084 !important; /* existing bg */
+  color: #e5fcff !important;      /* existing color */
+  vertical-align: middle !important;
 }
+
 .fixed-bottom-element {
   position: static !important; /* Ensure it's static */
   margin-top: 635px !important; /* Adjust the margin from the top */
   width: 100%; /* Optional: Make it span the full width */
   z-index: 2; /* Ensure it stays above other elements if needed */
 }
-
-  /* start of pagination styles */
- .pagination-wrapper {
-    position: fixed;
-    bottom: 40px; /* Adjust to place it above the footer */
-    left: 0;
-    width: 100%;
-    background: #f5f7ff; /* Optional: Background color */
-    z-index: 1000; /* Ensure it stays above other elements */
-    display: flex;
-    justify-content: center;
-    padding: 10px 0; /* Add padding for better spacing */
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Optional shadow for better separation */
-  }
-
-  @media (max-width: 600px) {
-    .pagination-wrapper {
-      bottom: 50px; /* Adjust for smaller screens */
-      padding: 5px 0;
-    }
-  }
-
-  .pagination .page-link {
-    padding: 2px 8px !important;
-    font-size: 13px !important;
-    min-width: 28px !important;
-    min-height: 28px !important;
-  }
-
-  @media (max-width: 600px) {
-    .pagination-wrapper {
-      margin-left: 4px !important;
-    }
-  }
-  
 
 /* --- Stylish Circle Pagination --- */
 .pagination {
@@ -208,107 +443,122 @@ thead th {
 }
 
 /* End of pagination styles */
-  /* Reduce the width of the Delink table */
-  .delink-table-container {
-    max-width: 600px; /* Set the desired width */
-    margin: 0 auto; /* Center the table horizontally */
-  }
+/* Reduce the width of the Delink table */
+.delink-table-container {
+  max-width: 600px; /* Set the desired width */
+  margin: 0 auto; /* Center the table horizontally */
+}
 
-  .delink-table-container table {
-    width: 90%; /* Ensure the table fits within the container */
-    border: solid 1px black;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
+.delink-table-container table {
+  width: 90%; /* Ensure the table fits within the container */
+  border: solid 1px black;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
 
-  .delink-table-container th,
-  .delink-table-container td {
-    padding: 12px;
-    text-align: center;
-  }
+.delink-table-container th,
+.delink-table-container td {
+  padding: 12px;
+  text-align: center;
+}
+
 .modal-top-header h6 {
-    margin-top: 10px;
-  }
- /* Increase the width of the new-popup-modal when open */
+  margin-top: 10px;
+}
+
+/* Increase the width of the new-popup-modal when open */
 .new-popup-modal.open {
   width: 500px; /* Set the desired width */
   right: 0; /* Ensure it slides in from the right */
   transition: width 0.3s ease, right 0.3s ease; /* Smooth transition */
 }
-  /* Style for toggle switch and whole row inactive */
-  @media (max-width: 426px){
-    .file-upload-area p {
-      font-size: 12px !important;
-    }
+
+/* Style for toggle switch and whole row inactive */
+@media (max-width: 426px){
+  .file-upload-area p {
+    font-size: 12px !important;
   }
-  .tooltip-inner {
-    white-space: pre-line !important;
-  }
-  td:first-child,
-  td:first-child * {
-    filter: none !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    color: inherit !important;
-  }
-  .row-inactive,
-  .row-inactive td {
-    background: #ededed !important;
-    background-color: #ededed !important;
-  }
-  .row-inactive td:first-child {
-    background: none !important;
-    background-color: transparent !important;
-  }
-  .row-inactive-blur {
-    filter: blur(0.7px);
-    cursor: not-allowed !important;
-    user-select: none;
-    pointer-events: auto; /* allow hover for cursor effect */
-  }
-  .hold-toggle-switch {
-    position: relative;
-    display: inline-block;
-    width: 36px;
-    height: 20px;
-  }
-  .hold-toggle-switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-  .hold-slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #e5e5e5; /* Always grey track */
-    border-radius: 20px;
-    transition: .3s;
-  }
-  .hold-slider:before {
-    position: absolute;
-    content: "";
-    height: 16px; width: 16px;
-    left: 2px; bottom: 2px;
-    background-color: #bbb; /* Default grey circle */
-    border: 2px solid #bbb;
-    border-radius: 50%;
-    transition: .3s;
-  }
-  .hold-toggle-switch input:checked + .hold-slider:before {
-    transform: translateX(16px);
-    background-color: #007bff; /* Blue circle when ON */
-    border-color: #007bff;
-  }
-  .hold-toggle-switch input:not(:checked) + .hold-slider:before {
-    background-color: #bbb; /* Grey circle when OFF */
-    border-color: #bbb;
-  }
-  .hold-toggle-switch input:disabled + .hold-slider:before {
-    background-color: #bbb !important; /* Grey circle when disabled */
-    border-color: #bbb !important;
-  }
-  
-  /* end of toggle style switch */
+}
+
+.tooltip-inner {
+  white-space: pre-line !important;
+}
+
+td:first-child,
+td:first-child * {
+  filter: none !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  color: inherit !important;
+}
+
+.row-inactive,
+.row-inactive td {
+  background: #ededed !important;
+  background-color: #ededed !important;
+}
+
+.row-inactive td:first-child {
+  background: none !important;
+  background-color: transparent !important;
+}
+
+.row-inactive-blur {
+  filter: blur(0.7px);
+  cursor: not-allowed !important;
+  user-select: none;
+  pointer-events: auto; /* allow hover for cursor effect */
+}
+
+.hold-toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+}
+
+.hold-toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.hold-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #e5e5e5; /* Always grey track */
+  border-radius: 20px;
+  transition: .3s;
+}
+
+.hold-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px; width: 16px;
+  left: 2px; bottom: 2px;
+  background-color: #bbb; /* Default grey circle */
+  border: 2px solid #bbb;
+  border-radius: 50%;
+  transition: .3s;
+}
+
+.hold-toggle-switch input:checked + .hold-slider:before {
+  transform: translateX(16px);
+  background-color: #007bff; /* Blue circle when ON */
+  border-color: #007bff;
+}
+
+.hold-toggle-switch input:not(:checked) + .hold-slider:before {
+  background-color: #bbb; /* Grey circle when OFF */
+  border-color: #bbb;
+}
+
+.hold-toggle-switch input:disabled + .hold-slider:before {
+  background-color: #bbb !important; /* Grey circle when disabled */
+  border-color: #bbb !important;
+}
+
+/* end of toggle style switch */
 
 /* Zoom animation for modal user profile image */
 .modal-top-header img {
@@ -325,187 +575,198 @@ thead th {
 
 /* Day Planning Tray Scan Modal Styles */
 .dp-row-action-highlight {
-background-color: #f0f8ff !important; /* Light blue, or pick your color */
-transition: background 0.3s;
+  background-color: #f0f8ff !important; /* Light blue, or pick your color */
+  transition: background 0.3s;
 }
 
-  /* Show tooltip on hover */
-  .model-hover-trigger:hover .model-image-tooltip {
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    display: flex !important;
-  }
+/* Show tooltip on hover */
+.model-hover-trigger:hover .model-image-tooltip {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  display: flex !important;
+}
 
-  .readonly-modal-header {
-    background: #f3f3f3;
-    border-radius: 8px 8px 0 0;
-    padding: 16px 20px 12px 20px !important;
-    margin-bottom: 10px;
-    align-items: flex-end !important;
-  }
-  .readonly-modal-header .user-profile {
-    display: flex;
-    align-items: flex-end;
-    gap: 8px;
-  }
-  #modalModelNo_DayPlanning {
-    margin-top: 10px !important;
-    display: inline-block;
-    font-weight: 600;
-    color: #028084;
-  }
+.readonly-modal-header {
+  background: #f3f3f3;
+  border-radius: 8px 8px 0 0;
+  padding: 16px 20px 12px 20px !important;
+  margin-bottom: 10px;
+  align-items: flex-end !important;
+}
 
-  /* Dim or blur main content when read-only tray scan modal is open */
-  .tray-scan-modal-DayPlanning.open ~ .content-wrapper {
-    opacity: 0.3;
-    pointer-events: none;
-    /* For blur effect, use the next line instead of opacity: */
-    /* filter: blur(2px); */
-  }
-  
-  /* Shrink table row height in read-only tray scan modal */
-  #trayScanModal_DayPlanning table tr,
-  #trayScanModal_DayPlanning table td,
-  #trayScanModal_DayPlanning table th {
-    height: 22px !important;
-    padding-top: 2px !important;
-    padding-bottom: 2px !important;
-    padding-left: 6px !important;
-    padding-right: 6px !important;
-    font-size: 12px !important;
-  }
-  #trayScanModal_DayPlanning input.form-control {
-    height: 22px !important;
-    padding: 2px 6px !important;
-    font-size: 12px !important;
-  }
-  .tray-scan-modal-DayPlanning {
-    display: none;
-    position: fixed;
-    top: 40px;
-    right: 20px;
-    width: 600px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    padding: 20px;
-    z-index: 10000;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-  .tray-scan-modal-DayPlanning.open {
-    display: block;
-  }
-  .tray-scan-close-readonly {
-    position: absolute;
-    top: 18px;
-    right: 10px;
-    font-size: 24px;
-    font-weight: bold;
-    cursor: pointer;
-    color: #d9534f;
-  }
-  #trayScanDetails.table-grid > div {
-    overflow: visible !important;
-    min-width: 0 !important;
-    word-break: break-all;
-  }
-  .tray-scan-modal h5 {
-    text-align: center !important;
-    margin: 0 auto 8px auto !important;
-    font-size: 1.15rem !important;
-    font-weight: 600 !important;
-    width: 100%;
-    display: block;
-  }
-  #trayScanDetails.table-grid > div.tray-validation-status-header {
-    background-color: #e0f7fa !important;
-    font-weight: bold !important;
-    color: #028084 !important;
-  }
-  #trayScanDetails.table-grid > div.tray-validation-status-cell {
-    background-color: #f1fcff !important;
-    font-weight: bold !important;
-    color: #028084 !important;
-  }
-  /* Modal header improvements */
-  .modal-top-header {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #e9ecef;
-    margin-bottom: 20px;
-    margin-top: 15px;
-  }
+.readonly-modal-header .user-profile {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
 
-  /* Button styling improvements */
-  #trayValidateBtn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #f5faff;
-    border: 1px solid #007bff;
-    color: #007bff;
-    border-radius: 25px;
-    padding: 8px 18px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
+#modalModelNo_DayPlanning {
+  margin-top: 10px !important;
+  display: inline-block;
+  font-weight: 600;
+  color: #028084;
+}
 
-  #trayValidateBtn:hover {
-    background: #e3f2fd;
-    border-color: #0056b3;
-    color: #0056b3;
-    transform: translateY(-1px);
-  }
+/* Dim or blur main content when read-only tray scan modal is open */
+.tray-scan-modal-DayPlanning.open ~ .content-wrapper {
+  opacity: 0.3;
+  pointer-events: none;
+  /* For blur effect, use the next line instead of opacity: */
+  /* filter: blur(2px); */
+}
 
-  #trayScanRedoBtn {
-    width: 32px;
-    height: 32px;
-    cursor: pointer;
-    border-radius: 6px;
-    padding: 4px;
-    transition: all 0.2s ease;
-  }
+/* Shrink table row height in read-only tray scan modal */
+#trayScanModal_DayPlanning table tr,
+#trayScanModal_DayPlanning table td,
+#trayScanModal_DayPlanning table th {
+  height: 22px !important;
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+  font-size: 12px !important;
+}
 
-  #trayScanRedoBtn:hover {
-    background: rgba(0, 0, 0, 0.1);
-    transform: scale(1.1);
-  }
+#trayScanModal_DayPlanning input.form-control {
+  height: 22px !important;
+  padding: 2px 6px !important;
+  font-size: 12px !important;
+}
 
-  /* Error message styling */
-  #trayErrorMessage {
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    color: #721c24;
-    padding: 12px 16px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    font-size: 12px;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
+.tray-scan-modal-DayPlanning {
+  display: none;
+  position: fixed;
+  top: 40px;
+  right: 20px;
+  width: 600px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 20px;
+  z-index: 10000;
+  max-height: 90vh;
+  overflow-y: auto;
+}
 
-  /* Override grid display for table layout */
-  #trayScanDetails_DayPlanning.table-grid {
-    display: block !important;    /* Override grid display */
-    grid-template-columns: none !important;
-    gap: 0 !important;
-    max-height: none !important;
-    overflow-y: visible !important;
-    padding-right: 0;
-    margin-top: 0;
-    background: #fff;
-    position: relative;
-  }
+.tray-scan-modal-DayPlanning.open {
+  display: block;
+}
 
-  /* Remove grid cell styling when using table */
-  #trayScanDetails_DayPlanning.table-grid > div {
-    display: none !important;     /* Hide grid divs when table is used */
-  }
+.tray-scan-close-readonly {
+  position: absolute;
+  top: 18px;
+  right: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #d9534f;
+}
+
+#trayScanDetails.table-grid > div {
+  overflow: visible !important;
+  min-width: 0 !important;
+  word-break: break-all;
+}
+
+.tray-scan-modal h5 {
+  text-align: center !important;
+  margin: 0 auto 8px auto !important;
+  font-size: 1.15rem !important;
+  font-weight: 600 !important;
+  width: 100%;
+  display: block;
+}
+
+#trayScanDetails.table-grid > div.tray-validation-status-header {
+  background-color: #e0f7fa !important;
+  font-weight: bold !important;
+  color: #028084 !important;
+}
+
+#trayScanDetails.table-grid > div.tray-validation-status-cell {
+  background-color: #f1fcff !important;
+  font-weight: bold !important;
+  color: #028084 !important;
+}
+
+/* Modal header improvements */
+.modal-top-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e9ecef;
+  margin-bottom: 20px;
+  margin-top: 15px;
+}
+
+/* Button styling improvements */
+#trayValidateBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f5faff;
+  border: 1px solid #007bff;
+  color: #007bff;
+  border-radius: 25px;
+  padding: 8px 18px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#trayValidateBtn:hover {
+  background: #e3f2fd;
+  border-color: #0056b3;
+  color: #0056b3;
+  transform: translateY(-1px);
+}
+
+#trayScanRedoBtn {
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 4px;
+  transition: all 0.2s ease;
+}
+
+#trayScanRedoBtn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  transform: scale(1.1);
+}
+
+/* Error message styling */
+#trayErrorMessage {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-size: 12px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Override grid display for table layout */
+#trayScanDetails_DayPlanning.table-grid {
+  display: block !important;    /* Override grid display */
+  grid-template-columns: none !important;
+  gap: 0 !important;
+  max-height: none !important;
+  overflow-y: visible !important;
+  padding-right: 0;
+  margin-top: 0;
+  background: #fff;
+  position: relative;
+}
+
+/* Remove grid cell styling when using table */
+#trayScanDetails_DayPlanning.table-grid > div {
+  display: none !important;     /* Hide grid divs when table is used */
+}
 
 /* Professional Validation Status Icons Styling */
 .validation-status {
@@ -625,7 +886,43 @@ transition: background 0.3s;
     font-size: 14px !important;
     font-weight: 500 !important;
   }
+  
+  .content-wrapper,
+  .row,
+  .col-12,
+  .grid-margin,
+  .stretch-card,
+  .card,
+  .card-body,
+  .table-responsive,
+  #order-listing {
+    max-width: 1400px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    width: 100% !important;
+  }
+  
+  .card {
+    min-height: 700px !important;
+  }
+  
+  .card-body {
+    min-height: 650px !important;
+    padding: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  #order-listing tr,
+  #order-listing td,
+  #order-listing th {
+    height: 44px !important;
+    min-height: 44px !important;
+  }
 }
+
 @media (min-width: 600px) and (max-width: 1024px) {
   #order-listing,
   #order-listing th,
@@ -641,516 +938,462 @@ transition: background 0.3s;
   font-size: 12px !important;
   font-weight: 600 !important;
 }
- body.sidebar-icon-only .main-panel,
-    body.sidebar-icon-only .content-wrapper,
-    body.sidebar-icon-only .card,
-    body.sidebar-icon-only .card-body,
-    body.sidebar-icon-only .table-responsive {
-      margin-left: 0 !important;
-      padding-left: 0 !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      box-sizing: border-box !important;
-    }
-    
-    .content-wrapper,
-    .card,
-    .card-body,
-    .table-responsive {
-      width: 100% !important;
-      max-width: 100% !important;
-      margin-right: 0 !important;
-      /* padding-right: 0 !important; */
-      box-sizing: border-box !important;
-    }
-  @media (min-width: 1800px) and (max-width: 2000px) and (min-height: 1100px) and (max-height: 1300px) {
-    .content-wrapper,
-    .row,
-    .col-12,
-    .grid-margin,
-    .stretch-card,
-    .card,
-    .card-body,
-    .table-responsive,
-    #order-listing {
-      max-width: 1400px !important;
-      margin-left: auto !important;
-      margin-right: auto !important;
-      width: 100% !important;
-    }
-    .card {
-      min-height: 700px !important;
-    }
-    .card-body {
-      min-height: 650px !important;
-      padding: 0 !important;
-      margin-right: 0 !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      box-sizing: border-box !important;
-    }
-    #order-listing tr,
-    #order-listing td,
-    #order-listing th {
-      height: 44px !important;
-      min-height: 44px !important;
-    }
-  }
-  
-  /* Remove right space after the table and make table stretch fully */
-  .content-wrapper,
-  .row,
-  .col-12,
-  .grid-margin,
-  .stretch-card,
-  .card,
-  .card-body,
-  .table-responsive,
-  #order-listing {
-    margin-right: 0 !important;
-    padding-right: 0 !important;
-    box-sizing: border-box !important;
-  }
-  
-  body, html {
-    overflow-x: hidden !important;
-  }
-  
-  /* Remove left/right padding from .row and .col-12 if any */
-  .row,
-  .col-12 {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-  
-  /* Remove min-width from table if not needed */
-  #order-listing {
-    min-width: 0 !important;
-    min-width: unset !important;
-    max-width: 100% !important;
-    margin-bottom: 0 !important;
-  }
-  
-  /* Main panel and content wrapper base */
-  .main-panel,
-  .content-wrapper {
-    padding: 0 !important;
-    margin: 0 !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100vw !important;
-    min-height: 0 !important;
-    box-sizing: border-box !important;
-  }
-  
-  /* White Container - behind the table */
-  .content-wrapper {
-    display: flex;
+
+body.sidebar-icon-only .main-panel,
+body.sidebar-icon-only .content-wrapper,
+body.sidebar-icon-only .card,
+body.sidebar-icon-only .card-body,
+body.sidebar-icon-only .table-responsive {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.content-wrapper,
+.card,
+.card-body,
+.table-responsive {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-right: 0 !important;
+  /* padding-right: 0 !important; */
+  box-sizing: border-box !important;
+}
+
+/* Remove right space after the table and make table stretch fully */
+.content-wrapper,
+.row,
+.col-12,
+.grid-margin,
+.stretch-card,
+.card,
+.card-body,
+.table-responsive,
+#order-listing {
+  margin-right: 0 !important;
+  padding-right: 0 !important;
+  box-sizing: border-box !important;
+}
+
+body, html {
+  overflow-x: hidden !important;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Remove left/right padding from .row and .col-12 if any */
+.row,
+.col-12 {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Remove min-width from table if not needed */
+#order-listing {
+  min-width: 0 !important;
+  min-width: unset !important;
+  max-width: 100% !important;
+  margin-bottom: 0 !important;
+  border-collapse: collapse;
+}
+
+#order-listing th,
+#order-listing td {
+  border-right: 1px solid #d1d1d1;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 12px;
+}
+
+#order-listing th:last-child,
+#order-listing td:last-child {
+  border-right: none;
+}
+
+#order-listing tr,
+#order-listing td,
+#order-listing th {
+  height: 20px !important;
+  padding: 4px 8px !important;
+}
+
+/* Main panel and content wrapper base */
+.main-panel,
+.content-wrapper {
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100vw !important;
+  min-height: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* White Container - behind the table */
+.content-wrapper {
+  display: flex;
   flex-direction: column;
   min-height: 100vh; 
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    padding-left: 2px !important;
-    transition: opacity 0.3s ease;
-    flex: 1;
-   overflow-y: visible !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-left: 2px !important;
+  transition: opacity 0.3s ease;
+  flex: 1;
+  overflow-y: visible !important;
   overflow-x: visible !important;
-    transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease;
+  padding-bottom: 20px !important; /* Reduce space above footer */
+}
 
+@media (max-width: 600px) {
+  .content-wrapper {
+    padding-left: 8px !important;
   }
-  
-  @media (max-width: 600px) {
-    .content-wrapper {
-      padding-left: 8px !important;
-    }
-  }
-  
-  /* Title spacing */
-  .card-body > h5.text-left.mt-0.mb-4 {
-margin-bottom: 10px !important;    
-margin-top: 10px !important;
-    padding-bottom: 0 !important;
-    margin-left: 5px !important;
-  }
-  .content-wrapper > h5.text-left.mt-0.mb-4 {
-    margin-top: -50px !important;
-    margin-bottom: -5px !important;
-    margin-left: -15px !important;
-  }
-  
- #order-listing thead th {
+}
+
+/* Title spacing */
+.card-body > h5.text-left.mt-0.mb-4 {
+  margin-bottom: 10px !important;    
+  margin-top: 10px !important;
+  padding-bottom: 0 !important;
+  margin-left: 5px !important;
+}
+
+.content-wrapper > h5.text-left.mt-0.mb-4 {
+  margin-top: -50px !important;
+  margin-bottom: -5px !important;
+  margin-left: -15px !important;
+}
+
+#order-listing thead th {
   height: 38px !important; /* Increase as needed */
   background: #028084 !important; /* existing bg */
   color: #e5fcff !important;      /* existing color */
   vertical-align: middle !important;
   font-size: 13px !important; /* Adjust font size */
-  
 }
-thead th {
-  height: 38px !important; /* Increase as needed */
-  background: #028084 !important; /* existing bg */
-  color: #e5fcff !important;      /* existing color */
-  vertical-align: middle !important;
-  
+
+.tray-scan-modal,
+.new-popup-modal {
+  position: fixed;
+  top: 0;
+  width: 400px;
+  height: 100%;
+  background: white;
+  box-shadow: -3px 0 10px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+  transition: right 0.3s ease, width 0.3s ease, padding 0.3s ease;
+  padding: 20px;
+  font-family: Arial, sans-serif;
 }
-    /* --- DP_PickTable: Match DP_Completed_Table style --- */
-  #order-listing {
-    border-collapse: collapse;
-  }
-  #order-listing th,
-  #order-listing td {
-    border-right: 1px solid #d1d1d1;
-    border-bottom: 1px solid #e0e0e0;
-    font-size: 12px;
-  }
-  #order-listing th:last-child,
-  #order-listing td:last-child {
-    border-right: none;
-  }
-  #order-listing tr,
-  #order-listing td,
-  #order-listing th {
-    height: 20px !important;
-    padding: 4px 8px !important;
-  }
-  .content-wrapper {
-    transition: opacity 0.3s ease;
-    padding-bottom: 20px !important; /* Reduce space above footer */
-  }
+
+.tray-scan-modal {
+  right: -500px; /* must match the new width above to stay hidden properly */
+  z-index: 9999;
+}
+
+.tray-scan-modal.open {
+  right: 400px; /* When open, sits next to New Popup */
+  width: 600px; /* your desired expanded width */
+  margin-right: 20px;
+}
+
+.new-popup-modal {
+  right: -440px; /* hidden by default */
+  z-index: 10000;
+}
+
+.new-popup-modal.open {
+  right: 0; /* When open, slides in from the right */
+}
+
+.tray-scan-close {
+  position: absolute;
+  right: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#trayScanDetails.table-grid {
+  display: grid !important; /* override any existing grid or flex */
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 0px !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+  padding-right: 10px; /* prevent scrollbar overlay */
+  margin-top: 10px;
+}
+
+/* Sticky header row: first 3 divs inside trayScanDetails */
+#trayScanDetails.table-grid > div:nth-child(-n + 3) {
+  background-color: #e0e0e0;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  align-items: center;
+}
+
+#trayScanModal {
+  border-radius: 12px;
+  max-height: 90vh;
+  top: 40px; /* Moves the entire modal down from the top of the viewport */
+  height: calc(100% - 40px); /* Keeps height correct */
+}
+
+#trayScanDetails {
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.ms-2{
+  margin-top: 8px;
+}
+
+/* Make each 
+ <p> act like a table cell */
+#trayScanDetails p {
+  margin: 0;
+  padding: 4px 8px;
+  background: #f7f7f7;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* Responsive adjustments for screens below 768px */
+@media (max-width: 767px) {
   .tray-scan-modal,
   .new-popup-modal {
-    position: fixed;
-    top: 0;
-    width: 400px;
-    height: 100%;
-    background: white;
-    box-shadow: -3px 0 10px rgba(0, 0, 0, 0.2);
-    overflow-y: auto;
-    transition: right 0.3s ease, width 0.3s ease, padding 0.3s ease;
-    padding: 20px;
-    font-family: Arial, sans-serif;
+    width: 100%;
+    padding: 10px;
   }
-  .tray-scan-modal {
-    right: -400px; /* hidden by default */
-    z-index: 9999;
-  }
+  
   .tray-scan-modal.open {
-    right: 400px; /* When open, sits next to New Popup */
-  }
-  .new-popup-modal {
-    right: -440px; /* hidden by default */
-    z-index: 10000;
-  }
-  .new-popup-modal.open {
-    right: 0; /* When open, slides in from the right */
-  }
-  .tray-scan-close {
-    position: absolute;
-    right: 10px;
-    font-size: 24px;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  .modal-top-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #ddd;
-    margin-bottom: 12px;
-  }
-  #trayScanDetails.table-grid {
-    display: grid !important; /* override any existing grid or flex */
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 0px !important;
-    max-height: 300px !important;
-    overflow-y: auto !important;
-    padding-right: 10px; /* prevent scrollbar overlay */
-    margin-top: 10px;
-  }
- 
-  /* Sticky header row: first 3 divs inside trayScanDetails */
-  #trayScanDetails.table-grid > div:nth-child(-n + 3) {
-    background-color: #e0e0e0;
-    font-weight: 600;
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    align-items: center;
-  }
-  /* Override only when modal is open */
-  .tray-scan-modal.open {
-    width: 600px; /* your desired expanded width */
-    margin-right: 20px;
-  }
-  /* Keep it hidden with negative offset matching default width */
-  .tray-scan-modal {
-    right: -500px; /* must match the new width above to stay hidden properly */
-  }
-  #trayScanModal {
-    border-radius: 12px;
-    max-height: 90vh;
-    top: 40px; /* Moves the entire modal down from the top of the viewport */
-    height: calc(100% - 40px); /* Keeps height correct */
-  }
-  #trayScanDetails {
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-
-  .ms-2{
-        margin-top: 8px;
-  }
-  /* Make each 
-   <p> act like a table cell */
-  #trayScanDetails p {
-    margin: 0;
-    padding: 4px 8px;
-    background: #f7f7f7;
-    border-radius: 6px;
-    font-size: 14px;
-  }
-
-  /* Responsive adjustments for screens below 768px */
-  @media (max-width: 767px) {
-    .tray-scan-modal,
-    .new-popup-modal {
-      width: 100%;
-      padding: 10px;
-    }
-     .tray-scan-modal.open {
     width: 100% !important; /* your desired expanded width */
     margin-right: 0px !important;
+    right: 0;
+    top: 0;
   }
-    /* On very small screens, stacking is more appropriate */
-    .tray-scan-modal.open {
-      right: 0;
-      top: 0;
-    }
-    .new-popup-modal.open {
-      right: 0;
-      top: 0;
-      /* Optionally, you can add margin-top to separate them */
-      margin-top: 20px;
-    }
-
-    /* Day Planning Modal Responsive */
-    .tray-scan-modal-DayPlanning {
-      width: 95%;
-      right: 2.5%;
-      top: 60px;
-      max-height: 70vh;
-      padding: 20px;
-    }
-    
-    .modal-top-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 12px;
-    }
-    
-    #trayScanModal_DayPlanning table th,
-    #trayScanModal_DayPlanning table td {
-      padding: 4px 6px;
-      font-size: 12px;
-    }
-  }
-  /* Responsive adjustments for tablets (768px to 1024px) */
-  @media (min-width: 768px) and (max-width: 1024px) {
-    .tray-scan-modal,
-    .new-popup-modal {
-      width: 300px;
-      padding: 15px;
-    }
-    .tray-scan-modal {
-      right: -300px;
-    }
-    .tray-scan-modal.open {
-      right: 300px;
-    }
-    .new-popup-modal {
-      right: -300px;
-    }
-    .new-popup-modal.open {
-      right: 0;
-    }
-
-    .tray-scan-modal-DayPlanning {
-      width: 90%;
-      right: 5%;
-      max-height: 75vh;
-    }
+  
+  /* On very small screens, stacking is more appropriate */
+  .new-popup-modal.open {
+    right: 0;
+    top: 0;
+    /* Optionally, you can add margin-top to separate them */
+    margin-top: 20px;
   }
 
-  @media (min-width: 768px) and (max-width: 1024px) {
-    .table-responsive {
-      max-height: 800px;
-    }
+  /* Day Planning Modal Responsive */
+  .tray-scan-modal-DayPlanning {
+    width: 95%;
+    right: 2.5%;
+    top: 60px;
+    max-height: 70vh;
+    padding: 20px;
   }
-  @media (min-width: 1025px) {
-    .table-responsive {
-      max-height: 100%;
-    }
+  
+  .modal-top-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
-  @media (min-width: 768px) and (max-width: 1024px) {
-    .table-responsive {
-      max-height: 600px;
-    }
+  
+  #trayScanModal_DayPlanning table th,
+  #trayScanModal_DayPlanning table td {
+    padding: 4px 6px;
+    font-size: 12px;
+  }
+}
+
+/* Responsive adjustments for tablets (768px to 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .tray-scan-modal,
+  .new-popup-modal {
+    width: 300px;
+    padding: 15px;
+  }
+  
+  .tray-scan-modal {
+    right: -300px;
+  }
+  
+  .tray-scan-modal.open {
+    right: 300px;
+  }
+  
+  .new-popup-modal {
+    right: -300px;
+  }
+  
+  .new-popup-modal.open {
+    right: 0;
   }
 
-  @media (max-width: 1200px) {
-    .tray-scan-modal-DayPlanning {
-      width: 90%;
-      right: 5%;
-      max-height: 75vh;
-    }
+  .tray-scan-modal-DayPlanning {
+    width: 90%;
+    right: 5%;
+    max-height: 75vh;
   }
+  
+  .table-responsive {
+    max-height: 800px;
+  }
+}
 
+@media (min-width: 1025px) {
   .table-responsive {
     max-height: 100%;
-    overflow-y: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    flex: 1;
   }
-  .table-responsive::-webkit-scrollbar {
-    display: none;
+}
+
+@media (max-width: 1200px) {
+  .tray-scan-modal-DayPlanning {
+    width: 90%;
+    right: 5%;
+    max-height: 75vh;
   }
-  thead th {
-    position: sticky;
-    top: 0;
-    background-color: white;
-    z-index: 10;
-    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
-  }
-  html,
-  body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-  }
-  body {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
-  .content-wrapper {
-    flex: 1;
-    overflow-y: auto;
-    padding-bottom: 70px;
-  }
-  /* Make the table header sticky */
-  thead th {
-    position: sticky;
-    top: 0;
-    background-color: white; /* or your table header bg color */
-    z-index: 10; /* ensure it stays above the table rows */
-    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* optional shadow for better separation */
-  }
-  .card-body {
-    width: 100%;
-    overflow-x: auto;
-    max-height: 400px;
-  }
-  footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 40px;
-  }
-  .btn-twitter.btn-social-icon-text i {
-    margin-right: 0.5rem !important;
-    padding: 0.3rem !important;
-    background: #2e7d32;
-  }
-  .btn-youtube.btn-social-icon-text i {
-    margin-right: 0.5rem !important;
-    padding: 0.3rem !important;
-  }
-  /* Modal styles */
+}
+
+.table-responsive {
+  max-height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  flex: 1;
+}
+
+.table-responsive::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.card-body {
+  width: 100%;
+  overflow-x: auto;
+  max-height: 400px;
+}
+
+footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 40px;
+}
+
+.btn-twitter.btn-social-icon-text i {
+  margin-right: 0.5rem !important;
+  padding: 0.3rem !important;
+  background: #2e7d32;
+}
+
+.btn-youtube.btn-social-icon-text i {
+  margin-right: 0.5rem !important;
+  padding: 0.3rem !important;
+}
+
+/* Modal styles */
+.image-slider-modal {
+  display: none;
+  position: fixed;
+  top: 40px; /* Leaves room at the top */
+  right: 20px;
+  width: 600px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 20px;
+  z-index: 10000;
+  transition: right 0.3s ease;
+}
+
+.image-slider-modal.open {
+  display: block;
+}
+
+.modal-close-BQ {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+}
+
+.modal-close-BQ:hover {
+  color: #333;
+}
+
+/* Slider styles */
+.slider {
+  position: relative;
+  overflow: hidden;
+  height: 350px;
+}
+
+.slides {
+  display: flex;
+  transition: transform 0.5s ease;
+}
+
+.slide {
+  flex: 0 0 100%;
+  box-sizing: border-box;
+  display: none;
+}
+
+.slide.active {
+  display: block;
+}
+
+.slide img {
+  width: 100%;
+  height: 350px;
+  object-fit: cover;
+  display: block;
+}
+
+.prev,
+.next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5);
+  border: none;
+  color: #fff;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 50%;
+  user-select: none;
+}
+
+.prev { left: 10px; }
+.next { right: 10px; }
+
+@media (max-width: 767px) {
   .image-slider-modal {
-    display: none;
-    position: fixed;
-    top: 40px; /* Leaves room at the top */
-    right: 20px;
-    width: 600px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    padding: 20px;
-    z-index: 10000;
-    transition: right 0.3s ease;
-  }
-  .image-slider-modal.open {
-    display: block;
-  }
-  .modal-close-BQ {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 24px;
-    cursor: pointer;
-    color: #666;
-  }
-  .modal-close-BQ:hover {
-    color: #333;
-  }
-  /* Slider styles */
-  .slider {
-    position: relative;
-    overflow: hidden;
-    height: 350px;
-  }
-  .slides {
-    display: flex;
-    transition: transform 0.5s ease;
-  }
-  .slide {
-    flex: 0 0 100%;
-    box-sizing: border-box;
-    display: none;
-  }
-  .slide.active {
-    display: block;
-  }
-  .slide img {
     width: 100%;
-    height: 350px;
-    object-fit: cover;
-    display: block;
+    right: 0;
+    top: 0;
+    border-radius: 0;
+    padding: 10px;
   }
-  .prev,
-  .next {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(0,0,0,0.5);
-    border: none;
-    color: #fff;
-    padding: 8px;
-    cursor: pointer;
-    border-radius: 50%;
-    user-select: none;
-  }
-  .prev { left: 10px; }
-  .next { right: 10px; }
-  @media (max-width: 767px) {
-    .image-slider-modal {
-      width: 100%;
-      right: 0;
-      top: 0;
-      border-radius: 0;
-      padding: 10px;
-    }
-    .slider { height: 250px; }
-    .slide img { height: 250px; }
-  }
- 
+  .slider { height: 250px; }
+  .slide img { height: 250px; }
+}
+
 </style>
 
 <div class="content-wrapper">
@@ -1193,7 +1436,7 @@ thead th {
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Tray Category-Capacity
+                      Tray Cate-Capacity
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
@@ -1254,7 +1497,7 @@ thead th {
                     data-ip-onhold-picking="{{ data.ip_onhold_picking }}"
                       data-model-no="{{ data.model_stock_no__model_no }}">
                     
-                  <td style="position: relative;" {% if data.ip_hold_lot %} class="row-inactive-blur"{% endif %}>
+                  <td {% if data.ip_hold_lot %} class="row-inactive-blur"{% endif %}>
                       <span style="display:flex; align-items:center; gap:6px;">
                         <label class="hold-toggle-switch" style="margin-bottom:0;">
                           {% if not data.ip_hold_lot %}
@@ -1279,7 +1522,7 @@ thead th {
                     <td {% if data.ip_hold_lot %} class="row-inactive-blur" {% endif %}>
                               {{ data.last_process_date_time|date:"Y-m-d" }}<br>
                         <span style="display:inline-block; margin-top:4px;">{{ data.last_process_date_time|date:"h:i A" }}</span>
-                        <td {% if data.ip_hold_lot %} class="row-inactive-blur" {% endif %} style="position: relative;">
+                        <td {% if data.ip_hold_lot %} class="row-inactive-blur" {% endif %} >
                       <span class="model-hover-trigger" style="cursor: pointer;">
                         {{ data.plating_stk_no }}
                         <div class="model-image-tooltip" style="position: absolute; left: 50%; top: 110%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 9999; display: flex; align-items: center; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s;">
@@ -4805,138 +5048,6 @@ function updateUIForBatchRejection(batchId) {
     });
 </script>
 
-  <!-- Script for Model / Stock No - Image Mouse Hover -->
-<script nonce="{{ csp_nonce }}">
-  document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.model-hover-trigger').forEach(function(trigger) {
-      const tooltip = trigger.querySelector('.model-image-tooltip');
-      let currentIndex = 0;
-      let tooltipPinned = false;
-      const images = Array.from(tooltip.querySelectorAll('.img-gallery img'));
-
-      function showImages(start) {
-        images.forEach((img, i) => {
-          img.style.display = (i >= start && i < start + 3) ? 'block' : 'none';
-        });
-      }
-      showImages(currentIndex);
-
-      trigger.addEventListener('mouseenter', function() {
-        if (!tooltipPinned) {
-          tooltip.style.opacity = '1';
-          tooltip.style.pointerEvents = 'auto';
-        }
-      });
-      trigger.addEventListener('mouseleave', function() {
-        if (!tooltipPinned) {
-          tooltip.style.opacity = '0';
-          tooltip.style.pointerEvents = 'none';
-        }
-      });
-      tooltip.addEventListener('mouseenter', function() {
-        if (!tooltipPinned) {
-          tooltip.style.opacity = '1';
-          tooltip.style.pointerEvents = 'auto';
-        }
-      });
-      tooltip.addEventListener('mouseleave', function() {
-        if (!tooltipPinned) {
-          tooltip.style.opacity = '0';
-          tooltip.style.pointerEvents = 'none';
-        }
-      });
-
-      // Pin tooltip on click
-      trigger.addEventListener('click', function(e) {
-        e.preventDefault();
-        tooltipPinned = true;
-        tooltip.style.opacity = '1';
-        tooltip.style.pointerEvents = 'auto';
-      });
-
-      // Unpin tooltip if user clicks outside
-      document.addEventListener('mousedown', function(e) {
-        if (!trigger.contains(e.target) && !tooltip.contains(e.target)) {
-          tooltipPinned = false;
-          tooltip.style.opacity = '0';
-          tooltip.style.pointerEvents = 'none';
-        }
-      });
-
-      tooltip.querySelector('.img-scroll-left').addEventListener('click', function(e) {
-        e.stopPropagation();
-        if (currentIndex > 0) {
-          currentIndex--;
-          showImages(currentIndex);
-        }
-      });
-      tooltip.querySelector('.img-scroll-right').addEventListener('click', function(e) {
-        e.stopPropagation();
-        if (currentIndex < images.length - 3) {
-          currentIndex++;
-          showImages(currentIndex);
-        }
-      });
-
-      // Add click event to images for modal slider
-      images.forEach(function(img, idx) {
-        img.style.cursor = 'pointer';
-        img.addEventListener('click', function(e) {
-          e.stopPropagation();
-          openImageSlider(images.map(i => i.src), idx);
-        });
-      });
-    });
-
-    // Modal slider functions
-    const modal = document.getElementById("imageSliderModal");
-    const closeModal = document.getElementById("closeImageSliderModal");
-    const slidesContainer = modal.querySelector(".slides");
-    let sliderImages = [];
-    let currentSlide = 0;
-
-    function openImageSlider(srcArray, startIdx) {
-      sliderImages = srcArray;
-      slidesContainer.innerHTML = '';
-      sliderImages.forEach(src => {
-        const slide = document.createElement('div');
-        slide.className = 'slide';
-        const img = document.createElement('img');
-        img.src = src;
-        slide.appendChild(img);
-        slidesContainer.appendChild(slide);
-      });
-      currentSlide = startIdx;
-      showSlide(currentSlide);
-      modal.classList.add('open');
-    }
-
-    function showSlide(n) {
-      const slides = slidesContainer.querySelectorAll('.slide');
-      if (!slides.length) return;
-      currentSlide = (n + slides.length) % slides.length;
-      slides.forEach((slide, idx) => {
-        slide.classList.toggle('active', idx === currentSlide);
-      });
-    }
-
-    modal.querySelector("#prevBtn").addEventListener("click", function(e) {
-      e.stopPropagation();
-      showSlide(currentSlide - 1);
-    });
-    modal.querySelector("#nextBtn").addEventListener("click", function(e) {
-      e.stopPropagation();
-      showSlide(currentSlide + 1);
-    });
-    closeModal.addEventListener("click", function() {
-      modal.classList.remove("open");
-    });
-    modal.addEventListener("click", function(e) {
-      if (e.target === modal) modal.classList.remove("open");
-    });
-  });
-</script>
-
 <!-- Active table row highlight -->
 <script nonce="{{ csp_nonce }}">
 // Row highlight & position swap for tray-scan-btn-Jig (like DP_PickTable.html)
@@ -5175,5 +5286,513 @@ document.addEventListener("DOMContentLoaded", function () {
   }, true);
 });
 </script>
+<!-- Script for full-screen image modal -->
+<script nonce="{{ csp_nonce }}">
+document.addEventListener('DOMContentLoaded', function() {
+  // Remove tooltip functionality and add click-to-modal for Plating Stk No
+  document.querySelectorAll('.model-hover-trigger').forEach(function(trigger) {
+    const tooltip = trigger.querySelector('.model-image-tooltip');
+    
+    // Get images from the original element before cloning
+    let imageSources = [];
+    if (tooltip) {
+      const images = tooltip.querySelectorAll('.img-gallery img');
+      imageSources = Array.from(images).map(img => img.src);
+    }
+
+    // Remove all existing event listeners by cloning the element
+    const newTrigger = trigger.cloneNode(true);
+    trigger.parentNode.replaceChild(newTrigger, trigger);
+
+    // Add click event for full-screen modal
+    newTrigger.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      if (imageSources.length > 0) {
+        // Create full-screen image modal
+        showFullScreenImageModal(imageSources, 0);
+      } else {
+        // Fallback: show placeholder or error message
+        showFullScreenImageModal(['/static/assets/images/imagePlaceholder.png'], 0);
+      }
+    });
+
+    // Ensure no hover functionality
+    newTrigger.style.cursor = 'pointer';
+    const newTooltip = newTrigger.querySelector('.model-image-tooltip');
+    if (newTooltip) {
+      newTooltip.style.display = 'none !important';
+      newTooltip.style.opacity = '0 !important';
+      newTooltip.style.visibility = 'hidden !important';
+      newTooltip.style.pointerEvents = 'none !important';
+    }
+  });
+
+  // Function to show full-screen image modal
+  function showFullScreenImageModal(imageSources, currentIndex) {
+    // Remove any existing modal first
+    const existingModal = document.getElementById('fullScreenImageModal');
+    if (existingModal) {
+      existingModal.remove();
+    }
+
+    // Create modal overlay
+    const modalOverlay = document.createElement('div');
+    modalOverlay.id = 'fullScreenImageModal';
+    modalOverlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    `;
+
+    // Create image container
+    const imageContainer = document.createElement('div');
+    imageContainer.style.cssText = `
+      position: relative;
+      max-width: 90vw;
+      max-height: 90vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    `;
+
+    // Create main image
+    const mainImage = document.createElement('img');
+    mainImage.style.cssText = `
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    `;
+    
+    // Add error handling for image loading
+    mainImage.onerror = function() {
+      this.src = '/static/assets/images/imagePlaceholder.png';
+    };
+    
+    mainImage.src = imageSources[currentIndex];
+
+    // Create close button
+    const closeButton = document.createElement('button');
+    closeButton.innerHTML = '&times;';
+    closeButton.style.cssText = `
+      position: absolute;
+      top: -15px;
+      right: -15px;
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 50%;
+      background: #dc3545;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+      transition: all 0.3s ease;
+      z-index: 100000;
+    `;
+
+    // Create info button
+    const infoButton = document.createElement('button');
+    infoButton.innerHTML = '<i class="fa fa-info-circle"></i>';
+    infoButton.style.cssText = `
+      position: absolute;
+      top: -15px;
+      left: -15px;
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 50%;
+      background: #007bff;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+      transition: all 0.3s ease;
+      z-index: 100000;
+    `;
+
+    // Create navigation buttons if multiple images
+    let prevButton, nextButton, imageCounter;
+    if (imageSources.length > 1) {
+      // Previous button
+      prevButton = document.createElement('button');
+      prevButton.innerHTML = '&#8249;';
+      prevButton.style.cssText = `
+        position: absolute;
+        left: -60px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 50px;
+        height: 50px;
+        border: none;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.9);
+        color: #333;
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        z-index: 100000;
+      `;
+
+      // Next button
+      nextButton = document.createElement('button');
+      nextButton.innerHTML = '&#8250;';
+      nextButton.style.cssText = `
+        position: absolute;
+        right: -60px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 50px;
+        height: 50px;
+        border: none;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.9);
+        color: #333;
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        z-index: 100000;
+      `;
+
+      // Image counter
+      imageCounter = document.createElement('div');
+      imageCounter.style.cssText = `
+        position: absolute;
+        bottom: -40px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+      `;
+      imageCounter.textContent = `${currentIndex + 1} / ${imageSources.length}`;
+    }
+
+    // Add hover effects
+    closeButton.addEventListener('mouseenter', function() {
+      this.style.background = '#c82333';
+      this.style.transform = 'scale(1.1)';
+    });
+    closeButton.addEventListener('mouseleave', function() {
+      this.style.background = '#dc3545';
+      this.style.transform = 'scale(1)';
+    });
+
+    infoButton.addEventListener('mouseenter', function() {
+      this.style.background = '#0056b3';
+      this.style.transform = 'scale(1.1)';
+    });
+    infoButton.addEventListener('mouseleave', function() {
+      this.style.background = '#007bff';
+      this.style.transform = 'scale(1)';
+    });
+
+    // Assemble modal
+    imageContainer.appendChild(mainImage);
+    imageContainer.appendChild(closeButton);
+    imageContainer.appendChild(infoButton);
+
+    if (imageSources.length > 1) {
+      imageContainer.appendChild(prevButton);
+      imageContainer.appendChild(nextButton);
+      imageContainer.appendChild(imageCounter);
+    }
+
+    modalOverlay.appendChild(imageContainer);
+    document.body.appendChild(modalOverlay);
+
+    // Show modal with animation
+    setTimeout(() => {
+      modalOverlay.style.opacity = '1';
+    }, 10);
+
+    // Navigation functionality
+    let current = currentIndex;
+    
+    function updateImage() {
+      mainImage.src = imageSources[current];
+      mainImage.onerror = function() {
+        this.src = '/static/assets/images/imagePlaceholder.png';
+      };
+      if (imageCounter) {
+        imageCounter.textContent = `${current + 1} / ${imageSources.length}`;
+      }
+    }
+
+    if (prevButton) {
+      prevButton.addEventListener('click', function() {
+        current = (current - 1 + imageSources.length) % imageSources.length;
+        updateImage();
+      });
+    }
+
+    if (nextButton) {
+      nextButton.addEventListener('click', function() {
+        current = (current + 1) % imageSources.length;
+        updateImage();
+      });
+    }
+
+    // Close functionality
+    function closeModal() {
+      modalOverlay.style.opacity = '0';
+      setTimeout(() => {
+        if (modalOverlay.parentNode) {
+          modalOverlay.parentNode.removeChild(modalOverlay);
+        }
+      }, 300);
+    }
+
+    closeButton.addEventListener('click', closeModal);
+
+    // Info button functionality
+    infoButton.addEventListener('click', function() {
+      alert('Image Viewer\n\n• Click arrows to navigate between images\n• Press ESC or click X to close\n• Click outside image to close');
+    });
+
+    // Close on overlay click
+    modalOverlay.addEventListener('click', function(e) {
+      if (e.target === modalOverlay) {
+        closeModal();
+      }
+    });
+
+    // Keyboard navigation
+    function handleKeyDown(e) {
+      switch(e.key) {
+        case 'Escape':
+          closeModal();
+          break;
+        case 'ArrowLeft':
+          if (prevButton) {
+            current = (current - 1 + imageSources.length) % imageSources.length;
+            updateImage();
+          }
+          break;
+        case 'ArrowRight':
+          if (nextButton) {
+            current = (current + 1) % imageSources.length;
+            updateImage();
+          }
+          break;
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup on close
+    modalOverlay.addEventListener('transitionend', function() {
+      if (modalOverlay.style.opacity === '0') {
+        document.removeEventListener('keydown', handleKeyDown);
+      }
+    });
+  }
+});
+</script>
+<!-- Script for tooltips and hover functionality -->
+<script nonce="{{ csp_nonce }}">
+document.addEventListener('DOMContentLoaded', function() {
+  // Handle close and info button clicks for tooltips
+  document.querySelectorAll('.model-hover-trigger').forEach(function(trigger) {
+    const tooltip = trigger.querySelector('.model-image-tooltip');
+    
+    if (tooltip) {
+      // Handle close button click (top-right area)
+      tooltip.addEventListener('click', function(e) {
+        const rect = this.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        // Close button area (top-right 60px x 60px)
+        if (x > rect.width - 60 && y < 60) {
+          e.stopPropagation();
+          trigger.classList.add('tooltip-closed');
+          
+          // Remove the class after animation to allow hover again
+          setTimeout(() => {
+            trigger.classList.remove('tooltip-closed');
+          }, 300);
+        }
+        
+        // Info button area (top-left 60px x 60px)
+        if (x < 60 && y < 60) {
+          e.stopPropagation();
+          alert('Image Viewer\n\n• Hover to view full-size image\n• Click X to close\n• Move mouse away to hide');
+        }
+      });
+      
+      // Prevent tooltip from closing when clicking on the image
+      tooltip.addEventListener('click', function(e) {
+        e.stopPropagation();
+      });
+    }
+  });
+  
+  // Close tooltip when pressing ESC key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.model-hover-trigger').forEach(function(trigger) {
+        trigger.classList.add('tooltip-closed');
+        setTimeout(() => {
+          trigger.classList.remove('tooltip-closed');
+        }, 300);
+      });
+    }
+  });
+  
+  // Close tooltip when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.model-hover-trigger')) {
+      document.querySelectorAll('.model-hover-trigger').forEach(function(trigger) {
+        trigger.classList.add('tooltip-closed');
+        setTimeout(() => {
+          trigger.classList.remove('tooltip-closed');
+        }, 300);
+      });
+    }
+  });
+});
+</script>
+<!-- script for hover functionality without click -->
+<script nonce="{{ csp_nonce }}">
+document.addEventListener('DOMContentLoaded', function() {
+  // Remove click functionality from Plating Stk No - only keep hover
+  document.querySelectorAll('.model-hover-trigger').forEach(function(trigger) {
+    const tooltip = trigger.querySelector('.model-image-tooltip');
+    
+    // Get images from the original element
+    let imageSources = [];
+    if (tooltip) {
+      const images = tooltip.querySelectorAll('.img-gallery img');
+      imageSources = Array.from(images).map(img => img.src);
+    }
+
+    // Remove all existing event listeners by cloning the element
+    const newTrigger = trigger.cloneNode(true);
+    trigger.parentNode.replaceChild(newTrigger, trigger);
+
+    // REMOVE CLICK EVENT - Only keep hover functionality
+    // Keep cursor as default, not pointer
+    newTrigger.style.cursor = 'default';
+    
+    // Ensure tooltip works on hover only
+    const newTooltip = newTrigger.querySelector('.model-image-tooltip');
+    if (newTooltip) {
+      newTooltip.style.display = 'none';
+      newTooltip.style.opacity = '0';
+      newTooltip.style.visibility = 'hidden';
+      newTooltip.style.pointerEvents = 'none';
+    }
+    
+    // Add hover events back
+    newTrigger.addEventListener('mouseenter', function() {
+      if (newTooltip) {
+        newTooltip.style.display = 'flex';
+        newTooltip.style.opacity = '1';
+        newTooltip.style.visibility = 'visible';
+        newTooltip.style.pointerEvents = 'auto';
+      }
+    });
+    
+    newTrigger.addEventListener('mouseleave', function() {
+      if (newTooltip) {
+        newTooltip.style.display = 'none';
+        newTooltip.style.opacity = '0';
+        newTooltip.style.visibility = 'hidden';
+        newTooltip.style.pointerEvents = 'none';
+      }
+    });
+  });
+});
+</script>
+
+
+<!-- Script for model hover functionality with backdrop -->
+<script nonce="{{ csp_nonce }}">
+document.addEventListener('DOMContentLoaded', function() {
+  // Store original styles - minimal storage needed
+  let originalStyles = new Map();
+  
+  document.querySelectorAll('.model-hover-trigger').forEach(function(trigger) {
+    const tooltip = trigger.querySelector('.model-image-tooltip');
+    
+    trigger.addEventListener('mouseenter', function() {
+      // Only handle frozen columns z-index to ensure tooltip appears above
+      const frozenElements = document.querySelectorAll(`
+        #order-listing th:nth-child(1),
+        #order-listing td:nth-child(1),
+        #order-listing th:nth-child(3),
+        #order-listing td:nth-child(3)
+      `);
+      
+      frozenElements.forEach(function(element) {
+        // Store and lower only the z-index, keep position intact
+        originalStyles.set(element, {
+          zIndex: element.style.zIndex
+        });
+        element.style.zIndex = '1';
+      });
+      
+      // Show tooltip with highest z-index - no backdrop needed
+      if (tooltip) {
+        tooltip.style.display = 'flex';
+        tooltip.style.opacity = '1';
+        tooltip.style.visibility = 'visible';
+        tooltip.style.pointerEvents = 'auto';
+        tooltip.style.zIndex = '100001'; // Ensure tooltip is above everything
+      }
+    });
+    
+    trigger.addEventListener('mouseleave', function() {
+      // Restore only z-index values
+      originalStyles.forEach(function(styles, element) {
+        element.style.zIndex = styles.zIndex || '';
+      });
+      originalStyles.clear();
+      
+      // Hide tooltip
+      if (tooltip) {
+        tooltip.style.display = 'none';
+        tooltip.style.opacity = '0';
+        tooltip.style.visibility = 'hidden';
+        tooltip.style.pointerEvents = 'none';
+      }
+    });
+  });
+});
+</script>
+
 
 {% endblock %} {% endblock content %}

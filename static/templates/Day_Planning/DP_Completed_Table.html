@@ -5,6 +5,65 @@
  {% block content %}
 
 <style>
+  /* Professional table header styling with proper text wrapping */
+#order-listing th {
+  position: relative;
+  padding: 8px 12px 8px 16px !important;
+  text-align: left !important;
+  vertical-align: middle !important;
+  white-space: normal !important;
+  line-height: 1.3 !important;
+  word-break: keep-all !important;
+  hyphens: none !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  background: #028084 !important;
+  color: #e5fcff !important;
+  border-bottom: 2.5px solid #bdbdbd !important;
+  min-width: 80px;
+  max-width: 140px;
+}
+
+/* Specific width adjustments for better text wrapping */
+#order-listing th:nth-child(1) { min-width: 60px; max-width: 80px; }   /* S.No */
+#order-listing th:nth-child(2) { min-width: 90px; max-width: 110px; }  /* Last Updated */
+#order-listing th:nth-child(3) { min-width: 100px; max-width: 120px; } /* Plating Stk No */
+#order-listing th:nth-child(4) { min-width: 90px; max-width: 130px; } /* Polishing Stk No */
+#order-listing th:nth-child(5) { min-width: 90px; max-width: 110px; }  /* Plating Color */
+#order-listing th:nth-child(6) { min-width: 100px; max-width: 100px; }  /* Category */
+#order-listing th:nth-child(7) { min-width: 90px; max-width: 110px; }  /* Polish Finish */
+#order-listing th:nth-child(8) { min-width: 90px; max-width: 90px; }   /* Version */
+#order-listing th:nth-child(9) { min-width: 110px; max-width: 140px; } /* Tray Cate-Capacity */
+#order-listing th:nth-child(10) { min-width: 90px; max-width: 90px; }  /* Source */
+#order-listing th:nth-child(11) { min-width: 80px; max-width: 100px; } /* No of Tray */
+#order-listing th:nth-child(12) { min-width: 90px; max-width: 130px; } /* Input Qty */
+#order-listing th:nth-child(13) { min-width: 90px; max-width: 110px; } /* Process Status */
+#order-ling th:nth-child(14) { min-width: 80px; max-width: 100px; } /* Action */
+#order-listing th:nth-child(15) { min-width: 90px; max-width: 110px; } /* Lot Status */
+#order-listing th:nth-child(16) { min-width: 100px; max-width: 120px; } /* Current Stage */
+#order-listing th:nth-child(17) { min-width: 90px; max-width: 100px; } /* Remarks */
+ 
+/* Right-align filter icons */
+#order-listing th .fa-filter {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+#order-listing th .fa-filter:hover {
+  opacity: 1;
+}
+
+/* Better text wrapping for specific headers */
+#order-listing th {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
 /* Zoom animation for modal user profile image */
 .modal-top-header img {
   transition: transform 0.3s cubic-bezier(.4,2,.3,1), box-shadow 0.3s;
@@ -142,19 +201,67 @@
   }
 .pagination-wrapper {
   position: fixed !important;
-  left: 0;
-  bottom: 0;
-  width: 100vw;
-  background: #fff;
-  z-index: 1002;
-  box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
-  padding: 10px 0 0 0;
-  display: flex;
-  justify-content: center;
-  margin: 0 !important;
-  border-top: 1px solid #e0e0e0;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  bottom: 32px !important;
+  width: 350px !important;
+  max-width: 85vw !important;
+  z-index: 1001 !important;
+  background: rgba(245, 247, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border-top: 1px solid #e0e0e0 !important;
+  border-radius: 8px 8px 0 0 !important;
+  padding: 8px 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.08) !important;
 }
-/* ...existing code... */
+
+/* Remove sidebar adjustments since we're centering it */
+body:not(.sidebar-icon-only) .pagination-wrapper {
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 350px !important;
+}
+
+.sidebar-icon-only .pagination-wrapper {
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 350px !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .pagination-wrapper {
+    width: 280px !important;
+    max-width: 90vw !important;
+  }
+}
+
+/* Add bottom padding to table container to prevent overlap */
+.table-responsive {
+  padding-bottom: 80px !important; /* Space for fixed pagination */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .pagination-wrapper {
+    left: 0 !important; /* Full width on mobile */
+    bottom: 32px !important;
+    padding: 8px 0 !important;
+  }
+  
+  .table-responsive {
+    padding-bottom: 70px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .pagination-wrapper {
+    bottom: 40px !important; /* Account for mobile footer height */
+    padding: 4px 0 !important;
+  }
+}
 
 @media (max-width: 600px) {
   .pagination-wrapper {
@@ -856,42 +963,9 @@ height: 20px !important;
 padding: 4px 8px !important;
 }
 
-.pagination-wrapper {
-      background: #fff;
-      margin-bottom: 0 !important;
-      margin-top: -25px !important;
-      margin-right: -25px !important;
-      right: 205px !important;
-      margin-left: 0 !important;
-      padding-top: 0 !important;
-      padding-bottom: 0 !important;
-      position: static  !important;
-      z-index: 2;
-      display: flex;
-      justify-content: center;
-      width: 100% !important;
-      box-sizing: border-box !important;
-      margin-bottom: 0 !important;
-      padding-bottom: 0 !important;
-      
-    }
-  .pagination {
-  font-size: 13px !important;
-  gap: 2px !important;
-}
 
-.pagination .page-link {
-  padding: 2px 8px !important;
-  font-size: 13px !important;
-  min-width: 28px !important;
-  min-height: 28px !important;
-}
-@media (max-width: 600px) {
-  .pagination-wrapper {
-    margin-left: 4px !important;
-    
-  }
-}
+
+
   
   .table-responsive {
 max-height: 500px;
@@ -1368,7 +1442,7 @@ display: none; /* Chrome, Safari, Opera */
                 <!-- No buttons for read-only modal -->
               </div>
             </div>
-         <!-- Pagination Section -->
+        <!-- Pagination Section -->
             <div class="pagination-wrapper">
               <nav aria-label="Page navigation">
                                 <ul class="pagination justify-content-end mb-0">
@@ -1428,9 +1502,11 @@ display: none; /* Chrome, Safari, Opera */
               </nav>
             </div>
         </div>
+        
       </div>
     </div>
   </div>
+   
 
    <script nonce="{{ csp_nonce }}">
     document.addEventListener("DOMContentLoaded", function () {

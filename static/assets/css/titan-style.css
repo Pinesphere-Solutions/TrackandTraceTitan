@@ -1087,11 +1087,11 @@ body {
 }
 .table-header h2 .icon {
   margin-right: 0.5rem;
-}
+}/* 
 .table-container {
   overflow-y: hidden;
   max-height: 320px;
-}
+} */
 .data-table {
   width: 100%;
   border-collapse: collapse; /* Collapse borders for grid view */
