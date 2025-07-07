@@ -7,11 +7,13 @@ from django.contrib.auth.models import User
 from django.utils.timezone import now
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
+from django.contrib.auth.models import User
 
 # Create your models here.
 class ModelImage(models.Model):
   #give master_image field for mulitple image slection
     master_image = models.ImageField(upload_to='model_images/')
+    date_time = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"Master_Image {self.id}"
@@ -24,6 +26,8 @@ class PolishFinishType(models.Model):
         default="DefaultInternal",
         help_text="Internal name of the Polish Finish"
     )
+    date_time = models.DateTimeField(default=timezone.now)
+
 
     def __str__(self):
         return self.polish_finish 
@@ -32,13 +36,13 @@ class Plating_Color(models.Model):
     #need choices for plating color field -dropdown field
     plating_color = models.CharField(max_length=255, unique=True, help_text="Plating color")
     plating_color_internal = models.CharField(
-        max_length=10, 
-        null=True,
-        blank=True,
+        max_length=10,
+        default="B",  
         help_text="Short internal code used in stock number (e.g., B for Black)", 
     )
     jig_unload_zone_1 = models.BooleanField(default=False, help_text="Indicates if Jig Unload Zone 1 is active")
     jig_unload_zone_2 = models.BooleanField(default=False, help_text="Indicates if Jig Unload Zone 2 is active")
+    date_time = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return self.plating_color
@@ -47,6 +51,7 @@ class Plating_Color(models.Model):
 class Version(models.Model):
     version_name = models.CharField(max_length=255, unique=True, help_text="Version name")
     version_internal = models.CharField(max_length=255, unique=True,null=True,blank=True, help_text="Version Internal")
+    date_time = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return self.version_name
@@ -55,6 +60,7 @@ class TrayType(models.Model):
     tray_type = models.CharField(max_length=255, unique=True, help_text="Type of tray")
     tray_capacity = models.IntegerField(help_text="Number of watches the tray can hold")  
     tray_color = models.CharField(max_length=255, help_text="Color of the tray",blank=True, null=True)  
+    date_time = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return self.tray_type
@@ -62,18 +68,21 @@ class TrayType(models.Model):
 class Vendor(models.Model):
     vendor_name = models.CharField(max_length=255, unique=True, help_text="Name of the vendor")
     vendor_internal = models.CharField(max_length=255, unique=True, help_text="Internal name of the vendor")
+    date_time = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return self.vendor_name
 
 class Location(models.Model):
     location_name = models.CharField(max_length=255, unique=True, help_text="Name of the location")
+    date_time = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return self.location_name
     
 class Category(models.Model):
     category_name = models.CharField(max_length=255, unique=True, help_text="Name of the location")
+    date_time = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return self.category_name
@@ -88,9 +97,10 @@ class ModelMaster(models.Model):
     tray_capacity = models.IntegerField(null=True, blank=True)
     images = models.ManyToManyField(ModelImage, blank=True)  # Allows multiple images
     vendor_internal = models.ForeignKey(Vendor, on_delete=models.SET_NULL, null=True, blank=True)
-    brand = models.CharField(max_length=100)
-    gender = models.CharField(max_length=50)
+    brand = models.CharField(max_length=100,null=True, blank=True)
+    gender = models.CharField(max_length=50,null=True, blank=True)
     wiping_required = models.BooleanField(default=False)
+    date_time = models.DateTimeField(default=timezone.now)
  
     def __str__(self):
         return self.model_no
@@ -114,8 +124,6 @@ class ModelMasterCreation(models.Model):
     current_batch_quantity = models.IntegerField(default=0)  # not in use
     no_of_trays = models.IntegerField(null=True, blank=True)  # Calculated field
     vendor_internal = models.CharField(max_length=100,null=True, blank=True)
-    brand = models.CharField(max_length=100)
-    gender = models.CharField(max_length=50)
     sequence_number = models.IntegerField(default=0)  # Add this field
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True)  # Allow null values
     Moved_to_D_Picker = models.BooleanField(default=False, help_text="Moved to D Picker")
@@ -152,8 +160,6 @@ class ModelMasterCreation(models.Model):
             self.tray_type = ""
         
         self.tray_capacity = model_data.tray_capacity
-        self.brand = model_data.brand
-        self.gender = model_data.gender
 
         super().save(*args, **kwargs)
         self.images.set(model_data.images.all())
@@ -175,9 +181,16 @@ class TrayId(models.Model):
     date = models.DateTimeField(default=timezone.now)
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     top_tray = models.BooleanField(default=False)
-    
+    ip_top_tray = models.BooleanField(default=False)
+    ip_top_tray_qty= models.IntegerField(default=0, help_text="IP Top Tray Quantity")
+
     delink_tray = models.BooleanField(default=False, help_text="Is tray delinked")
     delink_tray_qty = models.CharField(max_length=50, null=True, blank=True, help_text="Delinked quantity")
+    
+    IP_tray_verified= models.BooleanField(default=False, help_text="Is tray verified in IP")
+    
+    rejected_tray= models.BooleanField(default=False, help_text="Is tray rejected")
+    new_tray=models.BooleanField(default=True, help_text="Is tray new")
     
     # Tray configuration fields (filled by admin)
     tray_type = models.CharField(max_length=50, null=True, blank=True, help_text="Type of tray (Jumbo, Normal, etc.) - filled by admin")
@@ -212,7 +225,23 @@ class TrayId(models.Model):
     class Meta:
         verbose_name = "Tray ID"
         verbose_name_plural = "Tray IDs"
+
+
+
+class IP_TrayVerificationStatus(models.Model):
+    lot_id = models.CharField(max_length=100)
+    tray_position = models.IntegerField()  # 1, 2, 3, etc.
+    tray_id = models.CharField(max_length=100, blank=True, null=True)
+    is_verified = models.BooleanField(default=False)
+    verification_status = models.CharField(max_length=10, choices=[('pass', 'Pass'), ('fail', 'Fail')], null=True, blank=True)
+    verified_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    verified_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ['lot_id', 'tray_position']
         
+    def __str__(self):
+        return f"Lot {self.lot_id} - Position {self.tray_position} - {self.verification_status}"        
         
 class DraftTrayId(models.Model):
     """
@@ -266,6 +295,7 @@ class TotalStockModel(models.Model):
     location = models.ManyToManyField(Location, blank=True, help_text="Multiple Locations")
     lot_id = models.CharField(max_length=50, unique=True, null=True, blank=True, help_text="Lot ID")
     created_at = models.DateTimeField(default=now, help_text="Timestamp of the record")
+    brass_saved_time = models.DateTimeField(default=now)
     # day planning missing qty in day planning pick table
     dp_missing_qty = models.IntegerField(default=0, help_text="Missing quantity in day planning")
     dp_physical_qty = models.IntegerField(help_text="Original physical quantity", default=0)  # New field
@@ -403,7 +433,6 @@ class IP_RejectionGroup(models.Model):
         return self.group_name
 
 class IP_Rejection_Table(models.Model):
-    group = models.ForeignKey(IP_RejectionGroup, on_delete=models.SET_NULL, null=True, blank=True, related_name='rejection_reasons')
     rejection_reason_id = models.CharField(max_length=10, null=True, blank=True, editable=False)
     rejection_reason = models.TextField(help_text="Reason for rejection")
     rejection_count = models.PositiveIntegerField(help_text="Count of rejected items")
@@ -421,7 +450,25 @@ class IP_Rejection_Table(models.Model):
 
     def __str__(self):
         return f"{self.rejection_reason} - {self.rejection_count}"
+   
+# Add this to your models.py
+
+class IP_Rejection_Draft(models.Model):
+    """
+    Model to store draft rejection data that can be edited later
+    """
+    lot_id = models.CharField(max_length=50, unique=True, help_text="Lot ID")
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    draft_data = models.JSONField(help_text="JSON data containing rejection details")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
+    class Meta:
+        unique_together = ['lot_id', 'user']
+    
+    def __str__(self):
+        return f"Draft: {self.lot_id} - {self.user.username}"
+     
 class Brass_QC_Rejection_Table(models.Model):
     group = models.ForeignKey(IP_RejectionGroup, on_delete=models.SET_NULL, null=True, blank=True, related_name='brass_qc_rejection_reasons')
     rejection_reason_id = models.CharField(max_length=10, null=True, blank=True, editable=False)
@@ -552,17 +599,19 @@ class IQF_Accepted_TrayScan(models.Model):
     def __str__(self):
         return f"{self.accepted_tray_quantity} - {self.lot_id}"
     
-#give accepted tray scan in input screening - fields are lot_id , tray_id , user
 class IP_Accepted_TrayID_Store(models.Model):
     lot_id = models.CharField(max_length=50, null=True, blank=True, help_text="Lot ID")
-    tray_id = models.CharField(max_length=100, unique=True)
-    tray_qty = models.IntegerField(null=True, blank=True, help_text="Quantity in the tray")
+    top_tray_id = models.CharField(max_length=100, unique=True)  # renamed from tray_id
+    top_tray_qty = models.IntegerField(null=True, blank=True, help_text="Quantity in the tray")  # renamed from tray_qty
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_draft = models.BooleanField(default=False, help_text="Draft Save")
-    is_save= models.BooleanField(default=False, help_text="Save")
-     
+    is_save = models.BooleanField(default=False, help_text="Save")
+    # NEW FIELDS
+    delink_tray_id = models.CharField(max_length=100, null=True, blank=True, help_text="Delink Tray ID")
+    delink_tray_qty = models.IntegerField(null=True, blank=True, help_text="Delink Tray Quantity")
+
     def __str__(self):
-        return f"{self.tray_id} - {self.lot_id}"
+        return f"{self.top_tray_id} - {self.lot_id}"
     
 class Brass_Qc_Accepted_TrayID_Store(models.Model):
     lot_id = models.CharField(max_length=50, null=True, blank=True, help_text="Lot ID")
@@ -712,6 +761,16 @@ class JigUnloadAfterTable(models.Model):
     nickle_ip_verified_tray_qty=models.IntegerField(default=0, help_text="Nickle-Verified Tray Quantity")
     nickle_ip_top_tray_qty_modify=models.IntegerField(default=0)
     
+    unload_audit_accepted = models.BooleanField(default=False, help_text="Indicates if the unload was accepted")
+    audit_accepted_qty=models.IntegerField(default=0, help_text="Accepted quantity during unload")
+    nickle_audit_few_cases_acceptance=models.BooleanField(default=False)
+    nickle_audit_rejection_tray_scan_status=models.BooleanField(default=False)
+    nickle_audit_accepted_tray_scan_status=models.BooleanField(default=False)
+    nickle_audit_onhold_picking=models.BooleanField(default=False, help_text="Nickle On Hold Picking")
+    nickle_audit_top_tray_qty_verified = models.BooleanField(default=False, help_text="Nickle-On Hold Picking")
+    nickle_audit_verified_tray_qty=models.IntegerField(default=0, help_text="Nickle-Verified Tray Quantity")
+    nickle_audit_top_tray_qty_modify=models.IntegerField(default=0)
+    
     last_process_module = models.CharField(
         max_length=255,
         null=True,
@@ -726,6 +785,9 @@ class JigUnloadAfterTable(models.Model):
     )
     
     rejected_nickle_ip_stock = models.BooleanField(default=False, help_text="Rejected Nickle IP Stock")  # New field
+    rejected_audit_nickle_ip_stock = models.BooleanField(default=False, help_text="Rejected Nickle Audit Stock")  # New field
+    audit_check = models.BooleanField(default=False, help_text="Audit Check")  # New field
+    send_to_nickel_ip=models.BooleanField(default=False)
     
     def __str__(self):
         return f"{self.lot_id} - {self.total_case_qty}"
@@ -792,6 +854,69 @@ class Nickle_IP_Accepted_TrayID_Store(models.Model):
     def __str__(self):
         return f"{self.tray_id} - {self.lot_id}"
     
+class Nickle_Audit_Rejection_Table(models.Model):
+    group = models.ForeignKey(IP_RejectionGroup, on_delete=models.SET_NULL, null=True, blank=True, related_name='nickle_audit_rejection_reasons')
+    rejection_reason_id = models.CharField(max_length=10, null=True, blank=True, editable=False)
+    rejection_reason = models.TextField(help_text="Reason for rejection")
+    rejection_count = models.PositiveIntegerField(help_text="Count of rejected items")
+
+    def save(self, *args, **kwargs):
+        if not self.rejection_reason_id:
+            last = Nickle_Audit_Rejection_Table.objects.order_by('-rejection_reason_id').first()
+            if last and last.rejection_reason_id.startswith('R'):
+                last_num = int(last.rejection_reason_id[1:])
+                new_num = last_num + 1
+            else:
+                new_num = 1
+            self.rejection_reason_id = f"R{new_num:02d}"
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.rejection_reason} - {self.rejection_count}"
+
+#rejection reasons stored tabel , fields ared rejection resoon multiple slection from RejectionTable an dlot_id , user, Total_rejection_qunatity
+class Nickle_Audit_Rejection_ReasonStore(models.Model):
+    rejection_reason = models.ManyToManyField(Nickle_Audit_Rejection_Table, blank=True)
+    lot_id = models.CharField(max_length=50, null=True, blank=True, help_text="Lot ID")
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    total_rejection_quantity = models.PositiveIntegerField(help_text="Total Rejection Quantity")
+    batch_rejection=models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f"{self.user} - {self.total_rejection_quantity} - {self.lot_id}"
+    
+#give rejected trayscans - fields are lot_id , rejected_tray_quantity , rejected_reson(forign key from RejectionTable), user
+class Nickle_Audit_Rejected_TrayScan(models.Model):
+    lot_id = models.CharField(max_length=50, null=True, blank=True, help_text="Lot ID")
+    rejected_tray_quantity = models.CharField(help_text="Rejected Tray Quantity")
+    rejected_tray_id= models.CharField(max_length=100, null=True, blank=True, help_text="Rejected Tray ID")
+    rejection_reason = models.ForeignKey(Nickle_Audit_Rejection_Table, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return f"{self.rejection_reason} - {self.rejected_tray_quantity} - {self.lot_id}"
+
+class Nickle_Audit_Accepted_TrayScan(models.Model):
+    lot_id = models.CharField(max_length=50, null=True, blank=True, help_text="Lot ID")
+    accepted_tray_quantity = models.CharField(help_text="Accepted Tray Quantity")
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return f"{self.accepted_tray_quantity} - {self.lot_id}"
+    
+class Nickle_Audit_Accepted_TrayID_Store(models.Model):
+    lot_id = models.CharField(max_length=50, null=True, blank=True, help_text="Lot ID")
+    tray_id = models.CharField(max_length=100, unique=True)
+    tray_qty = models.IntegerField(null=True, blank=True, help_text="Quantity in the tray")
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    is_draft = models.BooleanField(default=False, help_text="Draft Save")
+    is_save= models.BooleanField(default=False, help_text="Save")
+     
+    def __str__(self):
+        return f"{self.tray_id} - {self.lot_id}"
+    
+    
+    
 class TrayAutoSaveData(models.Model):
     """
     Model to store auto-save data for tray scan modal
@@ -818,6 +943,8 @@ class TrayAutoSaveData(models.Model):
     
     def __str__(self):
         return f"AutoSave: {self.user.username} - {self.batch_id}"
+    
+
 
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
@@ -826,3 +953,40 @@ from django.dispatch import receiver
 def delete_related_trayids(sender, instance, **kwargs):
     TrayId.objects.filter(batch_id=instance).delete()
     DraftTrayId.objects.filter(batch_id=instance).delete()
+    
+from django.db import models
+from django.contrib.auth.models import User
+
+# 🔹 Department master table
+class Department(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+# 🔹 Role master table
+class Role(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+# 🔹 User extended profile
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    custom_user_id = models.CharField(max_length=10, unique=True, blank=True)
+    
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
+    role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    manager = models.CharField(max_length=100, blank=True, null=True)
+    employment_status = models.CharField(
+        max_length=20,
+        choices=[('On-role', 'On-role'), ('Off-role', 'Off-role')]
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.custom_user_id}"

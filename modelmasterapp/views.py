@@ -15,6 +15,7 @@ from modelmasterapp.models import TrayId, ModelMasterCreation, TotalStockModel  
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.renderers import TemplateHTMLRenderer, JSONRenderer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from django.views.decorators.csrf import csrf_exempt
 
 class BaseAPIView(APIView):
     """
@@ -176,4 +177,52 @@ class LoginAPIView(APIView):
 def logout_view(request):
     logout(request)
     return redirect('login-api')  # Redirect to login page after logout
+
+
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.contrib.admin.views.decorators import staff_member_required
+from . import models
+@csrf_exempt
+@require_POST
+def delete_all_tables(request):
+    # List all model classes you want to clear
+    model_list = [
+        models.ModelMasterCreation,
+        models.TrayId,
+        models.IP_TrayVerificationStatus,
+        models.DraftTrayId,
+        models.TotalStockModel,
+        models.DP_TrayIdRescan,
+        models.IP_Rejection_Draft,
+        models.IP_Rejection_ReasonStore,
+        models.Brass_QC_Rejection_ReasonStore,
+        models.IQF_Rejection_ReasonStore,
+        models.IP_Rejected_TrayScan,
+        models.Brass_QC_Rejected_TrayScan,
+        models.IQF_Rejected_TrayScan,
+        models.IP_Accepted_TrayScan,
+        models.Brass_Qc_Accepted_TrayScan,
+        models.IQF_Accepted_TrayScan,
+        models.IP_Accepted_TrayID_Store,
+        models.Brass_Qc_Accepted_TrayID_Store,
+        models.IQF_Accepted_TrayID_Store,
+        models.JigDetails,
+        models.JigUnload_TrayId,
+        models.JigUnloadAfterTable,
+        models.Nickle_IP_Rejection_ReasonStore,
+        models.Nickle_IP_Rejected_TrayScan,
+        models.Nickle_IP_Accepted_TrayScan,
+        models.Nickle_IP_Accepted_TrayID_Store,
+        models.Nickle_Audit_Rejection_ReasonStore,
+        models.Nickle_Audit_Rejected_TrayScan,
+        models.Nickle_Audit_Accepted_TrayScan,
+        models.Nickle_Audit_Accepted_TrayID_Store,
+        models.TrayAutoSaveData,
+    ]
+    for model in model_list:
+        model.objects.all().delete()
+    return JsonResponse({'status': 'success', 'message': 'All tables cleared.'})
+ 
     

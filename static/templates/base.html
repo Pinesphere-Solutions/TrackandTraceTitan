@@ -5,6 +5,81 @@
 
 
 <style>
+
+ .navbar-nav .nav-item .nav-link#settingsDropdown i.ti-settings {
+  font-size: 18px !important; /* your desired size */
+  color: #028084 !important;
+}
+
+/* =========================
+   Global LAPTOP STYLES (min-width: 1001px)
+   ========================= */
+@media (min-width: 1001px) {
+  /* Header icon size */
+  .navbar-nav .nav-item .nav-link#settingsDropdown i.ti-settings,
+  .navbar-nav .nav-item .nav-link i.ti-user,
+  .navbar-nav .nav-item .nav-link i.ti-bell,
+  .navbar-nav .nav-item .nav-link i.ti-eye,
+  .navbar-nav .nav-item .nav-link i.ti-file {
+    font-size: 16px !important;
+  }
+
+  /* Menu font size */
+  .sidebar .nav .menu-title,
+  .sidebar .nav .nav-link,
+  .sidebar .nav .sub-menu .nav-link {
+    font-size: 13px !important;
+  }
+
+
+/* =========================
+   TABLET STYLES (800px–1000px)
+   Remove overrides for tablet
+   ========================= */
+@media (min-width: 800px) and (max-width: 1000px) {
+  /* Reset header icon size */
+  .navbar-nav .nav-item .nav-link#settingsDropdown i.ti-settings,
+  .navbar-nav .nav-item .nav-link i.ti-user,
+  .navbar-nav .nav-item .nav-link i.ti-bell,
+  .navbar-nav .nav-item .nav-link i.ti-eye,
+  .navbar-nav .nav-item .nav-link i.ti-file {
+    font-size: 14px !important;
+  }
+
+  /* Reset menu font size */
+  .sidebar .nav .menu-title,
+  .sidebar .nav .nav-link,
+  .sidebar .nav .sub-menu .nav-link {
+    font-size: 14px !important;
+  }
+
+  /* Remove menu borders */
+  .sidebar .nav .nav-link,
+  .sidebar .nav .sub-menu .nav-link {
+    border-bottom: none !important;
+  }
+}
+
+/* Start of global font handling for tablet device */
+        @media (min-width: 800px) and (max-width: 1000px) and (min-height: 600px) and (max-height: 900px) and (orientation: landscape) {
+        html, body {
+          font-size: 16px !important;
+        }
+        *, *::before, *::after {
+          font-size: 16px !important;
+        }
+        input, select, textarea, button {
+          font-size: 16px !important;
+        }
+        th, td {
+          font-size: 16px !important;
+        }
+       
+      }
+        
+           
+      
+/* End of global font handling for tablet device */
      .pagination-wrapper {
     position: relative; /* Ensure it stays in the flow of the document */
     background: #f5f7ff; /* Optional: Background color */
@@ -21,15 +96,7 @@
   margin-top: 0px !important; /* Adjust the value to move it down */
 }
 
-/* Target Samsung Galaxy Tab A9+ (11") */
-@media (resolution: 206dpi) and (aspect-ratio: 16/10) {
-  body {
-    font-size: 18px !important; /* Adjust font size for better readability */
-  }
-  * {
-    font-size: 1rem !important; /* Ensure all elements scale proportionally */
-  }
-}
+
     /* Ensure row highlight is visible for sticky S.No and Date/Time columns */
   tr.dp-row-action-highlight > td:nth-child(1),
   tr.dp-row-action-highlight > td:nth-child(2) {
@@ -76,13 +143,21 @@
     margin-right: 0; /* Remove margin for the last icon */
   }
   
-    .ti-user, .ti-settings, .ti-bell, .ti-file {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-  }
+   
 
+
+/* Sidebar menu: allow text to wrap and prevent cropping */
+.sidebar .nav .menu-title,
+.sidebar .nav .nav-link {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  word-break: break-word !important;
+  line-height: 1.3 !important;
+  height: auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
 .sidebar .nav .nav-item:not(.active) > .nav-link,
   .sidebar .nav .menu-title,
   .sidebar .nav .sub-menu .nav-link {
@@ -854,9 +929,9 @@ tr.dp-row-action-highlight > td:nth-child(2) {
                   href="#"
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
-                  style="border-radius: 50%; padding: 7px; display: flex; align-items: center; justify-content: center;"
+                  
                 >
-                  <i class="ti-settings" style="font-size: 1.3rem; color: #028084;"></i>
+                  <i class="ti-settings"></i>
                 </a>
               </a>
               <div
@@ -864,7 +939,7 @@ tr.dp-row-action-highlight > td:nth-child(2) {
                 aria-labelledby="settingsDropdown"
                 style="min-width: 200px;"
               >
-                <a class="dropdown-item" href="{% url 'settings' %}">
+                <a class="dropdown-item" href="{% url 'adminPanel' %}">
                   <i class="ti-user text-primary" style="margin-right: 8px;"></i>
                   User Creation
                 </a>
@@ -883,7 +958,7 @@ tr.dp-row-action-highlight > td:nth-child(2) {
           class="nav-link count-indicator ms-2"
           id="reportStatus"
           href="{% url 'VisualAid' %}"
-          style="border-radius: 50%; padding: 7px; display: flex; align-items: center; justify-content: center;"
+          
         >
           <i class="ti-eye" style="font-size: 1.3rem; color: #028084;"></i>
         </a>
@@ -917,7 +992,7 @@ tr.dp-row-action-highlight > td:nth-child(2) {
                   href="#"
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
-                  style="border-radius: 50%; padding: 7px; display: flex; align-items: center; justify-content: center;"
+                  
                 >
                   <i class="ti-bell" style="font-size: 1.3rem; color: #028084;"></i>
                   <span class="count"></span>
@@ -944,7 +1019,7 @@ tr.dp-row-action-highlight > td:nth-child(2) {
                 data-bs-toggle="dropdown"
                 id="profileDropdown"
                 aria-expanded="false"
-                style="border-radius: 50%; width: 38px; height: 38px; padding: 7px; display: flex; align-items: center; justify-content: center;"
+                
               >
                 <i class="ti-user" style="font-size: 1.3rem; color: #028084; display: flex; align-items: center; justify-content: center; line-height: 1;"></i>
               </a>
@@ -972,7 +1047,7 @@ tr.dp-row-action-highlight > td:nth-child(2) {
             </li>
             <li class="nav-item d-flex align-items-center ms-2">
                           <a class="nav-link p-0" href="#" tabindex="-1" aria-disabled="true" style="background: none; border: none;">
-                            <i class="ti-file" style="font-size: 1.5rem; color: #028084;"></i> <!-- Document icon -->
+                            <i class="ti-file"></i> <!-- Document icon -->
                           </a>
                         </li>
                     <!-- Place this after the user/profile icon dropdown in your navbar-nav navbar-nav-right list -->

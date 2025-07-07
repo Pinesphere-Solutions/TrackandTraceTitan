@@ -37,18 +37,15 @@ urlpatterns = [
     path('spiderspindle/', include('Spider_Spindle.urls')),
     path('brass_qc/',include('Brass_Qc.urls')),
     path('inputscreening/',include('InputScreening.urls')),
-    path('user_management/', include('User_Management.urls')),
+    
     path('nickel_inspection/', include('Nickel_Inspection.urls')),
     path('iqf/', include('IQF.urls')),
     path('adminportal/',include('adminportal.urls')),
-    path('settings/', TemplateView.as_view(template_name="settings.html"), name='settings'),
     path('modelmaster/', TemplateView.as_view(template_name="modelmaster.html"), name='modelmaster'),
     path('viewmasters/', TemplateView.as_view(template_name="viewmasters.html"), name='viewmasters'),
     path('visualaid/', TemplateView.as_view(template_name="VisualAid.html"), name='VisualAid'),
-
-
-    
     path('recovery_dp/',include('Recovery_DP.urls')),
+    
  
 
 

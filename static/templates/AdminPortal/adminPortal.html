@@ -1,0 +1,3004 @@
+{% extends "base.html" %} {% load static %} {% block content %}
+
+<style>
+    /* Add to your <style> block */
+  #department,
+  #role {
+    min-width: 180px !important;
+    width: 100% !important;
+    max-width: 320px;
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
+  #department option,
+  #role option {
+    white-space: normal !important;
+    word-break: break-word !important;
+    max-width: 300px;
+    overflow-wrap: break-word;
+    padding-right: 2em;
+    position: relative;
+  }
+  .select-option-remove {
+    position: absolute;
+    right: 0.5em;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #dc2626;
+    font-size: 1.1em;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    z-index: 2;
+  }
+  
+  /* Make breadcrumb links show hand cursor */
+  .breadcrumb li,
+  .breadcrumb li a,
+  .breadcrumb li span[aria-current="page"] {
+    cursor: pointer;
+  }
+  /* Add this to your <style> block */
+  .dp-module {
+    background: #e0f2fe !important;
+    border: 2px solid #38bdf8 !important;
+  }
+
+  /* Add this at the end of your <style> block in Settings.html */
+  #moduleTilesGrid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.5rem 0.7rem !important;
+    width: 100%;
+    margin: 1rem 0 !important;
+    padding: 0;
+  }
+  #moduleTilesGrid .module-tile {
+    min-width: 120px;
+    max-width: 100%;
+    margin: 0 !important;
+    padding: 0.5rem 0.2rem;
+    box-sizing: border-box;
+  }
+  /* Tighter, professional grid for module headings checkboxes */
+  #selectedModulesContainer .module-headings-grid {
+    display: flex;
+    width: 100%;
+    margin: 0.2em 0 0.2em 0;
+    flex-wrap: wrap;
+  }
+  #selectedModulesContainer .module-headings-grid label {
+    display: flex;
+    font-weight: 500;
+    font-size: 0.97em;
+    cursor: pointer;
+  }
+  #selectedModulesContainer .module-headings-grid input[type="checkbox"] {
+    display: table-cell;
+    margin: 0 0.5em 0 0;
+    width: 1em;
+    height: 1em;
+    accent-color: #2563eb;
+    vertical-align: middle;
+  }
+  #selectedModulesContainer .module-headings-grid label span {
+    display: table-cell;
+    vertical-align: middle;
+    padding-left: 0.3em;
+    white-space: nowrap;
+  }
+  #selectedModulesContainer .module-headings-grid label:hover {
+    background: #f1f5f9;
+  }
+  #selectedModulesContainer .module-headings-grid input[type="checkbox"] {
+    margin: 0 0.3em 0 0;
+    width: 1em;
+    height: 1em;
+    accent-color: #2563eb;
+  }
+  /* Add this at the end of your <style> block in Settings.html */
+  #selectedModulesContainer label {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    margin: 0 0.8em 0.3em 0 !important;
+    font-weight: 500;
+    font-size: 0.97em;
+    min-width: 0;
+  }
+  #selectedModulesContainer input[type="checkbox"] {
+    margin: 0 0.3em 0 0;
+    width: 1em;
+    height: 1em;
+  }
+  .breadcrumb {
+    padding: 0 0.5rem;
+    margin-bottom: 1.2rem;
+  }
+  .breadcrumb ol {
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    align-items: end;
+  }
+  .breadcrumb li:not(:last-child)::after {
+    display: inline-block;
+    margin: 0 0.25rem;
+    content: "→";
+    color: #64748b;
+    font-weight: 600;
+  }
+  .breadcrumb li {
+    font-size: 1.05em;
+    color: #64748b;
+    font-weight: 500;
+  }
+  .breadcrumb li.active,
+  .breadcrumb li[aria-current="page"] {
+    color: #2563eb;
+    font-weight: 700;
+  }
+  .breadcrumb a {
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+  .breadcrumb a:hover {
+    color: #2563eb;
+    text-decoration: underline;
+  }
+  /* Responsive modal for module selection */
+  #moduleSelectModal .modal-content {
+    padding: 1.2rem;
+    max-width: 400px;
+    width: 95%;
+  }
+  @media (max-width: 600px) {
+    #moduleSelectModal .modal-content {
+      padding: 0.7rem;
+      max-width: 98vw;
+    }
+  }
+  /* Minimal, responsive, and compact for Module Provision */
+  #module-provision-section .card-header {
+    padding: 0.35rem 0.75rem !important;
+    min-height: 0 !important;
+  }
+  #module-provision-section .card-content {
+    padding: 0.75rem 1rem !important;
+  }
+  .module-provision-grid {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .module-provision-half {
+    flex: 1 1 250px;
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+  }
+  .module-provision-title {
+    font-weight: 600;
+    font-size: 1em;
+    margin-bottom: -15px;
+    color: #2563eb;
+  }
+  .module-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+  }
+  .module-tile {
+    background: #f1f5f9;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 0.5rem 0.2rem;
+    text-align: center;
+    font-size: 0.97em;
+    cursor: pointer;
+    transition: background 0.15s, border 0.15s;
+    user-select: none;
+  }
+  .module-tile.selected {
+    background: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+  }
+  .chosen-modules-dropzone {
+    min-height: 90px;
+    background: #f8fafc;
+    border: 1px dashed #d1d5db;
+    border-radius: 6px;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .chosen-module {
+    background: #fff;
+    border: 1px solid #2563eb;
+    border-radius: 6px;
+    padding: 0.45rem 0.7rem;
+    margin-bottom: 0;
+    font-size: 0.97em;
+    cursor: move;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: box-shadow 0.2s;
+  }
+  .chosen-module.dragging {
+    opacity: 0.6;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+  }
+  .chosen-modules-placeholder {
+    color: #94a3b8;
+    font-size: 0.95em;
+    text-align: center;
+    padding: 0.7rem 0;
+  }
+  @media (max-width: 900px) {
+    .module-provision-grid {
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+    .module-provision-half {
+      min-width: 0;
+    }
+    .module-tiles {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (max-width: 600px) {
+    .module-tiles {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  .form-group .toggle-group {
+    margin-left: 16px;
+    margin-bottom: 10px;
+  }
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+      sans-serif;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    color: #1a202c;
+    line-height: 1.6;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  /* Header */
+  .header {
+    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0.5rem 0;
+  }
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .logo {
+    width: 48px;
+    height: 48px;
+
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+
+  .logo-text h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a202c;
+  }
+
+  .logo-text p {
+    font-size: 0.875rem;
+    color: #64748b;
+  }
+
+  .header-badges {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .badge.enterprise {
+    color: #64748b;
+  }
+
+  .badge.admin {
+    color: #2563eb;
+  }
+
+  /* Main Content */
+  .main {
+    padding: 2rem 0;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr !important;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    justify-content: start;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+  }
+  .card:first-child {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-bottom: 2rem;
+  }
+
+  .card:first-child .card-content .form-grid {
+    grid-template-columns: 1fr 1fr 1fr !important;
+  }
+  .card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 0.5rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  /* Reduce the height of card headers */
+  .card-header {
+    padding: 0.35rem 0.75rem !important;
+    border-bottom: 1px solid #f1f5f9;
+    min-height: 0 !important;
+  }
+
+  .card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1a202c;
+    padding: 5px !important;
+  }
+
+  .card-content {
+    padding: 1rem 1rem 0.5rem 1rem !important;
+  }
+
+  /* Form Styles */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .form-group.full-width {
+    grid-column: 1 / -1;
+  }
+
+  label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #374151;
+  }
+
+  input,
+  select {
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+  }
+
+  input:focus,
+  select:focus {
+    outline: none;
+    border-color: #2563eb;
+  }
+
+  .toggle-group {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .toggle-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-primary {
+    background: #2563eb;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #1d4ed8;
+  }
+
+  .btn-secondary {
+    background: #f8fafc;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+  }
+
+  .btn-secondary:hover {
+    background: #f1f5f9;
+  }
+
+  .btn-danger {
+    background: #dc2626;
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background: #b91c1c;
+  }
+
+  .btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  /* Drag and Drop */
+  .module-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .module-header {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+
+  .module-list {
+    min-height: 100px;
+    padding: 0.75rem;
+    border: 2px dashed #d1d5db;
+    border-radius: 6px;
+    background: #f8fafc;
+    transition: all 0.3s;
+  }
+
+  .module-list.drag-over {
+    border-color: #2563eb;
+    background: #eff6ff;
+  }
+
+  .module-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    cursor: move;
+    transition: all 0.2s;
+  }
+
+  .module-item:hover {
+    border-color: #9ca3af;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .module-item.dragging {
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+
+  .module-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+  }
+
+  .module-icon.inventory {
+    background: #3b82f6;
+  }
+  .module-icon.attendance {
+    background: #10b981;
+  }
+  .module-icon.leave {
+    background: #8b5cf6;
+  }
+  .module-icon.finance {
+    background: #059669;
+  }
+  .module-icon.design {
+    background: #f59e0b;
+  }
+
+  .badge-count {
+    background: #6b7280;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .badge-count.primary {
+    background: #2563eb;
+  }
+
+  /* Table */
+  .table-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.5rem !important;
+  }
+  input,
+  select {
+    padding-top: 0.35rem !important;
+    padding-bottom: 0.35rem !important;
+    min-height: 28px !important;
+    font-size: 0.95rem !important;
+  }
+  .search-input {
+    position: relative;
+    flex: 1;
+    max-width: 300px;
+  }
+
+  .search-input input {
+    padding-left: 2.5rem;
+    width: 100%;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .table th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .table tr:hover {
+    background: #f8fafc;
+  }
+
+  .table-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .table-badge.on-role {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .table-badge.off-role {
+    background: #fed7aa;
+    color: #9a3412;
+  }
+
+  .table-badge.department {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+  }
+
+  .table-badge.module {
+    background: #e0e7ff;
+    color: #3730a3;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .action-btn {
+    padding: 0.25rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .action-btn.edit {
+    background: #dbeafe;
+    color: #1d4ed8;
+  }
+
+  .action-btn.delete {
+    background: #fecaca;
+    color: #dc2626;
+  }
+
+  .action-btn:hover {
+    transform: scale(1.1);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #6b7280;
+  }
+
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+  }
+
+  .modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #6b7280;
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .header-content {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .table-controls {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .search-input {
+      max-width: none;
+    }
+  }
+</style>
+
+<!-- Header -->
+<header class="header">
+  <div class="container">
+    <div class="header-content">
+      <div class="logo-section">
+        <img
+          src="{% static 'assets/gif/UserAuth.gif' %}"
+          alt="Logo"
+          class="logo"
+          style="
+            width: 60px;
+            height: auto;
+            object-fit: cover;
+            border-radius: 12px;
+          "
+        />
+        <div class="logo-text">
+          <h3>User Administration Module</h3>
+          <p>Only for admins</p>
+        </div>
+      </div>
+
+      <!--  <div class="header-badges">
+                    <div class="badge enterprise">
+                        <span>👥</span>
+                        <span>Enterprise Dashboard</span>
+                    </div>
+                    <div class="badge admin">
+                        <span>🛡️</span>
+                        <span>Admin Access</span>
+                    </div>
+                </div> -->
+
+      <!-- Place this code immediately after the closing </div> of the User Creation & Management card-content, before the Users Table Section. -->
+    </div>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="main">
+  <!-- Add this markup just above your existing <nav id="step-breadcrumbs"> (do not remove the old nav, just add this above it) -->
+  <nav aria-label="Breadcrumb" class="breadcrumb">
+    <ol>
+      <li id="bc-user"><a>User Creation</a></li>
+      <li id="bc-modules"><a>Select Modules</a></li>
+      <li id="bc-table"><span aria-current="page">User Table</span></li>
+    </ol>
+  </nav>
+
+  <div class="container">
+    <!-- User Creation Section -->
+    <div id="step-user-form">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span>
+              <img
+                src="{% static 'assets/icons/AddUser.png' %}"
+                alt="User Icon"
+                style="width: 1.3em; height: 1.3em; vertical-align: middle"
+              />
+            </span>
+            User Creation & Management
+          </h2>
+        </div>
+        <div class="card-content">
+          <form id="userForm">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="userID">User ID</label>
+                <input type="text" id="userId" name="custom_user_id" readonly value="{{ next_user_id }}" />
+
+
+              </div>
+              <div class="form-group">
+                <label for="fullName">First Name</label>
+                <input type="text" id="firstName" name="first_name" required placeholder="Enter First Name" />
+
+              </div>
+              <div class="form-group">
+                <label for="fullName">Second Name</label>
+                <input type="text" id="lastName" name="last_name" required placeholder="Enter Last Name" />
+
+              </div>
+              <div class="form-group">
+                <label for="email">Email ID</label>
+                <input type="email" id="email" name="email" required placeholder="Enter Email ID" />
+
+              </div>
+              <div class="form-group">
+                 <label for="department">Department</label>
+                 <span id="departmentOptions"></span>
+  <div style="display:flex;gap:1.1em;">
+    <select id="department" name="department" required></select>
+    <button type="button" id="addDepartmentBtn" class="btn btn-sm btn-primary" title="Add Department">Add</button>
+  </div>
+</div>
+<div class="form-group">
+  <label for="role">Role</label>
+  <span id="roleOptions"></span>
+  <div style="display:flex;gap:1.1em;">
+    <select id="role" name="role" required></select>
+    <button type="button" id="addRoleBtn" class="btn btn-sm btn-primary" title="Add Role">Add</button>
+  </div>
+              
+              </div>
+           
+              <div class="form-group">
+                <label for="manager">Manager Name</label>
+                <input type="text" id="manager" name="manager" />
+              </div>
+              <div class="form-group">
+                <label>Employment Status</label>
+                <div class="toggle-group">
+                  <div class="toggle-option">
+                    <input
+                      type="radio"
+                      id="onRole"
+                      name="employmentStatus"
+                      value="On-role"
+                      checked
+                    />
+                    <label for="onRole">On-role</label>
+                  </div>
+                  <div class="toggle-option">
+                    <input
+                      type="radio"
+                      id="offRole"
+                      name="employmentStatus"
+                      value="Off-role"
+                    />
+                    <label for="offRole">Off-role</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 1rem;
+                margin-top: 1.2rem;
+              "
+            >
+              <button
+                type="button"
+                class="btn btn-secondary"
+                id="btn-user-before"
+              >
+                Before
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <span></span>
+                Next
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Module Provision Section (Expandable) -->
+    <div id="step-module-select" style="display: none">
+      <div
+        class="card"
+        id="module-provision-section"
+        style="margin-bottom: 1rem"
+      >
+        <div
+          class="card-content"
+          id="module-provision-content"
+          style="padding: 0.75rem 1rem"
+        >
+          <div class="module-provision-grid">
+            <!-- Module Selection -->
+            <div>
+              <div class="module-provision-title">Select Modules</div>
+
+              <div
+                id="moduleTilesGrid"
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                  gap: 0.5rem 0.7rem;
+                  width: 100%;
+                  margin: 1rem 0;
+                  padding: 0;
+                "
+              >
+                <!-- Tiles will be injected here -->
+              </div>
+            </div>
+            <!-- Add this block after your Select Modules title, before any chosen modules section -->
+            <div style="margin-bottom: 1.2rem">
+              <div
+                id="moduleBtnGrid"
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(5, 1fr);
+                  gap: 0.7rem 1.2rem;
+                "
+              >
+                <!-- Module buttons will be injected here -->
+              </div>
+            </div>
+            <div id="selectedModulesContainer" style="margin-top: -20px">
+              <!-- Dropped modules and their heading checkboxes will appear here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Users Table Section -->
+    <div id="step-user-table" style="display: none">
+      <div class="card">
+        <div class="card-header">
+          <div class="table-controls">
+            <div class="card-title">
+              <span>👥</span>
+              <span>User Management</span>
+              <span class="badge-count" id="userCount">3</span>
+            </div>
+            <div style="display: flex; gap: 1rem">
+              <div class="search-input">
+                <span class="search-icon">🔍</span>
+                <input
+                  type="text"
+                  id="searchUsers"
+                  placeholder="Search users..."
+                />
+              </div>
+              <select id="filterDepartment">
+                
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="card-content" style="padding: 0">
+          <div class="table-wrapper">
+            <table class="table" id="usersTable">
+              <thead>
+                <tr id="tableHeader">
+                  <th data-column="fullName">Full Name</th>
+                  <th data-column="email">Email</th>
+                  <th data-column="department">Department</th>
+                  <th data-column="role">Role</th>
+                  <th data-column="manager">Manager</th>
+                  <th data-column="status">Status</th>
+                  <th data-column="modules">Modules</th>
+                  <th data-column="created">Created</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody">
+                <!-- Users will be populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Edit User Modal -->
+<div class="modal" id="editModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Edit User</h3>
+      <button class="close-btn" onclick="closeEditModal()">&times;</button>
+    </div>
+    <form id="editForm">
+      <div class="form-group">
+        <label for="editFullName">Full Name</label>
+        <input type="text" id="editFullName" name="fullName" required />
+      </div>
+      <div class="form-group">
+        <label for="editEmail">Email</label>
+        <input type="email" id="editEmail" name="email" required />
+      </div>
+      <div class="form-group">
+        <label for="editDepartment">Department</label>
+        <select id="editDepartment" name="department" required>
+          
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="editRole">Role</label>
+        <select id="editRole" name="role" required>
+          <option value="Manager">Manager</option>
+          <option value="Senior Developer">Senior Developer</option>
+          <option value="Developer">Developer</option>
+          <option value="Analyst">Analyst</option>
+          <option value="Designer">Designer</option>
+          <option value="Coordinator">Coordinator</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick="closeEditModal()"
+        >
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- Scripts -->
+<script nonce="{{ csp_nonce }}">
+  // Sample data
+  let users = [
+    {
+      id: 1,
+      fullName: "John Mitchell",
+      email: "john.mitchell@titanwatch.com",
+      department: "Engineering",
+      role: "Senior Developer",
+      manager: "Sarah Wilson",
+      employmentStatus: "On-role",
+      modules: ["Day Planning"],
+      createdAt: "2024-01-15",
+    },
+    {
+      id: 2,
+      fullName: "Emily Chen",
+      email: "emily.chen@titanwatch.com",
+      department: "HR",
+      role: "HR Manager",
+      manager: "David Brown",
+      employmentStatus: "On-role",
+      modules: ["Brass QC"],
+      createdAt: "2024-02-03",
+    },
+    {
+      id: 3,
+      fullName: "Marcus Rodriguez",
+      email: "marcus.rodriguez@titanwatch.com",
+      department: "Finance",
+      role: "Financial Analyst",
+      manager: "Lisa Thompson",
+      employmentStatus: "Off-role",
+      modules: ["IP Inspection"],
+      createdAt: "2024-01-28",
+    },
+  ];
+
+  let currentEditId = null;
+  let assignedModules = [];
+
+  // Initialize the application
+  document.addEventListener("DOMContentLoaded", function () {
+    renderUsersTable();
+    updateColumnVisibility();
+    setupEventListeners();
+    updateModuleCounts();
+  });
+
+  // Setup event listeners
+  function setupEventListeners() {
+    // User form submission
+    document
+      .getElementById("userForm")
+      .addEventListener("submit", handleUserSubmit);
+
+    // Edit form submission
+    document
+      .getElementById("editForm")
+      .addEventListener("submit", handleEditSubmit);
+
+    // Search functionality
+    document
+      .getElementById("searchUsers")
+      .addEventListener("input", filterUsers);
+
+    // Department filter
+    document
+      .getElementById("filterDepartment")
+      .addEventListener("change", filterUsers);
+
+    // Column visibility checkboxes
+    const checkboxes = document.querySelectorAll('[id^="col-"]');
+    checkboxes.forEach((checkbox) => {
+      checkbox.addEventListener("change", updateColumnVisibility);
+    });
+  }
+
+  // Handle user form submission
+ async function handleUserSubmit(e) {
+    e.preventDefault();
+
+    const data = {
+      first_name: document.getElementById("fullName").value,
+      last_name: document.getElementById("fullName").value,
+      email: document.getElementById("email").value,
+      profile: {
+        department: document.getElementById("department").value,
+        role: document.getElementById("role").value,
+        manager: document.getElementById("manager").value,
+        employment_status: document.querySelector('input[name="employmentStatus"]:checked').value
+      }
+    };
+
+    try {
+      const response = await fetch("/api/users/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCookie('csrftoken')  // add CSRF utility below
+        },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+      console.log("Server Response:", result);
+
+      if (response.ok) {
+        alert("User created successfully!");
+        document.getElementById("userForm").reset();
+      } else {
+        alert("Error: " + JSON.stringify(result));
+      }
+    } catch (error) {
+      console.error("Error submitting user form:", error);
+      alert("An unexpected error occurred");
+    }
+  }
+
+  // Add CSRF helper if not already present
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  // Handle edit form submission
+  function handleEditSubmit(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const userIndex = users.findIndex((u) => u.id === currentEditId);
+
+    if (userIndex !== -1) {
+      users[userIndex] = {
+        ...users[userIndex],
+        fullName: formData.get("fullName"),
+        email: formData.get("email"),
+        department: formData.get("department"),
+        role: formData.get("role"),
+      };
+
+      renderUsersTable();
+      closeEditModal();
+      alert("User updated successfully!");
+    }
+  }
+
+  // Render users table
+  function renderUsersTable() {
+    const tbody = document.getElementById("usersTableBody");
+    const filteredUsers = getFilteredUsers();
+
+    tbody.innerHTML = "";
+
+    if (filteredUsers.length === 0) {
+      tbody.innerHTML = `
+                    <tr>
+                      <td>{{ user.profile.custom_user_id }}</td>
+  <td>{{ user.first_name }}</td>
+  <td>{{ user.last_name }}</td>
+  <td>{{ user.email }}</td>
+  <td>{{ user.profile.department }}</td>
+  <td>{{ user.profile.role }}</td>
+  <td>{{ user.profile.manager }}</td>
+  <td>{{ user.profile.employment_status }}</td>
+                        <td colspan="9" class="empty-state">
+                            <div>
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">👥</div>
+                                <h3>No users found</h3>
+                                <p>Try adjusting your search or filter criteria</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+      return;
+    }
+
+    filteredUsers.forEach((user) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+      <td data-column="userId">${user.profile?.custom_user_id || '—'}</td>
+
+                    <td data-column="fullName">${user.fullName}</td>
+                    <td data-column="email">${user.email}</td>
+                    <td data-column="department"><span class="table-badge department">${user.profile?.department || ''}</span></td>
+<td data-column="role">${user.profile?.role || ''}</td>
+<td data-column="manager">${user.profile?.manager || ''}</td>
+
+                    <td data-column="status">
+                        <span class="table-badge ${
+                          user.employmentStatus === "On-role"
+                            ? "on-role"
+                            : "off-role"
+                        }">
+                            ${user.employmentStatus}
+                        </span>
+                    </td>
+                    <td data-column="modules">
+                        ${user.modules
+                          .slice(0, 2)
+                          .map(
+                            (m) =>
+                              `<span class="table-badge module">${m}</span>`
+                          )
+                          .join(" ")}
+                        ${
+                          user.modules.length > 2
+                            ? `<span class="table-badge module">+${
+                                user.modules.length - 2
+                              }</span>`
+                            : ""
+                        }
+                    </td>
+                    <td data-column="created">${user.createdAt}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn edit" onclick="editUser(${
+                              user.id
+                            })" title="Edit">✏️</button>
+                            <button class="action-btn delete" onclick="deleteUser(${
+                              user.id
+                            })" title="Delete">🗑️</button>
+                        </div>
+                    </td>
+                `;
+      tbody.appendChild(row);
+    });
+
+    document.getElementById("userCount").textContent = filteredUsers.length;
+  }
+
+  // Get filtered users
+  function getFilteredUsers() {
+    const searchTerm = document
+      .getElementById("searchUsers")
+      .value.toLowerCase();
+    const departmentFilter = document.getElementById("filterDepartment").value;
+
+    return users.filter((user) => {
+      const matchesSearch =
+        user.fullName.toLowerCase().includes(searchTerm) ||
+        user.email.toLowerCase().includes(searchTerm);
+      const matchesDepartment =
+        departmentFilter === "all" || user.department === departmentFilter;
+      return matchesSearch && matchesDepartment;
+    });
+  }
+
+  // Filter users
+  function filterUsers() {
+    renderUsersTable();
+    updateColumnVisibility();
+  }
+
+  // Update column visibility
+  function updateColumnVisibility() {
+    const columns = [
+      "fullName",
+      "email",
+      "department",
+      "role",
+      "manager",
+      "status",
+      "modules",
+      "created",
+    ];
+
+    columns.forEach((column) => {
+      const checkbox = document.getElementById(`col-${column}`);
+      const isVisible = checkbox.checked;
+
+      // Update header
+      const headerCell = document.querySelector(`th[data-column="${column}"]`);
+      if (headerCell) {
+        headerCell.style.display = isVisible ? "" : "none";
+      }
+
+      // Update body cells
+      const bodyCells = document.querySelectorAll(
+        `td[data-column="${column}"]`
+      );
+      bodyCells.forEach((cell) => {
+        cell.style.display = isVisible ? "" : "none";
+      });
+    });
+  }
+
+  // Edit user
+  function editUser(id) {
+    const user = users.find((u) => u.id === id);
+    if (user) {
+      currentEditId = id;
+      document.getElementById("editFullName").value = user.fullName;
+      document.getElementById("editEmail").value = user.email;
+      document.getElementById("editDepartment").value = user.department;
+      document.getElementById("editRole").value = user.role;
+      document.getElementById("editModal").classList.add("show");
+    }
+  }
+
+  // Delete user
+  function deleteUser(id) {
+    const user = users.find((u) => u.id === id);
+    if (user && confirm(`Are you sure you want to delete ${user.fullName}?`)) {
+      users = users.filter((u) => u.id !== id);
+      renderUsersTable();
+      alert(`${user.fullName} has been deleted.`);
+    }
+  }
+
+  // Close edit modal
+  function closeEditModal() {
+    document.getElementById("editModal").classList.remove("show");
+    currentEditId = null;
+  }
+
+  // Drag and drop functionality
+  let draggedElement = null;
+
+  function allowDrop(ev) {
+    ev.preventDefault();
+    ev.currentTarget.classList.add("drag-over");
+  }
+
+  function drag(ev) {
+    draggedElement = ev.target.closest(".module-item");
+    draggedElement.classList.add("dragging");
+    ev.dataTransfer.setData("text/plain", "");
+  }
+
+  function drop(ev) {
+    ev.preventDefault();
+    ev.currentTarget.classList.remove("drag-over");
+
+    if (draggedElement) {
+      const targetContainer = ev.currentTarget;
+      const sourceContainer = draggedElement.parentNode;
+
+      // Remove empty state if dropping into assigned modules
+      if (targetContainer.id === "assignedModules") {
+        const emptyState = targetContainer.querySelector(".empty-state");
+        if (emptyState) {
+          emptyState.style.display = "none";
+        }
+      }
+
+      // Move the element
+      targetContainer.appendChild(draggedElement);
+      draggedElement.classList.remove("dragging");
+
+      // Update assigned modules array
+      updateAssignedModules();
+
+      // Show/hide empty state for assigned modules
+      const assignedContainer = document.getElementById("assignedModules");
+      const moduleItems = assignedContainer.querySelectorAll(".module-item");
+      const emptyState = document.getElementById("emptyAssigned");
+
+      if (moduleItems.length === 0) {
+        emptyState.style.display = "block";
+        document.getElementById("priorityNote").style.display = "none";
+      } else {
+        emptyState.style.display = "none";
+        document.getElementById("priorityNote").style.display = "block";
+      }
+
+      updateModuleCounts();
+      draggedElement = null;
+    }
+  }
+
+  // Update assigned modules array
+  function updateAssignedModules() {
+    const assignedContainer = document.getElementById("assignedModules");
+    const moduleItems = assignedContainer.querySelectorAll(".module-item");
+
+    assignedModules = Array.from(moduleItems).map((item) =>
+      item.getAttribute("data-module")
+    );
+  }
+
+  // Update module counts
+  function updateModuleCounts() {
+    const availableCount = document
+      .getElementById("availableModules")
+      .querySelectorAll(".module-item").length;
+    const assignedCount = document
+      .getElementById("assignedModules")
+      .querySelectorAll(".module-item").length;
+
+    document.getElementById("availableCount").textContent = availableCount;
+    document.getElementById("assignedCount").textContent = assignedCount;
+  }
+
+  // Remove drag-over class when dragging leaves
+  document.addEventListener("dragleave", function (e) {
+    if (e.target.classList.contains("module-list")) {
+      e.target.classList.remove("drag-over");
+    }
+  });
+
+  // Close modal when clicking outside
+  document.getElementById("editModal").addEventListener("click", function (e) {
+    if (e.target === this) {
+      closeEditModal();
+    }
+  });
+</script>
+
+<script nonce="{{ csp_nonce }}">
+  // Expand/collapse logic
+  function toggleModuleProvision() {
+    const content = document.getElementById("module-provision-content");
+    const arrow = document.getElementById("module-provision-arrow");
+    if (content.style.display === "none") {
+      content.style.display = "";
+      arrow.style.transform = "rotate(0deg)";
+    } else {
+      content.style.display = "none";
+      arrow.style.transform = "rotate(-90deg)";
+    }
+  }
+  document.getElementById("module-provision-content").style.display = ""; // expanded by default
+
+  // Module selection and drag-drop logic
+  const availableTiles = document.querySelectorAll(
+    "#availableModuleTiles .module-tile"
+  );
+  const chosenDropzone = document.getElementById("chosenModulesDropzone");
+  const chosenPlaceholder = document.getElementById("chosenModulesPlaceholder");
+
+  availableTiles.forEach((tile) => {
+    tile.addEventListener("click", function () {
+      if (!tile.classList.contains("selected")) {
+        // Add to chosen
+        tile.classList.add("selected");
+        const chosen = document.createElement("div");
+        chosen.className = "chosen-module";
+        chosen.textContent = tile.textContent;
+        chosen.setAttribute("draggable", "true");
+        chosen.setAttribute("data-module", tile.getAttribute("data-module"));
+        chosen.addEventListener("dragstart", dragChosenModule);
+        chosen.addEventListener("dragend", dragEndChosenModule);
+        chosenDropzone.appendChild(chosen);
+        updateChosenPlaceholder();
+      }
+    });
+  });
+
+  chosenDropzone.addEventListener("dragover", function (e) {
+    e.preventDefault();
+    const dragging = document.querySelector(".chosen-module.dragging");
+    const afterElement = getDragAfterElementChosen(chosenDropzone, e.clientY);
+    if (dragging && afterElement) {
+      chosenDropzone.insertBefore(dragging, afterElement);
+    } else if (dragging) {
+      chosenDropzone.appendChild(dragging);
+    }
+  });
+
+  function dragChosenModule(e) {
+    this.classList.add("dragging");
+  }
+  function dragEndChosenModule(e) {
+    this.classList.remove("dragging");
+  }
+  function getDragAfterElementChosen(container, y) {
+    const draggableElements = [
+      ...container.querySelectorAll(".chosen-module:not(.dragging)"),
+    ];
+    return draggableElements.reduce(
+      (closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+          return child;
+        } else {
+          return closest.element;
+        }
+      },
+      { offset: -Infinity, element: null }
+    );
+  }
+
+  // Remove from chosen on double click, and unselect tile
+  chosenDropzone.addEventListener("dblclick", function (e) {
+    if (e.target.classList.contains("chosen-module")) {
+      const moduleName = e.target.getAttribute("data-module");
+      // Unselect tile
+      document
+        .querySelectorAll("#availableModuleTiles .module-tile")
+        .forEach((tile) => {
+          if (tile.getAttribute("data-module") === moduleName) {
+            tile.classList.remove("selected");
+          }
+        });
+      e.target.remove();
+      updateChosenPlaceholder();
+    }
+  });
+
+  function updateChosenPlaceholder() {
+    if (chosenDropzone.querySelectorAll(".chosen-module").length === 0) {
+      chosenPlaceholder.style.display = "";
+    } else {
+      chosenPlaceholder.style.display = "none";
+    }
+  }
+  updateChosenPlaceholder();
+</script>
+
+<script nonce="{{ csp_nonce }}">
+  // --- Module & Headings Data ---
+  const allModulesV2 = [
+    {
+      name: "DP Bulk Upload",
+      default: ["Single Upload", "Bulk Upload", "Preview Table Edit"],
+    },
+    {
+      name: "DP Pick Table",
+      default: [
+        "S.No",
+        "Last Updated",
+        "Plating Stk No",
+        "Polishing Stk No",
+        "Plating Color",
+        "Category",
+        "Polish Finish",
+        "Version",
+        "Tray Cate-Capacity",
+        "Source",
+        "No of Tray",
+        "Input Qty",
+        "Process Status",
+        "Action",
+        "Lot Status",
+        "Current Stage",
+        "Remarks",
+      ],
+    },
+
+    {
+      name: "DP Complete Table",
+      default: [
+        "S.No",
+        "Last Updated",
+        "Plating Stk No",
+        "Polishing Stk No",
+        "Plating Color",
+        "Category",
+        "Polish Finish",
+        "Version",
+        "Tray Cate-Capacity",
+        "Source",
+        "No of Tray",
+        "Input Qty",
+        "Process Status",
+        "Action",
+        "Lot Status",
+        "Current Stage",
+        "Remarks",
+      ],
+    },
+    {
+      name: "Recovery Bulk Upload",
+      default: ["Bulk Upload File", "Preview Table Edit"],
+    },
+    {
+      name: "Recovery Pick Table",
+      default: [
+        "S.No",
+        "Date and Time",
+        "Model/Stock No",
+        "Plating Color",
+        "Polish Finish",
+        "Version",
+        "Source - Location",
+        "Tray Type Capacity",
+        "No of Tray",
+        "Total Quantity",
+        "Process Status",
+        "Action",
+        "Batch Status",
+        "Current Location",
+        "Remarks",
+      ],
+    },
+    {
+      name: "Recovery Complete Table",
+      default: [
+        "S.No",
+        "Last Updated",
+        "Plating Stk No",
+        "Polishing Stk No",
+        "Plating Color",
+        "Category",
+        "Polish Finish",
+        "Version",
+        "Tray Cate-Capacity",
+        "Source",
+        "No of Tray",
+        "Input Qty",
+        "Process Status",
+        "Action",
+        "Lot Status",
+        "Current Stage",
+        "Remarks",
+      ],
+    },
+    {
+      name: "Input Main Table",
+      default: [
+        "S.No",
+        "Last Updated",
+        "Plating Stk No",
+        "Polishing Stk No",
+        "Plating Color",
+        "Category",
+        "Polish Finish",
+        "Version",
+        "Tray Cate-Capacity",
+        "Source",
+        "No of Tray",
+        "Input Qty",
+        "Process Status",
+        "Action",
+        "Lot Status",
+        "Current Stage",
+        "Remarks",
+      ],
+    },
+    {
+      name: "Input Complete Table",
+      default: [
+        "S.No",
+        "Last Updated",
+        "Plating Stk No",
+        "Polishing Stk No",
+        "Plating Color",
+        "Category",
+        "Polish Finish",
+        "Tray Category-Capacity",
+        "Input Source",
+        "No of Trays",
+        "LOT Qty",
+        "Physical Qty",
+        "IPA Wiping",
+        "Accept Qty",
+        "Reject Qty",
+        "Process Status",
+        "Action",
+        "Lot Status",
+        "Current Stage",
+        "Remarks",
+      ],
+    },
+    {
+      name: "Input Accept Table",
+      default: [
+        "S.No",
+        "Last Updated",
+        "Plating Stk No",
+        "Polishing Stock No",
+        "Plating Color",
+        "Category",
+        "Polish Finish",
+        "Tray Category-Capacity",
+        "Input Source",
+        "No of Trays",
+        "LOT Qty",
+        "Physical Qty",
+        "Accept Qty",
+        "Reject Qty",
+        "Process Status",
+        "Action",
+        "Lot Status",
+        "Current Stage",
+        "Remarks",
+      ],
+    },
+    {
+      name: "Input Reject Table",
+      default: [
+        "S.No",
+        "Last Updated",
+        "Plating Stk No",
+        "Plating Color",
+        "Category",
+        "Polish Finish",
+        "Tray Category-Capacity",
+        "Input Source",
+        "No of Tray",
+        "Reject Qty",
+        "Rejection Reasons",
+      ],
+    },
+    {
+      name: "Brass QC Pick Table",
+      default: [
+        "S.No",
+        "Date and Time",
+        "Model/Stock No",
+        "Plating Color",
+        "Polish Finish",
+        "Version",
+        "Source - Location",
+        "Tray Type Capacity",
+        "No of Tray",
+        "LOT Quantity",
+        "Physical Quantity",
+        "Accept Qty",
+        "Reject Qty",
+        "Process Status",
+        "Action",
+        "Batch Status",
+        "Current Location",
+        "Remarks",
+      ],
+    },
+    {
+      name: "Brass QC Complete Table",
+      default: [
+        "S.No",
+        "Date and Time",
+        "Model/Stock No",
+        "Plating Color",
+        "Polish Finish",
+        "Version",
+        "Source - Location",
+        "Tray Type Capacity",
+        "No of Tray",
+        "LOT Quantity",
+        "Physical Quantity",
+        "Accept Qty",
+        "Reject Qty",
+        "Process Status",
+        "Action",
+        "Batch Status",
+        "Current Location",
+        "Remarks",
+      ],
+    },
+    {
+      name: "IQF Pick Table",
+      default: [
+        "S.No",
+        "Date and Time",
+        "Model/Stock No",
+        "Plating Color",
+        "Polish Finish",
+        "Version",
+        "Source - Location",
+        "Tray Type Capacity",
+        "No of Tray",
+        "LOT Quantity",
+        "Physical Quantity",
+        "Accept Qty",
+        "Reject Qty",
+        "Process Status",
+        "Action",
+        "Batch Status",
+        "Current Location",
+        "Remarks",
+      ],
+    },
+    {
+      name: "IQF Complete Table",
+      default: [
+        "S.No",
+        "Date and Time",
+        "Model/Stock No",
+        "Plating Color",
+        "Polish Finish",
+        "Version",
+        "Source - Location",
+        "Tray Type Capacity",
+        "No of Tray",
+        "LOT Quantity",
+        "Physical Quantity",
+        "Accept Qty",
+        "Reject Qty",
+        "Process Status",
+        "Action",
+        "Batch Status",
+        "Current Location",
+        "Remarks",
+      ],
+    },
+    {
+      name: "IQF Reject Table",
+      default: [
+        "S.No",
+        "Date and Time",
+        "Model/Stock No",
+        "Plating Color",
+        "Polish Finish",
+        "Version",
+        "Source - Location",
+        "Tray Type Capacity",
+        "No of Tray",
+        "Reject Quantity",
+        "Reject Reason",
+      ],
+    },
+    { name: "Jig Loading", default: ["Jig ID", "Operator", "Load Time"] },
+    { name: "Jig Unloading", default: ["Jig ID", "Operator", "Unload Time"] },
+    { name: "IP Inspection", default: ["Part No", "Inspector", "Remarks"] },
+    { name: "Nickel Inspection", default: ["Sample", "Inspector", "Nickel %"] },
+    { name: "Nickel Audit", default: ["Audit Date", "Auditor", "Findings"] },
+  ];
+
+  // --- Modal Open/Close ---
+  document.getElementById("moduleDropdownBtn").onclick = function (e) {
+    e.preventDefault();
+    openModuleSelectModalV2();
+  };
+  function openModuleSelectModalV2() {
+    renderModuleSelectList();
+    renderModuleHeadingsSection();
+    renderModulePreviewGrid();
+    document.getElementById("moduleSelectModalV2").classList.add("show");
+  }
+  function closeModuleSelectModalV2() {
+    document.getElementById("moduleSelectModalV2").classList.remove("show");
+  }
+  // Hide modal when clicking outside content
+  document
+    .getElementById("moduleSelectModalV2")
+    .addEventListener("click", function (e) {
+      if (e.target === this) closeModuleSelectModalV2();
+    });
+
+  // --- State ---
+  let selectedModulesV2 = [];
+  let selectedHeadingsV2 = {}; // { moduleName: [headings] }
+
+  // --- Render Modules as Checkboxes ---
+  function renderModuleSelectList() {
+    const container = document.getElementById("moduleSelectList");
+    container.innerHTML = "";
+    allModulesV2.forEach((mod) => {
+      const label = document.createElement("label");
+      label.style =
+        "display:flex;align-items:center;gap:0.3rem;background:#f1f5f9;padding:0.3rem 0.7rem;border-radius:6px;cursor:pointer;";
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.value = mod.name;
+      cb.checked = selectedModulesV2.includes(mod.name);
+      cb.onchange = function () {
+        if (cb.checked) {
+          selectedModulesV2.push(mod.name);
+          selectedHeadingsV2[mod.name] = [...mod.default];
+        } else {
+          selectedModulesV2 = selectedModulesV2.filter((m) => m !== mod.name);
+          delete selectedHeadingsV2[mod.name];
+        }
+        renderModuleHeadingsSection();
+        renderModulePreviewGrid();
+      };
+      label.appendChild(cb);
+      label.appendChild(document.createTextNode(mod.name));
+      container.appendChild(label);
+    });
+  }
+
+  // --- Render Headings Selection for Each Module ---
+  function renderModuleHeadingsSection() {
+    const section = document.getElementById("moduleHeadingsSection");
+    section.innerHTML = "";
+    selectedModulesV2.forEach((modName) => {
+      const mod = allModulesV2.find((m) => m.name === modName);
+      if (!mod) return;
+      const div = document.createElement("div");
+      div.style =
+        "margin-bottom:0.7rem;background:#f8fafc;padding:0.6rem 0.7rem;border-radius:6px;";
+      const title = document.createElement("div");
+      title.style = "font-weight:600;color:#2563eb;margin-bottom:0.3rem;";
+      title.textContent = modName + " - Select Headings";
+      div.appendChild(title);
+
+      // Headings checkboxes
+      mod.default.forEach((head) => {
+        const label = document.createElement("label");
+        label.style = "margin-right:1.2em;font-weight:500;";
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.value = head;
+        cb.checked =
+          selectedHeadingsV2[modName] &&
+          selectedHeadingsV2[modName].includes(head);
+        cb.onchange = function () {
+          if (cb.checked) {
+            if (!selectedHeadingsV2[modName].includes(head))
+              selectedHeadingsV2[modName].push(head);
+          } else {
+            selectedHeadingsV2[modName] = selectedHeadingsV2[modName].filter(
+              (h) => h !== head
+            );
+          }
+          renderModulePreviewGrid();
+        };
+        label.appendChild(cb);
+        label.appendChild(document.createTextNode(" " + head));
+        div.appendChild(label);
+      });
+      section.appendChild(div);
+    });
+  }
+
+  // --- Render Preview Grid ---
+  function renderModulePreviewGrid() {
+    const grid = document.getElementById("modulePreviewGrid");
+    grid.innerHTML = "";
+    selectedModulesV2.forEach((modName) => {
+      const heads = selectedHeadingsV2[modName] || [];
+      const card = document.createElement("div");
+      card.style =
+        "background:#fff;border-radius:8px;padding:0.5rem 0.5rem 0.7rem 0.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.04);border:1px solid #e5e7eb;";
+      const title = document.createElement("div");
+      title.style = "font-weight:600;color:#2563eb;margin-bottom:0.3rem;";
+      title.textContent = modName;
+      card.appendChild(title);
+
+      // Table
+      const table = document.createElement("table");
+      table.className = "table";
+      table.style = "width:100%;margin-bottom:0.5rem;font-size:0.95em;";
+      const thead = document.createElement("thead");
+      const tr = document.createElement("tr");
+      heads.forEach((h) => {
+        const th = document.createElement("th");
+        th.textContent = h;
+        tr.appendChild(th);
+      });
+      thead.appendChild(tr);
+      table.appendChild(thead);
+
+      // Dummy row
+      const tbody = document.createElement("tbody");
+      const row = document.createElement("tr");
+      heads.forEach(() => {
+        const td = document.createElement("td");
+        td.textContent = "—";
+        row.appendChild(td);
+      });
+      tbody.appendChild(row);
+      table.appendChild(tbody);
+
+      card.appendChild(table);
+      grid.appendChild(card);
+    });
+  }
+
+  // --- Apply Selection ---
+  function applyModuleSelectionV2() {
+    // Show chosen modules as tiles (if you want to update another part of your UI, do it here)
+    closeModuleSelectModalV2();
+  }
+
+  // --- Optional: Open modal on "Choose modules" label click as well ---
+  document.getElementById("moduleDropdownLabel").onclick = function (e) {
+    e.preventDefault();
+    openModuleSelectModalV2();
+  };
+</script>
+
+<script nonce="{{ csp_nonce }}">
+  // filepath: a:\Workspace\Server_Setup_TTT\New_TTT_V2\static\templates\Settings.html
+
+  const modulesList = [
+    {
+      name: "DP Bulk Upload",
+      headings: ["Single Upload", "Bulk Upload", "Preview Table Edit"],
+    },
+
+    {
+      name: "DP Pick Table",
+      headings: [
+        "S.No",
+        "Last Updated",
+        "Plating Stk No",
+        "Polishing Stk No",
+        "Plating Color",
+        "Category",
+        "Polish Finish",
+        "Version",
+        "Tray Cate-Capacity",
+        "Source",
+        "No of Tray",
+        "Input Qty",
+        "Process Status",
+        "Action",
+        "Lot Status",
+        "Current Stage",
+        "Remarks",
+      ],
+    },
+    {
+      name: "DP Complete Table",
+      headings: [
+        "S.No",
+        "Last Updated",
+        "Plating Stk No",
+        "Polishing Stk No",
+        "Plating Color",
+        "Category",
+        "Polish Finish",
+        "Version",
+        "Tray Cate-Capacity",
+        "Source",
+        "No of Tray",
+        "Input Qty",
+        "Process Status",
+        "Action",
+        "Lot Status",
+        "Current Stage",
+        "Remarks",
+      ],
+    },
+    {
+      name: "Recovery Bulk Upload",
+      headings: ["Bulk Upload File", "Preview Table Edit"],
+    },
+    {
+      name: "Recovery Pick Table",
+      headings: [
+        "S.No",
+        "Date and Time",
+        "Model/Stock No",
+        "Plating Color",
+        "Polish Finish",
+        "Version",
+        "Source - Location",
+        "Tray Type Capacity",
+        "No of Tray",
+        "Total Quantity",
+        "Process Status",
+        "Action",
+        "Batch Status",
+        "Current Location",
+        "Remarks",
+      ],
+    },
+    {
+      name: "Recovery Complete Table",
+      headings: [
+        "S.No",
+        "Last Updated",
+        "Plating Stk No",
+        "Polishing Stk No",
+        "Plating Color",
+        "Category",
+        "Polish Finish",
+        "Version",
+        "Tray Cate-Capacity",
+        "Source",
+        "No of Tray",
+        "Input Qty",
+        "Process Status",
+        "Action",
+        "Lot Status",
+        "Current Stage",
+        "Remarks",
+      ],
+    },
+    {
+      name: "Input Main Table",
+      headings: [
+        "S.No",
+        "Last Updated",
+        "Plating Stk No",
+        "Polishing Stk No",
+        "Plating Color",
+        "Category",
+        "Polish Finish",
+        "Version",
+        "Tray Cate-Capacity",
+        "Source",
+        "No of Tray",
+        "Input Qty",
+        "Process Status",
+        "Action",
+        "Lot Status",
+        "Current Stage",
+        "Remarks",
+      ],
+    },
+    {
+      name: "Input Complete Table",
+      headings: [
+        "S.No",
+        "Last Updated",
+        "Plating Stk No",
+        "Polishing Stk No",
+        "Plating Color",
+        "Category",
+        "Polish Finish",
+        "Tray Category-Capacity",
+        "Input Source",
+        "No of Trays",
+        "LOT Qty",
+        "Physical Qty",
+        "IPA Wiping",
+        "Accept Qty",
+        "Reject Qty",
+        "Process Status",
+        "Action",
+        "Lot Status",
+        "Current Stage",
+        "Remarks",
+      ],
+    },
+    {
+      name: "Input Accept Table",
+      headings: [
+        "S.No",
+        "Last Updated",
+        "Plating Stk No",
+        "Polishing Stock No",
+        "Plating Color",
+        "Category",
+        "Polish Finish",
+        "Tray Category-Capacity",
+        "Input Source",
+        "No of Trays",
+        "LOT Qty",
+        "Physical Qty",
+        "Accept Qty",
+        "Reject Qty",
+        "Process Status",
+        "Action",
+        "Lot Status",
+        "Current Stage",
+        "Remarks",
+      ],
+    },
+    {
+      name: "Input Reject Table",
+      headings: [
+        "S.No",
+        "Last Updated",
+        "Plating Stk No",
+        "Plating Color",
+        "Category",
+        "Polish Finish",
+        "Tray Category-Capacity",
+        "Input Source",
+        "No of Tray",
+        "Reject Qty",
+        "Rejection Reasons",
+      ],
+    },
+    {
+      name: "Brass QC Pick Table",
+      headings: [
+        "S.No",
+        "Date and Time",
+        "Model/Stock No",
+        "Plating Color",
+        "Polish Finish",
+        "Version",
+        "Source - Location",
+        "Tray Type Capacity",
+        "No of Tray",
+        "LOT Quantity",
+        "Physical Quantity",
+        "Accept Qty",
+        "Reject Qty",
+        "Process Status",
+        "Action",
+        "Batch Status",
+        "Current Location",
+        "Remarks",
+      ],
+    },
+    {
+      name: "Brass QC Complete Table",
+      headings: [
+        "S.No",
+        "Date and Time",
+        "Model/Stock No",
+        "Plating Color",
+        "Polish Finish",
+        "Version",
+        "Source - Location",
+        "Tray Type Capacity",
+        "No of Tray",
+        "LOT Quantity",
+        "Physical Quantity",
+        "Accept Qty",
+        "Reject Qty",
+        "Process Status",
+        "Action",
+        "Batch Status",
+        "Current Location",
+        "Remarks",
+      ],
+    },
+    {
+      name: "IQF Pick Table",
+      headings: [
+        "S.No",
+        "Date and Time",
+        "Model/Stock No",
+        "Plating Color",
+        "Polish Finish",
+        "Version",
+        "Source - Location",
+        "Tray Type Capacity",
+        "No of Tray",
+        "LOT Quantity",
+        "Physical Quantity",
+        "Accept Qty",
+        "Reject Qty",
+        "Process Status",
+        "Action",
+        "Batch Status",
+        "Current Location",
+        "Remarks",
+      ],
+    },
+    {
+      name: "IQF Complete Table",
+      headings: [
+        "S.No",
+        "Date and Time",
+        "Model/Stock No",
+        "Plating Color",
+        "Polish Finish",
+        "Version",
+        "Source - Location",
+        "Tray Type Capacity",
+        "No of Tray",
+        "LOT Quantity",
+        "Physical Quantity",
+        "Accept Qty",
+        "Reject Qty",
+        "Process Status",
+        "Action",
+        "Batch Status",
+        "Current Location",
+        "Remarks",
+      ],
+    },
+    {
+      name: "IQF Reject Table",
+      headings: [
+        "S.No",
+        "Date and Time",
+        "Model/Stock No",
+        "Plating Color",
+        "Polish Finish",
+        "Version",
+        "Source - Location",
+        "Tray Type Capacity",
+        "No of Tray",
+        "Reject Quantity",
+        "Reject Reason",
+      ],
+    },
+    { name: "Jig Loading", headings: ["Jig ID", "Operator", "Load Time"] },
+    { name: "Jig Unloading", headings: ["Jig ID", "Operator", "Unload Time"] },
+    { name: "IP Inspection", headings: ["Part No", "Inspector", "Remarks"] },
+    {
+      name: "Nickel Inspection",
+      headings: ["Sample", "Inspector", "Nickel %"],
+    },
+    { name: "Nickel Audit", headings: ["Audit Date", "Auditor", "Findings"] },
+    {
+      name: "Final Packing",
+      headings: ["Pack ID", "Supervisor", "Packed Qty"],
+    },
+  ];
+
+  // 10 visually distinct, professional pastel shades and neutral borders
+  const pastelShades = [
+    "#f3f4f6",
+    "#e0f2fe",
+    "#f1f5f9",
+    "#fce7f3",
+    "#f3e8ff",
+    "#fef3c7",
+    "#e0e7ff",
+    "#dcfce7",
+    "#fee2e2",
+    "#fef9c3",
+  ];
+  const borderShades = [
+    "#d1d5db",
+    "#38bdf8",
+    "#cbd5e1",
+    "#f472b6",
+    "#a78bfa",
+    "#fbbf24",
+    "#818cf8",
+    "#34d399",
+    "#f87171",
+    "#eab308",
+  ];
+
+  // State
+  let droppedModules = []; // [{name, headings: [checked]}]
+
+  // Render module buttons
+  function renderModuleBtnGrid() {
+    const grid = document.getElementById("moduleBtnGrid");
+    grid.innerHTML = "";
+
+    // Day Planning Module
+    const dpModules = ["DP Bulk Upload", "DP Pick Table", "DP Complete Table"];
+    const dpColor = "#e0f2fe";
+    const dpBorder = "#38bdf8";
+
+    // Recovery modules  ---
+    const recoveryModules = [
+      "Recovery Bulk Upload",
+      "Recovery Pick Table",
+      "Recovery Complete Table",
+    ];
+    const recoveryColors = ["#fce7f3"];
+    const recoveryBorders = ["#f472b6"];
+
+    // Input Screening
+    const inputModules = [
+      "Input Main Table",
+      "Input Complete Table",
+      "Input Accept Table",
+      "Input Reject Table",
+    ];
+    const inputBg = "rgb(220, 252, 231)";
+    const inputColor = "rgb(51, 65, 85)";
+    const inputBorder = "1.5px solid rgb(52, 211, 153)";
+
+    // Brass QC
+    const brassIqfModules = [
+      "Brass QC Pick Table",
+      "Brass QC Complete Table",
+      "IQF Pick Table",
+      "IQF Complete Table",
+      "IQF Reject Table",
+    ];
+    const brassIqfBg = "rgb(254, 243, 199)";
+    const brassIqfColor = "rgb(51, 65, 85)";
+    const brassIqfBorder = "1.5px solid rgb(251, 191, 36)";
+
+    modulesList.forEach((mod, idx) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = mod.name;
+      btn.draggable = true;
+      btn.className = "btn btn-secondary btn-sm";
+
+      /// DP modules
+      if (dpModules.includes(mod.name)) {
+        btn.style = `
+      margin-bottom:0.2em;
+      background:${dpColor};
+      color:#334155;
+      border:1.5px solid ${dpBorder};
+      font-weight:600;
+      border-radius:30px;
+      box-shadow:0 1px 2px #e0e7ef;
+      transition:background 0.2s;
+      cursor:grab;
+    `;
+      } else if (recoveryModules.includes(mod.name)) {
+        // All Recovery modules get the same color and border
+        btn.style = `
+        margin-bottom:0.2em;
+        background:${recoveryColors[0]};
+        color:#334155;
+        border:1.5px solid ${recoveryBorders[0]};
+        font-weight:600;
+        border-radius:30px;
+        box-shadow:0 1px 2px #e0e7ef;
+        transition:background 0.2s;
+        cursor:grab;
+      `;
+      } else if (inputModules.includes(mod.name)) {
+        btn.style = `
+        margin-bottom:0.2em;
+        background:${inputBg};
+        color:${inputColor};
+        border:${inputBorder};
+        font-weight:600;
+        border-radius:30px;
+        box-shadow:0 1px 2px #e0e7ef;
+        transition:background 0.2s;
+        cursor:grab;
+      `;
+      } else if (brassIqfModules.includes(mod.name)) {
+        btn.style = `
+    margin-bottom:0.2em;
+    background:${brassIqfBg};
+    color:${brassIqfColor};
+    border:${brassIqfBorder};
+    font-weight:600;
+    border-radius:30px;
+    box-shadow:0 1px 2px #e0e7ef;
+    transition:background 0.2s;
+    cursor:grab;
+  `;
+      } else {
+        // Default style for other modules
+        btn.style = `
+        margin-bottom:0.2em;
+        background:${pastelShades[idx % pastelShades.length]};
+        color:#334155;
+        border:1.5px solid ${borderShades[idx % borderShades.length]};
+        font-weight:600;
+        border-radius:30px;
+        box-shadow:0 1px 2px #e0e7ef;
+        transition:background 0.2s;
+        cursor:grab;
+      `;
+      }
+
+      // --------------------------------------------
+
+      btn.ondragstart = function (e) {
+        e.dataTransfer.setData("text/plain", mod.name);
+        setTimeout(() => btn.classList.add("dragging"), 0);
+      };
+      btn.ondragend = function () {
+        btn.classList.remove("dragging");
+      };
+      // Highlight if already dropped
+      // --- In the "already dropped" highlight block, update as below ---
+      // ...inside renderModuleBtnGrid, replace the highlight block with:
+
+      if (droppedModules.find((m) => m.name === mod.name)) {
+        if (dpModules.includes(mod.name)) {
+          btn.style.background = "#2563eb";
+          btn.style.color = "#fff";
+          btn.style.border = `1.5px solid ${dpBorder}`;
+        } else if (recoveryModules.includes(mod.name)) {
+          btn.style.background = recoveryBorders[0];
+          btn.style.color = "#fff";
+          btn.style.border = `1.5px solid ${recoveryBorders[0]}`;
+        } else if (inputModules.includes(mod.name)) {
+          btn.style.background = "rgb(52, 211, 153)";
+          btn.style.color = "#fff";
+          btn.style.border = "1.5px solid rgb(52, 211, 153)";
+        } else if (brassIqfModules.includes(mod.name)) {
+          btn.style.background = "rgb(251, 191, 36)";
+          btn.style.color = "#fff";
+          btn.style.border = "1.5px solid rgb(251, 191, 36)";
+        } else {
+          btn.style.background = "#334155";
+          btn.style.color = "#fff";
+          btn.style.border = `1.5px solid ${
+            borderShades[idx % borderShades.length]
+          }`;
+        }
+
+        btn.style.cursor = "not-allowed";
+      }
+      // ---------------------------------------------------------------
+
+      grid.appendChild(btn);
+    });
+  }
+  renderModuleBtnGrid();
+
+  // Render dropped modules and heading checkboxes
+  function renderSelectedModulesContainer() {
+    const cont = document.getElementById("selectedModulesContainer");
+    cont.innerHTML = `
+    <div id="selectedModulesContainer" style="margin-top: 1.5rem">
+  <div style="font-weight:600; color:#2563eb; margin-bottom:0.5rem; font-size:1.07em;">
+    Chosen Modules
+  </div>
+    <div id="dropZone"
+      style="min-height:70px;padding:1.2em 0.5em;border:2px dashed #cbd5e1;border-radius:8px;background:#f8fafc;display:flex;flex-wrap:wrap;gap:1.2em;align-items:flex-start;width: 100%;">
+      <span id="dropZonePlaceholder" style="color:#94a3b8;font-size:1em;">Drag modules here to configure headings</span>
+    </div>
+  `;
+    const dropZone = document.getElementById("dropZone");
+    dropZone.ondragover = function (e) {
+      e.preventDefault();
+      dropZone.style.background = "#f1f5f9";
+    };
+    dropZone.ondragleave = function () {
+      dropZone.style.background = "#f8fafc";
+    };
+    dropZone.ondrop = function (e) {
+      e.preventDefault();
+      dropZone.style.background = "#f8fafc";
+      const modName = e.dataTransfer.getData("text/plain");
+      if (!droppedModules.find((m) => m.name === modName)) {
+        const mod = modulesList.find((m) => m.name === modName);
+        if (droppedModules.length < modulesList.length) {
+          droppedModules.push({ name: mod.name, headings: [...mod.headings] });
+          renderModuleBtnGrid();
+          renderSelectedModulesContainer();
+        }
+      }
+    };
+
+    // Show dropped modules with heading checkboxes
+    droppedModules.forEach((mod, idx) => {
+      const card = document.createElement("div");
+      card.style = `
+      background:${pastelShades[idx % pastelShades.length]};
+      border:1.5px solid ${borderShades[idx % borderShades.length]};
+      border-radius:8px;
+      padding:0.7em 1em 1em 1em;
+      min-width:180px;
+      box-shadow:0 2px 6px #e0e7ef;
+      position:relative;
+    `;
+      // Remove button
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.textContent = "×";
+      removeBtn.title = "Remove module";
+      removeBtn.style =
+        "position:absolute;top:7px;right:10px;background:none;border:none;color:#dc2626;font-size:1.2em;cursor:pointer;";
+      removeBtn.onclick = function () {
+        droppedModules = droppedModules.filter((m) => m.name !== mod.name);
+        renderModuleBtnGrid();
+        renderSelectedModulesContainer();
+      };
+      card.appendChild(removeBtn);
+
+      // Module name
+      const title = document.createElement("div");
+      title.textContent = mod.name;
+      title.style = "font-weight:600;color:#334155;margin-bottom:0.4em;";
+      card.appendChild(title);
+
+  
+      // Headings icons + label (replace the checkboxes block)
+      const headingsGrid = document.createElement("div");
+      headingsGrid.className = "module-headings-grid";
+      modulesList
+        .find((m) => m.name === mod.name)
+        .headings.forEach((head) => {
+          const headingDiv = document.createElement("div");
+          headingDiv.style = `
+            display: flex;
+            align-items: center;
+            gap: 2.5em;
+            background: #f3f4f6;
+            border-radius: 6px;
+            padding: 0.25em 0.7em 0.25em 0.5em;
+            margin: 0 0.7em 0.5em 0;
+            font-weight: 500;
+            font-size: 0.97em;
+            min-width: 0;
+          `;
+
+          // Edit icon
+          // ...existing code...
+
+          // Edit icon
+          const editIcon = document.createElement("span");
+          editIcon.innerHTML = "&#9998;";
+          editIcon.title = "Edit";
+          editIcon.style =
+            "color:#2563eb;cursor:pointer;font-size:1.1em;padding:2px 6px;border-radius:4px;background:#fff;transition:background 0.2s;";
+          editIcon.onclick = function () {
+            if (editIcon.style.backgroundColor === "rgb(209, 250, 229)") {
+              editIcon.style.backgroundColor = "#fff";
+            } else {
+              editIcon.style.backgroundColor = "#d1fae5";
+            }
+          };
+          headingDiv.appendChild(editIcon);
+
+          // View icon
+          const viewIcon = document.createElement("span");
+          viewIcon.innerHTML = "&#128065;";
+          viewIcon.title = "View";
+          viewIcon.style =
+            "color:#64748b;cursor:pointer;font-size:1.1em;padding:2px 6px;border-radius:4px;background:#fff;transition:background 0.2s;text-decoration:none;";
+          viewIcon.onclick = function () {
+            if (viewIcon.style.backgroundColor === "rgb(209, 250, 229)") {
+              viewIcon.style.backgroundColor = "#fff";
+              viewIcon.style.textDecoration = "";
+              viewIcon.style.opacity = "";
+            } else {
+              viewIcon.style.backgroundColor = "#d1fae5";
+              viewIcon.style.textDecoration = "line-through";
+              viewIcon.style.opacity = "0.5";
+            }
+          };
+          headingDiv.appendChild(viewIcon);
+
+          // Heading text
+          const headText = document.createElement("span");
+          headText.textContent = head;
+          headText.style = "margin-left:0.2em;";
+          headingDiv.appendChild(headText);
+
+          headingsGrid.appendChild(headingDiv);
+        });
+      card.appendChild(headingsGrid);
+
+      dropZone.appendChild(card);
+    });
+
+    // Hide placeholder if any module is dropped
+    document.getElementById("dropZonePlaceholder").style.display =
+      droppedModules.length ? "none" : "";
+  }
+  renderSelectedModulesContainer();
+</script>
+
+<script nonce="{{ csp_nonce }}">
+  // filepath: a:\Workspace\Server_Setup_TTT\New_TTT_V2\static\templates\Settings.html
+
+  function showStep(step) {
+    document.getElementById("step-user-form").style.display =
+      step === 1 ? "" : "none";
+    document.getElementById("step-module-select").style.display =
+      step === 2 ? "" : "none";
+    document.getElementById("step-user-table").style.display =
+      step === 3 ? "" : "none";
+
+    // Breadcrumbs
+    document.getElementById("crumb-user").style.color =
+      step === 1 ? "#2563eb" : "#94a3b8";
+    document.getElementById("crumb-user").style.fontWeight =
+      step === 1 ? "600" : "400";
+    document.getElementById("crumb-modules").style.color =
+      step === 2 ? "#2563eb" : "#94a3b8";
+    document.getElementById("crumb-modules").style.fontWeight =
+      step === 2 ? "600" : "400";
+    document.getElementById("crumb-table").style.color =
+      step === 3 ? "#2563eb" : "#94a3b8";
+    document.getElementById("crumb-table").style.fontWeight =
+      step === 3 ? "600" : "400";
+  }
+
+  showStep(1);
+
+  document.getElementById("btn-user-next").onclick = function () {
+    showStep(2);
+  };
+  document.getElementById("btn-module-before").onclick = function () {
+    showStep(1);
+  };
+  document.getElementById("btn-module-next").onclick = function () {
+    showStep(3);
+  };
+</script>
+
+<script nonce="{{ csp_nonce }}">
+  // filepath: a:\Workspace\Server_Setup_TTT\New_TTT_V2\static\templates\Settings.html
+
+  document.getElementById("crumb-user").style.cursor = "pointer";
+  document.getElementById("crumb-modules").style.cursor = "pointer";
+  document.getElementById("crumb-table").style.cursor = "pointer";
+
+  document.getElementById("crumb-user").onclick = function () {
+    showStep(1);
+  };
+  document.getElementById("crumb-modules").onclick = function () {
+    showStep(2);
+  };
+  document.getElementById("crumb-table").onclick = function () {
+    showStep(3);
+  };
+</script>
+
+<script nonce="{{ csp_nonce }}">
+  // filepath: a:\Workspace\Server_Setup_TTT\New_TTT_V2\static\templates\Settings.html
+
+  function updateBreadcrumbStage(step) {
+    // Remove all active/page states
+    document.querySelectorAll(".breadcrumb li").forEach((li) => {
+      li.classList.remove("active");
+      if (li.querySelector('[aria-current="page"]')) {
+        const text = li.querySelector('[aria-current="page"]').textContent;
+        li.innerHTML = `<a>${text}</a>`;
+      }
+    });
+
+    // Set active/page state
+    if (step === 1) {
+      document.getElementById("bc-user").classList.add("active");
+      document.getElementById(
+        "bc-user"
+      ).innerHTML = `<span aria-current="page">User Creation</span>`;
+    } else if (step === 2) {
+      document.getElementById("bc-modules").classList.add("active");
+      document.getElementById(
+        "bc-modules"
+      ).innerHTML = `<span aria-current="page">Select Modules</span>`;
+    } else if (step === 3) {
+      document.getElementById("bc-table").classList.add("active");
+      document.getElementById(
+        "bc-table"
+      ).innerHTML = `<span aria-current="page">User Table</span>`;
+    }
+  }
+
+  // Call this inside your showStep function
+  const prevShowStep = showStep;
+  showStep = function (step) {
+    prevShowStep(step);
+    updateBreadcrumbStage(step);
+  };
+  updateBreadcrumbStage(1);
+
+  // Make breadcrumb navigation clickable
+  document.getElementById("bc-user").onclick = function () {
+    showStep(1);
+  };
+  document.getElementById("bc-modules").onclick = function () {
+    showStep(2);
+  };
+  document.getElementById("bc-table").onclick = function () {
+    showStep(3);
+  };
+</script>
+
+<script nonce="{{ csp_nonce }}">
+// Fetch and populate departments and roles
+async function fetchDepartments() {
+  const res = await fetch('/adminportal/api/departments/');
+  const data = await res.json();
+  const select = document.getElementById('department');
+  select.innerHTML = '<option value="">Select Department</option>';
+  data.forEach(dep => {
+    select.innerHTML += `<option value="${dep.name}">${dep.name}</option>`;
+  });
+}
+async function fetchRoles() {
+  const res = await fetch('/adminportal/api/roles/');
+  const data = await res.json();
+  const select = document.getElementById('role');
+  select.innerHTML = '<option value="">Select Role</option>';
+  data.forEach(role => {
+    select.innerHTML += `<option value="${role.name}">${role.name}</option>`;
+  });
+}
+
+// Add new department
+document.getElementById('addDepartmentBtn').onclick = async function() {
+  const name = prompt('Enter new department name:');
+  if (name) {
+    const res = await fetch('/adminportal/api/departments/', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+      body: JSON.stringify({name})
+    });
+    if (res.ok) {
+      await fetchDepartments();
+      document.getElementById('department').value = name;
+    } else {
+      alert('Failed to add department');
+    }
+  }
+};
+// Add new role
+document.getElementById('addRoleBtn').onclick = async function() {
+  const name = prompt('Enter new role name:');
+  if (name) {
+    const res = await fetch('/adminportal/api/roles/', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+      body: JSON.stringify({name})
+    });
+    if (res.ok) {
+      await fetchRoles();
+      document.getElementById('role').value = name;
+    } else {
+      alert('Failed to add role');
+    }
+  }
+};
+
+// Call on page load
+document.addEventListener('DOMContentLoaded', function() {
+  fetchDepartments();
+  fetchRoles();
+});
+</script>
+
+<script nonce="{{ request.csp_nonce }}">
+  // Auto-populate Department and Role dropdowns
+  async function fetchAndPopulateDropdowns() {
+    try {
+      const deptRes = await fetch("/adminportal/api/departments/");
+      const departments = await deptRes.json();
+      const deptSelect = document.getElementById("department");
+      deptSelect.innerHTML = departments
+        .map(d => `<option value="${d.name}">${d.name}</option>`)
+        .join("");
+    } catch (err) {
+      console.error("Failed to load departments", err);
+    }
+
+    try {
+      const roleRes = await fetch("/adminportal/api/roles/");
+      const roles = await roleRes.json();
+      const roleSelect = document.getElementById("role");
+      roleSelect.innerHTML = roles
+        .map(r => `<option value="${r.name}">${r.name}</option>`)
+        .join("");
+    } catch (err) {
+      console.error("Failed to load roles", err);
+    }
+  }
+
+  // Handle form submission
+  async function handleUserSubmit(e) {
+    e.preventDefault();
+
+    const data = {
+      first_name: document.getElementById("firstName").value,
+      last_name: document.getElementById("lastName").value,
+      email: document.getElementById("email").value,
+      profile: {
+        department: document.getElementById("department").value,
+        role: document.getElementById("role").value,
+        manager: document.getElementById("manager").value,
+        employment_status: document.querySelector('input[name="employmentStatus"]:checked').value
+      }
+    };
+
+    try {
+      const response = await fetch("/adminportal/api/users/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert("User created successfully!\nUser ID: " + result.id);
+        document.getElementById("userForm").reset();
+        document.getElementById("userId").value = result.id;
+      } else {
+        alert("Error: " + JSON.stringify(result));
+      }
+    } catch (error) {
+      console.error("Submit error:", error);
+    }
+  }
+
+  // Get CSRF token from cookies
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  // Load dropdowns and attach submit event
+  document.addEventListener("DOMContentLoaded", function () {
+    fetchAndPopulateDropdowns();
+    const form = document.getElementById("userForm");
+    form.addEventListener("submit", handleUserSubmit);
+  });
+</script>
+
+
+{% endblock content %}

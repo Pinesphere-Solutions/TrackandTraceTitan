@@ -1,5 +1,174 @@
 {% extends "base.html" %} {% load static %} {% block content %}
 <style>
+  /* Professional table header styling with proper text wrapping */
+#order-listing th {
+  position: relative;
+  padding: 8px 12px 8px 16px !important;
+  text-align: left !important;
+  vertical-align: middle !important;
+  white-space: normal !important;
+  line-height: 1.3 !important;
+  word-break: keep-all !important;
+  hyphens: none !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  background: #028084 !important;
+  color: #e5fcff !important;
+  border-bottom: 2.5px solid #bdbdbd !important;
+  min-width: 80px;
+  max-width: 140px;
+}
+
+/* Specific width adjustments for better text wrapping */
+/* Specific width adjustments for better text wrapping */
+#order-listing th:nth-child(1) { min-width: 60px; max-width: 80px; }   /* S.No */
+#order-listing th:nth-child(2) { min-width: 90px; max-width: 110px; }  /* Last Updated */
+#order-listing th:nth-child(3) { min-width: 110px; max-width: 130px; } /* Plating Stk No */
+#order-listing th:nth-child(4) { min-width: 130px; max-width: 150px; } /* Polishing Stk No */
+#order-listing th:nth-child(5) { min-width: 90px; max-width: 110px; }  /* Plating Color */
+#order-listing th:nth-child(6) { min-width: 100px; max-width: 100px; }  /* Category */
+#order-listing th:nth-child(7) { min-width: 90px; max-width: 110px; }  /* Polish Finish */
+#order-listing th:nth-child(8) { min-width: 90px; max-width: 90px; }   /* Version */
+#order-listing th:nth-child(9) { min-width: 110px; max-width: 140px; } /* Tray Cate-Capacity */
+#order-listing th:nth-child(10) { min-width: 100px; max-width: 120px; }  /* No of Tray */
+#order-listing th:nth-child(11) { min-width: 100px; max-width: 120px; } /* Lot Qty */
+#order-listing th:nth-child(12) { min-width: 80px; max-width: 100px; } /* Physical Qty */
+#order-listing th:nth-child(13) { min-width: 100px; max-width: 120px; } /* Accept Qty */
+#order-listing th:nth-child(14) { min-width: 90px; max-width: 100px; } /* Reject Qty */
+#order-listing th:nth-child(15) { min-width: 90px; max-width: 110px; } /* Process Status */
+#order-listing th:nth-child(16) { min-width: 100px; max-width: 120px; } /* Action */
+#order-listing th:nth-child(17) { min-width: 90px; max-width: 100px; } /* Lot Status */
+#order-listing th:nth-child(17) { min-width: 90px; max-width: 100px; } /* Current Stage */
+#order-listing th:nth-child(17) { min-width: 90px; max-width: 100px; } /* Remarks */
+ 
+/* Right-align filter icons */
+#order-listing th .fa-filter {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+#order-listing th .fa-filter:hover {
+  opacity: 1;
+}
+
+/* Better text wrapping for specific headers */
+#order-listing th {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+   #order-listing tbody tr.no-data td {
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+  background: #f9f9f9;
+}
+  /* start of pagination styles */
+
+
+@media (max-width: 600px) {
+  .pagination-wrapper {
+    bottom: 40px;
+    padding: 4px 0 0 0;
+  }
+}
+  
+.pagination .page-link {
+  padding: 2px 8px !important;
+  font-size: 13px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+}
+@media (max-width: 600px) {
+  .pagination-wrapper {
+    margin-left: 4px !important;
+    
+  }
+}
+/* --- Stylish Circle Pagination --- */
+.pagination {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  background: none;
+}
+
+.pagination li {
+  list-style: none;
+}
+
+.pagination li a,
+.pagination li span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f0f6fa;
+  color: #028084;
+  font-weight: 600;
+  font-size: 15px;
+  border: 2px solid transparent;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  text-decoration: none;
+  
+  margin: 0 2px;
+}
+
+.pagination li a:hover,
+.pagination li:not(.active):not(.disabled) a:focus {
+  background: #028084;
+  color: #fff;
+  border-color: #028084;
+}
+
+.pagination li.active span {
+  background: #028084;
+  color: #fff;
+  border-color: #028084;
+  cursor: default;
+  
+}
+
+.pagination li.disabled span {
+  background: #e0e0e0;
+  color: #bdbdbd;
+  cursor: not-allowed;
+  border-color: #e0e0e0;
+}
+
+.pagination li .page-link {
+  border: none;
+  background: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.pagination li .fa {
+  font-size: 18px;
+  vertical-align: middle;
+}
+
+/* Responsive: smaller circles on mobile */
+@media (max-width: 600px) {
+  .pagination li a,
+  .pagination li span {
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
+  }
+}
+
+/* End of pagination styles */
 /* Center and style the tray scan table title */
 @media (min-width: 1800px) and (max-width: 2000px) and (min-height: 1100px) and (max-height: 1300px) {
   #order-listing,
@@ -137,7 +306,9 @@
     padding-left: 2px !important;
     transition: opacity 0.3s ease;
     flex: 1;
-   overflow-y: visible !important;
+   overflow-y: auto;
+position: relative;
+
   overflow-x: visible !important;
     transition: opacity 0.3s ease;
 
@@ -489,15 +660,7 @@ thead th {
       right: 0;
     }
   }
-  /* ... remaining styles unchanged ... */
-  .pagination-wrapper {
-    top: 530px;
-    right: 20px;
-    background: transparent;
-    z-index: 999;
-    padding: 5px 10px;
-    border-radius: 5px;
-  }
+ 
   @media (min-width: 768px) and (max-width: 1024px) {
     .table-responsive {
       max-height: 800px;
@@ -652,22 +815,19 @@ thead th {
     .slider { height: 250px; }
     .slide img { height: 250px; }
   }
-    .pagination-wrapper {
-      background: #fff;
-      margin-bottom: 0 !important;
-      margin-top: 8px !important;
-      margin-right: -25px !important;
-      right: 205px !important;
-      margin-left: 0 !important;
-      padding-top: 4px !important;
-      padding-bottom: 0px !important;
-      position: static  !important;
-      z-index: 2;
-      display: flex;
-      justify-content: center;
-      width: 100% !important;
-      box-sizing: border-box !important;
-    }
+ .pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  background: #f5f7ff;
+  margin-top: 16px;
+  padding: 10px 0 20px; /* bottom padding to avoid footer overlap */
+  width: 100%;
+  position: fixed !important;
+bottom: 32px;
+box-shadow: none !important;
+
+}
+
   .pagination {
   font-size: 13px !important;
   gap: 2px !important;
@@ -862,23 +1022,7 @@ thead th {
                         >
                           Q
                         </div>
-                        <div
-                          title="Tray Scan"
-                          class="d-flex align-items-center justify-content-center rounded-circle ms-1"
-                          style="
-                            width: 20px;
-                            height: 20px;
-                            background-color: {% if data.wiping_status %}#0c8249{% else %}#bdbdbd{% endif %};
-                            color: white;
-                            font-weight: bold;
-                            line-height: 20px;
-                            text-align: center;
-                            padding-top: 1px;
-                            padding-right: 1px;
-                          "
-                        >
-                          W
-                        </div>
+                       
                         <!-- S: Green if rejected_ip_stock or accepted_Ip_stock, else gray -->
                         <div
                           title="Tray Scan"
@@ -908,21 +1052,9 @@ thead th {
       <a href="#" class="delete-batch-btn" title="Delete" data-batch-id="{{ data.batch_id }}" data-stock-lot-id="{{ data.stock_lot_id }}">
         <img src="{% static 'assets/icons/bin.png' %}" alt="Delete" style="width: 20px; margin-right: 8px; height: auto" />
       </a>
-    {% else %}
-      <span title="Edit Disabled" style="opacity: 0.5; pointer-events: none;">
-        <img src="{% static 'assets/icons/edit1.png' %}" alt="Edit Disabled" style="width: 20px; margin-right: 8px; height: auto; filter: grayscale(1) opacity(0.5);" />
-      </span>
-      <span title="Delete Disabled" style="opacity: 0.5; pointer-events: none;">
-        <img src="{% static 'assets/icons/bin.png' %}" alt="Delete Disabled" style="width: 20px; margin-right: 8px; height: auto; filter: grayscale(1) opacity(0.5);" />
-      </span>
+   
     {% endif %}
-  {% else %}
-    <span title="Edit Disabled" style="opacity: 0.5; pointer-events: none;">
-      <img src="{% static 'assets/icons/edit1.png' %}" alt="Edit Disabled" style="width: 20px; margin-right: 8px; height: auto; filter: grayscale(1) opacity(0.5);" />
-    </span>
-    <span title="Delete Disabled" style="opacity: 0.5; pointer-events: none;">
-      <img src="{% static 'assets/icons/bin.png' %}" alt="Delete Disabled" style="width: 20px; margin-right: 8px; height: auto; filter: grayscale(1) opacity(0.5);" />
-    </span>
+
   {% endif %}
 
   {% if not data.accepted_Ip_stock and not data.rejected_ip_stock and not data.accepted_tray_scan_status %}
@@ -1353,40 +1485,66 @@ thead th {
             
            
           </div>
-          <!-- Pagination Section -->
-          <div class="pagination-wrapper">
-            <nav aria-label="Page navigation">
-              <ul class="pagination justify-content-end mb-0">
-                {% if page_obj.has_previous %}
-                  <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-                  </li>
-                {% else %}
-                  <li class="page-item disabled">
-                    <span class="page-link">Previous</span>
-                  </li>
-                {% endif %}
-          
-                {% for num in paginator.page_range %}
-                  {% if page_obj.number == num %}
-                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+           <!-- Pagination Section -->
+
+ <div class="pagination-wrapper">
+              <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-end mb-0">
+                  {# Previous button #}
+                  {% if page_obj.has_previous %}
+                    <li>
+                      <a href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true"><i class="fa fa-chevron-left"></i></span>
+                      </a>
+                    </li>
                   {% else %}
-                    <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                    <li class="disabled">
+                      <span aria-hidden="true"><i class="fa fa-chevron-left"></i></span>
+                    </li>
                   {% endif %}
-                {% endfor %}
-          
-                {% if page_obj.has_next %}
-                  <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-                  </li>
-                {% else %}
-                  <li class="page-item disabled">
-                    <span class="page-link">Next</span>
-                  </li>
-                {% endif %}
-              </ul>
-            </nav>
-          </div>
+                
+                  {# Always show first page #}
+                  {% if page_obj.number > 3 %}
+                    <li><a href="?page=1">1</a></li>
+                    {% if page_obj.number > 4 %}
+                      <li class="disabled"><span>…</span></li>
+                    {% endif %}
+                  {% endif %}
+                
+                  {# Show pages around current page #}
+                  {% for num in page_obj.paginator.page_range %}
+                    {% if num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+                      {% if num == page_obj.number %}
+                        <li class="active"><span>{{ num }}</span></li>
+                      {% else %}
+                        <li><a href="?page={{ num }}">{{ num }}</a></li>
+                      {% endif %}
+                    {% endif %}
+                  {% endfor %}
+                
+                  {# Show ellipsis and last page if needed #}
+                  {% if page_obj.number < page_obj.paginator.num_pages|add:'-2' %}
+                    {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                      <li class="disabled"><span>…</span></li>
+                    {% endif %}
+                    <li><a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a></li>
+                  {% endif %}
+                
+                  {# Next button #}
+                  {% if page_obj.has_next %}
+                    <li>
+                      <a href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true"><i class="fa fa-chevron-right"></i></span>
+                      </a>
+                    </li>
+                  {% else %}
+                    <li class="disabled">
+                      <span aria-hidden="true"><i class="fa fa-chevron-right"></i></span>
+                    </li>
+                  {% endif %}
+                </ul>
+              </nav>
+            </div>
         </div>
       </div>
     </div>
@@ -4268,39 +4426,6 @@ document.addEventListener("DOMContentLoaded", function() {
       });
     });
   }
-});
-</script>
-
-<!-- Script for restrict multiple actions when any modal is open -->
-
-<script nonce="{{ csp_nonce }}">
-document.addEventListener("DOMContentLoaded", function () {
-  function isAnyModalOpen() {
-    // Check for any open modal by class or style
-    return (
-      document.querySelector('.tray-scan-modal.open, .tray-scan-modal-DayPlanning.open, #holdRemarkModal[style*="display: flex"], #holdRemarkModal[style*="display: block"]')
-    );
-  }
-
-  // Block Tray Scan, View, Edit, Delete when any modal is open
-  document.body.addEventListener('click', function(e) {
-    if (isAnyModalOpen()) {
-      // Block Tray Scan button
-      if (
-        e.target.closest('.tray-scan-btn') ||
-        e.target.closest('.tray-scan-btn-Jig') ||
-        e.target.closest('.edit-qty-btn') ||
-        (e.target.closest('a[title="Delete"]')) ||
-        (e.target.cxlosest('img[alt="Edit"]')) ||
-        (e.target.closest('img[alt="Delete"]')) ||
-        (e.target.closest('img[alt="View"]'))
-      ) {
-        e.stopPropagation();
-        e.preventDefault();
-        return false;
-      }
-    }
-  }, true);
 });
 </script>
 

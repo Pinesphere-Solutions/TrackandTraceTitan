@@ -548,9 +548,7 @@ class DPBulkUploadView(APIView):
                         location=location_obj,  # Can be None for vendor-only format
                         tray_capacity=model_stock.tray_capacity if model_stock else None,
                         tray_type=model_stock.tray_type.tray_type if model_stock and model_stock.tray_type else None,
-                        gender=model_stock.gender if model_stock else None,
                         ep_bath_type=model_stock.ep_bath_type if model_stock else None,
-                        brand=model_stock.brand if model_stock else None,
                         total_batch_quantity=input_qty,
                         version=version_obj if version_obj else None,
                         polish_finish=polish_obj if polish_obj else None,
@@ -805,9 +803,7 @@ class DPBulkUploadView(APIView):
                     location=location_obj,  # Can be None for vendor-only format
                     tray_capacity=model_stock.tray_capacity if model_stock else None,
                     tray_type=model_stock.tray_type.tray_type if model_stock and model_stock.tray_type else None,
-                    gender=model_stock.gender if model_stock else None,
                     ep_bath_type=model_stock.ep_bath_type if model_stock else None,
-                    brand=model_stock.brand if model_stock else None,
                     total_batch_quantity=input_qty,
                     version=version_obj if version_obj else None,
                     polish_finish=polish_obj if polish_obj else None,

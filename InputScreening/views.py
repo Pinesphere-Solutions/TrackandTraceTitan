@@ -29,33 +29,9 @@ class IS_PickTable(APIView):
     def get(self, request):
         user = request.user
 
-        # Use your Brass QC models here if different
-
-        ip_rejection_reasons = IP_Rejection_Table.objects.select_related('group').all()
-        
-        # Dynamically assign colors to each group name
-        group_names = IP_RejectionGroup.objects.values_list('group_name', flat=True)
-        color_palette = [
-            "#e53935",  # red
-            "#fb8c00",  # orange
-            "#43a047",  # green
-            "#1e88e5",  # blue
-            "#8e24aa",  # purple
-            "#fbc02d",  # yellow
-            "#00897b",  # teal
-            "#6d4c41",  # brown
-            "#757575",  # grey
-            "#3949ab",  # indigo
-        ]
-        group_color_map = {}
-        for idx, name in enumerate(group_names):
-            group_color_map[name] = color_palette[idx % len(color_palette)]
-
-        # Annotate each reason with its color
-        for reason in ip_rejection_reasons:
-            group_name = reason.group.group_name if reason.group else ""
-            reason.row_color = group_color_map.get(group_name, "#222")  # default dark gray
-
+        # ✅ UPDATED: Remove group-related code and simplify rejection reasons
+        ip_rejection_reasons = IP_Rejection_Table.objects.all()
+       
         
         # Add the subquery for dp_physical_qty_edited
         dp_physical_qty_edited_subquery = TotalStockModel.objects.filter(
@@ -98,7 +74,8 @@ class IS_PickTable(APIView):
 
 
         queryset = ModelMasterCreation.objects.filter(
-            total_batch_quantity__gt=0
+            total_batch_quantity__gt=0,
+            
         ).annotate(
             last_process_module=Subquery(
                 TotalStockModel.objects.filter(batch_id=OuterRef('pk')).values('last_process_module')[:1]
@@ -151,10 +128,16 @@ class IS_PickTable(APIView):
             ip_release_reason=Subquery(
                 TotalStockModel.objects.filter(batch_id=OuterRef('pk')).values('ip_release_reason')[:1]
             ),
-            
+
+                    
 
            
-        ).filter(tray_scan_exists=True).order_by('-last_process_date_time') 
+        ).filter(
+            (Q(accepted_Ip_stock=False) | Q(accepted_Ip_stock__isnull=True)) &
+            (Q(rejected_ip_stock=False) | Q(rejected_ip_stock__isnull=True)) &
+            (Q(accepted_tray_scan_status=False) | Q(accepted_tray_scan_status__isnull=True)),
+            tray_scan_exists=True
+        ).order_by('-last_process_date_time')
 
         # Pagination
         page_number = request.GET.get('page', 1)
@@ -190,6 +173,7 @@ class IS_PickTable(APIView):
             'few_cases_accepted_Ip_stock',
             'accepted_tray_scan_status',
             'IP_pick_remarks',
+            'rejected_ip_stock',
             'ip_onhold_picking',
             'last_process_date_time',
             'plating_stk_no',
@@ -232,24 +216,39 @@ class IS_PickTable(APIView):
             accepted_tray_quantity = 0
 
             if not total_ip_accepted_quantity or total_ip_accepted_quantity == 0:
-                # Try to get accepted_tray_quantity from IP_Accepted_TrayScan
-                accepted_scan = IP_Accepted_TrayScan.objects.filter(lot_id=lot_id).order_by('-id').first()
-                if accepted_scan and accepted_scan.accepted_tray_quantity:
-                    accepted_tray_quantity = accepted_scan.accepted_tray_quantity
-                # Set the display value
-                data['display_accepted_qty'] = accepted_tray_quantity or 0
+                # Fetch total_rejection_quantity from IP_Rejection_ReasonStore
+                total_rejection_qty = 0
+                rejection_store = IP_Rejection_ReasonStore.objects.filter(lot_id=lot_id).order_by('-id').first()
+                if rejection_store and rejection_store.total_rejection_quantity:
+                    total_rejection_qty = rejection_store.total_rejection_quantity
+            
+                # Fetch dp_physical_qty from TotalStockModel
+                dp_physical_qty = 0
+                total_stock_obj = TotalStockModel.objects.filter(lot_id=lot_id).first()
+                if total_stock_obj and total_stock_obj.dp_physical_qty:
+                    dp_physical_qty = total_stock_obj.dp_physical_qty
+            
+                # Calculate display_accepted_qty
+                data['display_accepted_qty'] = max(dp_physical_qty - total_rejection_qty, 0)
             else:
                 data['display_accepted_qty'] = total_ip_accepted_quantity
 
             
              # --- Add available_qty for each row ---
+            # --- Add available_qty for each row ---
             lot_id = data.get('stock_lot_id')
             total_stock_obj = TotalStockModel.objects.filter(lot_id=lot_id).first()
             if total_stock_obj:
-                if total_stock_obj.rejected_ip_stock and total_stock_obj.dp_physical_qty > 0:
-                    data['available_qty'] = total_stock_obj.dp_physical_qty
-                else:
-                    data['available_qty'] = total_stock_obj.total_stock
+                # Priority: dp_physical_qty > total_stock
+                available_qty = 0
+                if hasattr(total_stock_obj, 'dp_physical_qty') and total_stock_obj.dp_physical_qty and total_stock_obj.dp_physical_qty > 0:
+                    available_qty = total_stock_obj.dp_physical_qty
+                    print(f"✅ Using dp_physical_qty: {available_qty} for lot {lot_id}")
+                elif hasattr(total_stock_obj, 'total_stock') and total_stock_obj.total_stock and total_stock_obj.total_stock > 0:
+                    available_qty = total_stock_obj.total_stock
+                    print(f"⚠️ Using total_stock: {available_qty} for lot {lot_id}")
+                
+                data['available_qty'] = available_qty
             else:
                 data['available_qty'] = 0
 
@@ -262,95 +261,7 @@ class IS_PickTable(APIView):
         }
         return Response(context, template_name=self.template_name)
 
-# Add this to your views.py file
 
-@method_decorator(csrf_exempt, name='dispatch')
-@method_decorator(login_required, name='dispatch')
-class SaveWipingStatusAPIView(APIView):
-    """
-    API View to save wiping status when radio button is checked
-    """
-    permission_classes = [IsAuthenticated]
-    
-    def post(self, request):
-        try:
-            data = request.data if hasattr(request, 'data') else json.loads(request.body.decode('utf-8'))
-            lot_id = data.get('lot_id')
-            wiping_status = data.get('wiping_status', False)  # Expected to be True when checked
-            
-            if not lot_id:
-                return JsonResponse({
-                    'success': False, 
-                    'error': 'lot_id is required'
-                }, status=400)
-            
-            # Find the TotalStockModel record by lot_id
-            try:
-                total_stock = TotalStockModel.objects.get(lot_id=lot_id)
-            except TotalStockModel.DoesNotExist:
-                return JsonResponse({
-                    'success': False, 
-                    'error': 'Stock record not found for the provided lot_id'
-                }, status=404)
-            
-            # Update the wiping_status field
-            total_stock.wiping_status = wiping_status
-            total_stock.save(update_fields=['wiping_status'])
-            
-            return JsonResponse({
-                'success': True, 
-                'message': f'Wiping status updated to {wiping_status}',
-                'lot_id': lot_id,
-                'wiping_status': wiping_status
-            })
-            
-        except json.JSONDecodeError:
-            return JsonResponse({
-                'success': False, 
-                'error': 'Invalid JSON data'
-            }, status=400)
-        except Exception as e:
-            # Log the error for debugging
-            import traceback
-            traceback.print_exc()
-            return JsonResponse({
-                'success': False, 
-                'error': f'Unexpected error occurred: {str(e)}'
-            }, status=500)
-
-# Alternative GET method to check current wiping status
-@require_GET
-def get_wiping_status(request):
-    """
-    GET endpoint to retrieve current wiping status for a lot_id
-    """
-    lot_id = request.GET.get('lot_id')
-    
-    if not lot_id:
-        return JsonResponse({
-            'success': False, 
-            'error': 'lot_id parameter is required'
-        }, status=400)
-    
-    try:
-        total_stock = TotalStockModel.objects.get(lot_id=lot_id)
-        return JsonResponse({
-            'success': True,
-            'lot_id': lot_id,
-            'wiping_status': total_stock.wiping_status,
-            'wiping_required': getattr(total_stock.batch_id.model_stock_no, 'wiping_required', False) if total_stock.batch_id and total_stock.batch_id.model_stock_no else False
-        })
-    except TotalStockModel.DoesNotExist:
-        return JsonResponse({
-            'success': False, 
-            'error': 'Stock record not found'
-        }, status=404)
-    except Exception as e:
-        return JsonResponse({
-            'success': False, 
-            'error': str(e)
-        }, status=500)
-    
 @method_decorator(csrf_exempt, name='dispatch')
 @method_decorator(login_required, name='dispatch')  
 class SaveIPCheckboxView(APIView):
@@ -359,6 +270,8 @@ class SaveIPCheckboxView(APIView):
             data = request.data
             lot_id = data.get("lot_id")
             missing_qty = data.get("missing_qty")
+            edited_tray_qty = data.get("edited_tray_qty")  # <-- Get edited qty from frontend
+            print(f"[SaveIPCheckboxView] edited_tray_qty received: {edited_tray_qty}")
 
             if not lot_id:
                 return Response({"success": False, "error": "Lot ID is required"}, status=status.HTTP_400_BAD_REQUEST)
@@ -366,6 +279,58 @@ class SaveIPCheckboxView(APIView):
             total_stock = TotalStockModel.objects.get(lot_id=lot_id)
             total_stock.ip_person_qty_verified = True
 
+            # --- NEW LOGIC: If edited_tray_qty is provided, update TrayId and accumulate missing_qty ---
+            if edited_tray_qty not in [None, ""]:
+                try:
+                    edited_tray_qty = int(edited_tray_qty)
+                    # Find the top tray for this lot
+                    top_tray = TrayId.objects.filter(lot_id=lot_id, top_tray=True).first()
+                    if top_tray:
+                        prev_qty = top_tray.tray_quantity or 0
+                        original_qty = prev_qty
+                        diff = (original_qty - edited_tray_qty)
+                        if diff < 0:
+                            diff = 0  # Prevent negative missing
+                        prev_missing = total_stock.dp_missing_qty or 0
+                        new_missing_qty = prev_missing + diff
+                        # Update the tray_quantity in TrayId
+                        top_tray.tray_quantity = edited_tray_qty
+                        top_tray.save(update_fields=['tray_quantity'])
+                        print(f"✅ Updated top tray {top_tray.tray_id} qty from {original_qty} to {edited_tray_qty}")
+                        missing_qty = new_missing_qty
+                    else:
+                        print("⚠️ Top tray not found for lot:", lot_id)
+                        original_qty = total_stock.dp_physical_qty or total_stock.total_stock or 0
+                        diff = (original_qty - edited_tray_qty)
+                        if diff < 0:
+                            diff = 0
+                        prev_missing = total_stock.dp_missing_qty or 0
+                        missing_qty = prev_missing + diff
+                except ValueError:
+                    return Response({"success": False, "error": "Edited tray qty must be an integer"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # --- NEW: Mark unverified trays as rejected ---
+            unverified_trays = TrayId.objects.filter(lot_id=lot_id, IP_tray_verified=False)
+            updated_count = unverified_trays.update(rejected_tray=True)
+            if updated_count > 0:
+                print(f"Marked {updated_count} unverified trays as rejected for lot {lot_id}")
+            
+                # --- Create IP_Rejection_ReasonStore instance for these trays ---
+                from django.contrib.auth import get_user_model
+                User = get_user_model()
+                current_user = request.user
+            
+                # Calculate total_rejection_quantity as the sum of tray_quantity for these trays
+                total_rejection_quantity = sum(tray.tray_quantity or 0 for tray in unverified_trays)
+            
+                IP_Rejection_ReasonStore.objects.create(
+                    lot_id=lot_id,
+                    user=current_user,
+                    total_rejection_quantity=total_rejection_quantity
+                )
+                print(f"Created IP_Rejection_ReasonStore for lot {lot_id} with total_rejection_quantity={total_rejection_quantity}")
+            # ...existing code...
+            # --- Save missing qty and physical qty ---
             if missing_qty not in [None, ""]:
                 try:
                     missing_qty = int(missing_qty)
@@ -378,9 +343,14 @@ class SaveIPCheckboxView(APIView):
                         status=status.HTTP_400_BAD_REQUEST
                     )
 
-                # Save missing qty and physical qty
                 total_stock.dp_missing_qty = missing_qty
                 total_stock.dp_physical_qty = total_stock.total_stock - missing_qty
+                total_stock.ip_onhold_picking = False
+
+                # Optionally: Add verification timestamp and method
+                from django.utils import timezone
+                total_stock.ip_verification_timestamp = timezone.now()
+                total_stock.ip_verification_method = "tray_scan_auto" if missing_qty == 0 else "manual_entry"
 
             total_stock.save()
             return Response({"success": True})
@@ -389,16 +359,10 @@ class SaveIPCheckboxView(APIView):
             return Response({"success": False, "error": "Stock not found."}, status=status.HTTP_404_NOT_FOUND)
 
         except Exception as e:
+            import traceback
             traceback.print_exc()   
             return Response({"success": False, "error": "Unexpected error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-    def get(self, request, format=None):
-        return Response(
-            {"success": False, "error": "Invalid request method."},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-      
-        
+
 @method_decorator(csrf_exempt, name='dispatch')
 class SaveIPPickRemarkAPIView(APIView):
     def post(self, request):
@@ -488,6 +452,9 @@ class IS_Accepted_form(APIView):
             total_stock_data.next_process_module = "Brass QC"
             total_stock_data.last_process_module = "Input screening"
             
+            # Set created_at to now
+            total_stock_data.created_at = timezone.now()
+            
             total_stock_data.save()
             return Response({"success": True})
         
@@ -526,15 +493,25 @@ class BatchRejectionAPIView(APIView):
                 return Response({'success': False, 'error': 'TotalStockModel not found'}, status=404)
 
             # Get dp_physical_qty if set and > 0, else use total_stock
-            qty = total_stock.dp_physical_qty if total_stock.dp_physical_qty and total_stock.dp_physical_qty > 0 else total_stock.total_stock
+            qty = total_stock.dp_physical_qty 
 
             # Set rejected_ip_stock = True
 
             total_stock.rejected_ip_stock = True
             total_stock.last_process_module = "Input screening"
             total_stock.next_process_module = "Brass QC"
-            total_stock.save(update_fields=['rejected_ip_stock', 'last_process_module', 'next_process_module'])
+            total_stock.ip_onhold_picking = False
+            # Set created_at to now
+            total_stock.created_at = timezone.now()
 
+            total_stock.save(update_fields=[
+                'rejected_ip_stock',
+                'ip_onhold_picking',
+                'last_process_module',
+                'next_process_module',
+                'created_at'
+            ])
+            
             # Create IP_Rejection_ReasonStore entry
             IP_Rejection_ReasonStore.objects.create(
                 lot_id=lot_id,
@@ -570,71 +547,210 @@ class TrayRejectionAPIView(APIView):
             if not total_stock_obj:
                 return Response({'success': False, 'error': 'TotalStockModel not found'}, status=404)
 
-            # Use rejected_ip_stock if set and > 0, else use total_stock
-            available_qty = total_stock_obj.dp_physical_qty if total_stock_obj.dp_physical_qty and total_stock_obj.dp_physical_qty > 0 else total_stock_obj.total_stock
+            # Use dp_physical_qty if set and > 0, else use total_stock
+            available_qty = total_stock_obj.dp_physical_qty 
+            # Calculate total quantity from individual tray entries
+            total_qty = sum(int(item.get('qty', 0)) for item in tray_rejections)
             
-            # Calculate the running total and check for exceeding
-            running_total = 0
-            for idx, item in enumerate(tray_rejections):
+            # Check if total quantity exceeds available quantity
+            if total_qty > available_qty:
+                return Response({
+                    'success': False,
+                    'error': f'Total rejection quantity ({total_qty}) exceeds available quantity ({available_qty}).'
+                }, status=400)
+
+            # Save each tray scan to IP_Rejected_TrayScan and update TrayId
+            for item in tray_rejections:
                 qty = int(item.get('qty', 0))
-                running_total += qty
-                if running_total > available_qty:
-                    return Response({
-                        'success': False,
-                        'error': f'Quantity exceeds available ({available_qty}).'
-                    }, status=400)
+                reason_id = item.get('reason_id')
+                tray_id = item.get('tray_id', '')
+                if qty > 0 and reason_id and tray_id:
+                    try:
+                        reason_obj = IP_Rejection_Table.objects.get(rejection_reason_id=reason_id)
+                        tray_obj = TrayId.objects.filter(tray_id=tray_id).first()
+                        if tray_obj:
+                            # If tray has no lot_id, assign it now
+                            if not tray_obj.lot_id:
+                                tray_obj.lot_id = lot_id
+                                tray_obj.batch_id = total_stock_obj.batch_id
+                                tray_obj.tray_quantity = qty
+                                tray_obj.save(update_fields=['lot_id', 'batch_id', 'tray_quantity'])
+                            # Mark as rejected
+                            tray_obj.rejected_tray = True
+                            tray_obj.save(update_fields=['rejected_tray'])
+                        # Save the rejection scan
+                        IP_Rejected_TrayScan.objects.create(
+                            lot_id=lot_id,
+                            rejected_tray_quantity=qty,
+                            rejection_reason=reason_obj,
+                            user=request.user,
+                            rejected_tray_id=tray_id
+                        )
+                    except IP_Rejection_Table.DoesNotExist:
+                        print(f"Warning: Rejection reason {reason_id} not found")
+                        continue
 
-            # Validate all tray_ids exist in TrayId table
+            # Group rejections by reason_id for IP_Rejection_ReasonStore
+            reason_groups = {}
             for item in tray_rejections:
-                tray_id = item.get('tray_id')
-                if tray_id and not TrayId.objects.filter(tray_id=tray_id).exists():
-                    return Response({'success': False, 'error': f'Tray ID "{tray_id}" is not existing.'}, status=400)
+                reason_id = item.get('reason_id')
+                qty = int(item.get('qty', 0))
+                if reason_id and qty > 0:
+                    if reason_id not in reason_groups:
+                        reason_groups[reason_id] = 0
+                    reason_groups[reason_id] += qty
 
-            # 1. Save to IP_Rejection_ReasonStore (all reasons for this lot)
-            reason_ids = [item['reason_id'] for item in tray_rejections if int(item['qty']) > 0]
-            reasons = IP_Rejection_Table.objects.filter(rejection_reason_id__in=reason_ids)
-            total_qty = sum(int(item['qty']) for item in tray_rejections if int(item['qty']) > 0)
-            reason_store = IP_Rejection_ReasonStore.objects.create(
-                lot_id=lot_id,
-                user=request.user,
-                total_rejection_quantity=total_qty,
-                batch_rejection=False
-            )
-            reason_store.rejection_reason.set(reasons)
+            # Save to IP_Rejection_ReasonStore (grouped by reason)
+            if reason_groups:
+                reason_ids = list(reason_groups.keys())
+                reasons = IP_Rejection_Table.objects.filter(rejection_reason_id__in=reason_ids)
+                reason_store = IP_Rejection_ReasonStore.objects.create(
+                    lot_id=lot_id,
+                    user=request.user,
+                    total_rejection_quantity=total_qty,
+                    batch_rejection=False
+                )
+                reason_store.rejection_reason.set(reasons)
 
-            # 2. Save each tray scan to IP_Rejected_TrayScan
-            for item in tray_rejections:
-                qty = int(item['qty'])
-                if qty > 0:
-                    reason_obj = IP_Rejection_Table.objects.get(rejection_reason_id=item['reason_id'])
-                    IP_Rejected_TrayScan.objects.create(
-                        lot_id=lot_id,
-                        rejected_tray_quantity=qty,
-                        rejection_reason=reason_obj,
-                        user=request.user,
-                        rejected_tray_id=item.get('tray_id', '')
-                    )
-            # --- Set few_cases_accepted_Ip_stock = True ---
-          
+            # Update TotalStockModel
             total_stock_obj.ip_onhold_picking = True
             total_stock_obj.few_cases_accepted_Ip_stock = True
-            total_stock_obj.total_stock = available_qty - total_qty
-
-            total_stock_obj.save(update_fields=['few_cases_accepted_Ip_stock','ip_onhold_picking','total_stock'])
-
-
+            total_stock_obj.dp_physical_qty = available_qty - total_qty
+            # Set created_at to now
+            total_stock_obj.created_at = timezone.now()
+            total_stock_obj.save(update_fields=[
+                'few_cases_accepted_Ip_stock',
+                'ip_onhold_picking',
+                'dp_physical_qty',
+                'created_at'
+            ])
             return Response({'success': True, 'message': 'Tray rejections saved.'})
 
         except Exception as e:
+            print(f"Error in TrayRejectionAPIView: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return Response({'success': False, 'error': str(e)}, status=500)
 
 @require_GET
 def reject_check_tray_id(request):
     tray_id = request.GET.get('tray_id', '')
-    exists = TrayId.objects.filter(tray_id=tray_id).exists()
-    return JsonResponse({'exists': exists})
+    current_lot_id = request.GET.get('lot_id', '')
 
+    try:
+        # Get the tray object if it exists
+        tray_obj = TrayId.objects.filter(tray_id=tray_id).first()
 
+        if not tray_obj:
+            # Tray doesn't exist
+            return JsonResponse({
+                'exists': False,
+                'error': 'Tray ID not found',
+                'status_message': 'Not Found'
+            })
+
+        # ✅ NEW: Only allow if IP_tray_verified is True, unless new_tray is True
+        if not getattr(tray_obj, 'IP_tray_verified', False):
+            # Allow if new_tray is True
+            if getattr(tray_obj, 'new_tray', False):
+                pass  # Allow to proceed
+            else:
+                return JsonResponse({
+                    'exists': False,
+                    'error': 'Tray id is not verified',
+                    'status_message': 'Tray id is not verified',
+                    'tray_status': 'not_verified'
+                })
+
+        # ✅ NEW: Get current model's tray type for validation
+        current_model_tray_type = None
+        if current_lot_id:
+            try:
+                total_stock = TotalStockModel.objects.filter(lot_id=current_lot_id).first()
+                if total_stock and total_stock.batch_id:
+                    current_model_tray_type = total_stock.batch_id.tray_type
+            except Exception as e:
+                print(f"Error getting model tray type: {e}")
+
+        # ✅ NEW VALIDATION: Check tray type matching
+        scanned_tray_type = getattr(tray_obj, 'tray_type', 'Normal') or 'Normal'
+        if current_model_tray_type and scanned_tray_type:
+            if current_model_tray_type.lower() != scanned_tray_type.lower():
+                return JsonResponse({
+                    'exists': False,
+                    'error': f'Wrong tray type',
+                    'status_message': f'Wrong Type ({scanned_tray_type})',
+                    'tray_status': 'wrong_tray_type',
+                    'expected_type': current_model_tray_type,
+                    'scanned_type': scanned_tray_type
+                })
+
+        # ✅ EXISTING VALIDATION: Check lot_id matching
+        if tray_obj.lot_id:  # If tray has an existing lot_id
+            if str(tray_obj.lot_id).strip() != str(current_lot_id).strip():
+                # Tray belongs to different lot
+                return JsonResponse({
+                    'exists': False,
+                    'error': 'Not in same lot',
+                    'status_message': 'Different Lot',
+                    'tray_status': 'different_lot'
+                })
+
+        # ✅ EXISTING VALIDATION: Check delink_tray and rejected_tray conditions
+        if not tray_obj.delink_tray and tray_obj.rejected_tray:
+            return JsonResponse({
+                'exists': False,
+                'error': 'Already rejected',
+                'status_message': 'Already Rejected',
+                'tray_status': 'rejected_not_delinked'
+            })
+
+        # ✅ EXISTING VALIDATION: Check if tray is already used in current process
+        if tray_obj.lot_id == current_lot_id and tray_obj.rejected_tray:
+            return JsonResponse({
+                'exists': False,
+                'error': 'Already scanned',
+                'status_message': 'Already Scanned',
+                'tray_status': 'already_rejected_in_lot'
+            })
+
+        # ✅ SUCCESS: Tray exists and passes all validations
+        return JsonResponse({
+            'exists': True,
+            'status_message': f'Available ({scanned_tray_type})',
+            'delink_tray': tray_obj.delink_tray,
+            'rejected_tray': tray_obj.rejected_tray,
+            'tray_status': 'available',
+            'tray_type': scanned_tray_type
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'exists': False,
+            'error': 'System error',
+            'status_message': 'System Error'
+        })
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_unscanned_trays(request):
+    lot_id = request.GET.get('lot_id')
+    if not lot_id:
+        return Response({'success': False, 'error': 'Missing lot_id'}, status=400)
+    try:
+        trays = TrayId.objects.filter(lot_id=lot_id, scanned=False)
+        data = [
+            {
+                'tray_id': tray.tray_id,
+                'tray_quantity': tray.tray_quantity,
+            }
+            for tray in trays
+        ]
+        return Response({'success': True, 'trays': data})
+    except Exception as e:
+        return Response({'success': False, 'error': str(e)}, status=500)
+    
+    
 @method_decorator(csrf_exempt, name='dispatch')
 @method_decorator(login_required, name='dispatch')
 class VerifyTopTrayQtyAPIView(APIView):
@@ -733,323 +849,565 @@ class VerifyTopTrayQtyAPIView(APIView):
 
 
 
-# Update the get_accepted_tray_scan_data function to include verification status
+@method_decorator(csrf_exempt, name='dispatch')
+class IPTrayValidateAPIView(APIView):
+    def post(self, request):
+        try:
+            data = request.data if hasattr(request, 'data') else json.loads(request.body.decode('utf-8'))
+            batch_id_input = str(data.get('batch_id')).strip()
+            tray_id = str(data.get('tray_id')).strip()
+            tray_position = data.get('tray_position')  # Add this parameter
+            lot_id = data.get('lot_id')  # Add this parameter
+            
+            print(f"[TrayValidateAPIView] User entered: batch_id={batch_id_input}, tray_id={tray_id}, position={tray_position}")
+
+            # Try to match batch_id by code part (after last '-')
+            trays = TrayId.objects.filter(batch_id__batch_id__icontains=batch_id_input)
+            exists = trays.filter(tray_id=tray_id).exists()
+            
+            # Save verification status
+            if lot_id and tray_position:
+                verification_status = 'pass' if exists else 'fail'
+                
+                # Update or create verification record
+                obj, created = IP_TrayVerificationStatus.objects.update_or_create(
+                    lot_id=lot_id,
+                    tray_position=tray_position,
+                    defaults={
+                        'tray_id': tray_id,
+                        'is_verified': True,
+                        'verification_status': verification_status,
+                        'verified_by': request.user
+                    }
+                )
+                # ✅ Update TrayId.ip_tray_verified if verified
+                if obj.is_verified and obj.tray_id:
+                    TrayId.objects.filter(tray_id=obj.tray_id).update(IP_tray_verified=True)
+            
+                
+                print(f"Saved verification: Position {tray_position}, Status: {verification_status}")
+
+            return JsonResponse({
+                'success': True, 
+                'exists': exists,
+                'verification_status': 'pass' if exists else 'fail'
+            })
+        except Exception as e:
+            print(f"[TrayValidateAPIView] Error: {str(e)}")
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_tray_verification_status(request):
+    """Get existing tray verification status for a lot"""
+    lot_id = request.GET.get('lot_id')
+    if not lot_id:
+        return Response({'success': False, 'error': 'Missing lot_id'}, status=400)
+    
+    try:
+        verification_records = IP_TrayVerificationStatus.objects.filter(lot_id=lot_id)
+        
+        verification_data = {}
+        for record in verification_records:
+            verification_data[record.tray_position] = {
+                'tray_id': record.tray_id,
+                'is_verified': record.is_verified,
+                'verification_status': record.verification_status,
+                'verified_at': record.verified_at.isoformat() if record.verified_at else None
+            }
+            
+        
+        return Response({
+            'success': True,
+            'verification_data': verification_data
+        })
+    except Exception as e:
+        return Response({'success': False, 'error': str(e)}, status=500)
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def reset_tray_verification_for_lot(request):
+    """
+    Reset all tray verifications for a given lot_id.
+    Deletes all IP_TrayVerificationStatus records for the lot,
+    sets IP_tray_verified=False for all related TrayId records,
+    and resets TotalStockModel fields for this lot.
+    POST: { "lot_id": "..." }
+    """
+    try:
+        data = request.data if hasattr(request, 'data') else json.loads(request.body.decode('utf-8'))
+        lot_id = data.get('lot_id')
+        if not lot_id:
+            return JsonResponse({'success': False, 'error': 'Missing lot_id'}, status=400)
+
+        # Get all verified tray_ids for this lot
+        verified_records = IP_TrayVerificationStatus.objects.filter(lot_id=lot_id)
+        tray_ids = list(verified_records.values_list('tray_id', flat=True))
+
+        # Delete all verification records for this lot
+        deleted_count, _ = verified_records.delete()
+
+        # Set IP_tray_verified=False for all those tray_ids in this lot
+        if tray_ids:
+            TrayId.objects.filter(tray_id__in=tray_ids, lot_id=lot_id).update(IP_tray_verified=False)
+
+        # --- NEW: Reset TotalStockModel fields for this lot ---
+        total_stock = TotalStockModel.objects.filter(lot_id=lot_id).first()
+        if total_stock:
+            total_stock.dp_physical_qty = 0
+            total_stock.dp_missing_qty = 0
+            total_stock.dp_physical_qty_edited = False
+            total_stock.ip_onhold_picking = False
+            total_stock.save(update_fields=[
+                'dp_physical_qty',
+                'dp_missing_qty',
+                'dp_physical_qty_edited',
+                'ip_onhold_picking'
+            ])
+
+        return JsonResponse({
+            'success': True,
+            'deleted_verifications': deleted_count,
+            'updated_trays': len(tray_ids)
+        })
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+@method_decorator(csrf_exempt, name='dispatch')
+class IPCompletedTrayIdListAPIView(APIView):
+    def get(self, request):
+        batch_id = request.GET.get('batch_id')
+        if not batch_id:
+            return JsonResponse({'success': False, 'error': 'Missing batch_id'}, status=400)
+        
+        # ✅ UPDATED: Get top tray first, then other trays, and filter out trays with quantity 0
+        top_tray = TrayId.objects.filter(
+            batch_id__batch_id=batch_id,
+            top_tray=True,
+            tray_quantity__gt=0  # Only include if quantity > 0
+        ).first()
+        
+        other_trays = TrayId.objects.filter(
+            batch_id__batch_id=batch_id,
+            top_tray=False,
+            tray_quantity__gt=0  # Only include if quantity > 0
+        ).order_by('id')
+        
+        data = []
+        
+        # Add top tray first if it exists
+        if top_tray:
+            data.append({
+                's_no': 1,  # Always 1 for top tray
+                'tray_id': top_tray.tray_id,
+                'tray_quantity': top_tray.tray_quantity,
+                'position': 0,  # Top position
+                'is_top_tray': True
+            })
+        
+        # Add other trays starting from position 2
+        for idx, tray in enumerate(other_trays):
+            data.append({
+                's_no': idx + 2,  # Start from 2 since top tray is 1
+                'tray_id': tray.tray_id,
+                'tray_quantity': tray.tray_quantity,
+                'position': idx + 1,  # Position after top tray
+                'is_top_tray': False
+            })
+        
+        return JsonResponse({'success': True, 'trays': data})
+   
+@method_decorator(csrf_exempt, name='dispatch')
+@method_decorator(login_required, name='dispatch')
+# ...existing code...
+class IPSaveTrayDraftAPIView(APIView):
+    """
+    API View to save tray scan as draft and update quantities
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        try:
+            data = request.data if hasattr(request, 'data') else json.loads(request.body.decode('utf-8'))
+            lot_id = data.get('lot_id')
+            total_lot_qty = data.get('total_lot_qty', 0)
+            missing_qty = data.get('missing_qty', 0)
+            physical_qty = data.get('physical_qty', 0)
+            edited_tray_qty = data.get('edited_tray_qty')  # <-- Get edited qty from frontend
+
+            if not lot_id:
+                return JsonResponse({
+                    'success': False, 
+                    'error': 'lot_id is required'
+                }, status=400)
+            
+            # Find the TotalStockModel record by lot_id
+            try:
+                total_stock = TotalStockModel.objects.get(lot_id=lot_id)
+            except TotalStockModel.DoesNotExist:
+                return JsonResponse({
+                    'success': False, 
+                    'error': 'Stock record not found for the provided lot_id'
+                }, status=404)
+
+            # Print before any edit
+            print(f"Avant modification: dp_missing_qty={total_stock.dp_missing_qty}, dp_physical_qty={total_stock.dp_physical_qty}")
+
+            # --- NEW LOGIC: If edited_tray_qty is provided, update TrayId and accumulate missing_qty ---
+            if edited_tray_qty not in [None, ""]:
+                try:
+                    edited_tray_qty = int(edited_tray_qty)
+                    if edited_tray_qty == 0:
+                        print(f"⚠️ edited_tray_qty est zéro. dp_missing_qty={total_stock.dp_missing_qty}, dp_physical_qty={total_stock.dp_physical_qty}")
+                    # Find the top tray for this lot
+                    top_tray = TrayId.objects.filter(lot_id=lot_id, top_tray=True).first()
+                    if top_tray:
+                        prev_qty = top_tray.tray_quantity or 0
+                        original_qty = prev_qty
+                        diff = (original_qty - edited_tray_qty)
+                        if diff < 0:
+                            diff = 0  # Prevent negative missing
+                        prev_missing = total_stock.dp_missing_qty or 0
+                        new_missing_qty = prev_missing + diff
+
+                        # Update the tray_quantity in TrayId
+                        top_tray.tray_quantity = edited_tray_qty
+                        top_tray.save(update_fields=['tray_quantity'])
+                        print(f"✅ [Draft] Updated top tray {top_tray.tray_id} qty from {original_qty} to {edited_tray_qty}")
+                        missing_qty = new_missing_qty
+                    else:
+                        print("⚠️ [Draft] Top tray not found for lot:", lot_id)
+                        original_qty = total_stock.dp_physical_qty or total_stock.total_stock or 0
+                        diff = (original_qty - edited_tray_qty)
+                        if diff < 0:
+                            diff = 0
+                        prev_missing = total_stock.dp_missing_qty or 0
+                        missing_qty = prev_missing + diff
+                except ValueError:
+                    return JsonResponse({"success": False, "error": "Edited tray qty must be an integer"}, status=400)
+
+            # --- Save missing qty and physical qty ---
+            total_stock.ip_onhold_picking = True
+            if missing_qty > 0:
+                total_stock.dp_missing_qty = missing_qty
+                total_stock.dp_physical_qty = total_stock.total_stock - missing_qty
+                total_stock.dp_physical_qty_edited = True  # Mark as edited
+
+            total_stock.save(update_fields=[
+                'ip_onhold_picking', 
+                'dp_missing_qty', 
+                'dp_physical_qty', 
+                'dp_physical_qty_edited'
+            ])
+            
+            return JsonResponse({
+                'success': True, 
+                'message': 'Tray scan saved as draft with accumulated missing quantity.',
+                'lot_id': lot_id,
+                'missing_qty': missing_qty,
+                'physical_qty': total_stock.dp_physical_qty
+            })
+# ...existing code...
+            
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False, 
+                'error': 'Invalid JSON data'
+            }, status=400)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({
+                'success': False, 
+                'error': f'Unexpected error occurred: {str(e)}'
+            }, status=500)
+
+# ✅ UPDATED: Modified get_accepted_tray_scan_data function for single top tray calculation
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_accepted_tray_scan_data(request):
     lot_id = request.GET.get('lot_id')
     if not lot_id:
         return Response({'success': False, 'error': 'Missing lot_id'}, status=400)
+    
     try:
-        tray_id_store_qs = IP_Accepted_TrayID_Store.objects.filter(lot_id=lot_id)
-        
-        # Check if there's draft data
-        has_draft = tray_id_store_qs.filter(is_draft=True).exists()
-        
-        tray_id_store_data = [
-            {
-                'lot_id': obj.lot_id,
-                'tray_id': obj.tray_id,
-                'tray_qty': obj.tray_qty,
-                'user': obj.user.username if obj.user else None,
-                'is_draft': obj.is_draft,
-                'is_save': obj.is_save,
-            }
-            for obj in tray_id_store_qs
-        ]
-
-        # Get model_no, tray_capacity, and verification status from TotalStockModel
+        # Get TotalStockModel data
         stock = TotalStockModel.objects.filter(lot_id=lot_id).first()
-        model_no = ""
-        tray_capacity = 0
-        total_stock = 0
-        top_tray_verified = False
-        verified_tray_qty = 0
+        if not stock:
+            return Response({'success': False, 'error': 'Stock not found'}, status=404)
         
-        if stock:
-            model_no = stock.model_stock_no.model_no if stock.model_stock_no else ""
-            tray_capacity = stock.batch_id.tray_capacity if stock.batch_id and hasattr(stock.batch_id, 'tray_capacity') else 0
-            
-            # Use dp_physical_qty if set and > 0, else use total_stock
-            if stock.dp_physical_qty and stock.dp_physical_qty > 0:
-                total_stock = stock.dp_physical_qty
-            else:
-                total_stock = stock.total_stock or 0
-                
-            # Get verification status
-            top_tray_verified = stock.ip_top_tray_qty_verified or False
-            verified_tray_qty = stock.ip_verified_tray_qty or 0
-
+        # Get model_no and tray_capacity
+        model_no = stock.model_stock_no.model_no if stock.model_stock_no else ""
+        tray_capacity = stock.batch_id.tray_capacity if stock.batch_id and hasattr(stock.batch_id, 'tray_capacity') else 10
+        
+        # ✅ NEW: Calculate remaining quantity after rejections
+        # Use dp_physical_qty if set and > 0, else use total_stock
+        if stock.dp_physical_qty and stock.dp_physical_qty > 0:
+            available_qty = stock.dp_physical_qty
+        else:
+            available_qty = stock.total_stock or 0
+        
         # Get total rejection quantity for this lot
         total_rejection_qty = 0
         reason_store = IP_Rejection_ReasonStore.objects.filter(lot_id=lot_id).order_by('-id').first()
         if reason_store:
-            total_rejection_qty = reason_store.total_rejection_quantity
-
-        # Calculate remaining stock for acceptance
-        remaining_qty = total_stock - total_rejection_qty
-
-        # If no accepted tray rows, generate rows based on remaining_qty and tray_capacity
-        if not tray_id_store_data and stock and tray_capacity > 0 and remaining_qty > 0:
-            from math import ceil
-            qty_left = remaining_qty
-            tray_id_store_data = []
-            for i in range(ceil(remaining_qty / tray_capacity)):
-                qty = tray_capacity if qty_left > tray_capacity else qty_left
-                tray_id_store_data.append({
-                    'lot_id': lot_id,
-                    'tray_id': '',
-                    'tray_qty': qty,
-                    'user': None,
-                    'sno': i + 1,
-                    'is_draft': False,
-                    'is_save': False,
-                })
-                qty_left -= qty
-
-        # Add S.no for frontend
-        for idx, row in enumerate(tray_id_store_data):
-            row['sno'] = idx + 1
-
-        return Response({
-            'success': True,
-            'rows': tray_id_store_data,
-            'model_no': model_no,
-            'has_draft': has_draft,
-            'top_tray_verified': top_tray_verified,  # Add verification status
-            'verified_tray_qty': verified_tray_qty,  # Add verified quantity
-        })
-    except Exception as e:
-        return Response({'success': False, 'error': str(e)}, status=500)
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def ip_view_tray_list(request):
-    """
-    Returns tray list for a given lot_id based on different conditions:
-    1. If accepted_Ip_stock is True: get from TrayId table
-    2. If batch_rejection is True: split total_rejection_quantity by tray_capacity and get tray_ids from TrayId
-    3. If batch_rejection is False: return all trays from IQF_Accepted_TrayID_Store
-    """
-    stock_lot_id = request.GET.get('stock_lot_id')
-    
-    # Validate the stock_lot_id parameter
-    if not stock_lot_id or stock_lot_id in ['None', 'null', '']:
-        return Response({
-            'success': False, 
-            'error': 'Valid stock_lot_id parameter is required'
-        }, status=400)
-    try:
-        # Check if this lot has accepted_Ip_stock = True
-        stock = TotalStockModel.objects.filter(lot_id=stock_lot_id).first()
-        accepted_Ip_stock = False
-        tray_capacity = 0
+            total_rejection_qty = reason_store.total_rejection_quantity or 0
         
-        if stock:
-            accepted_Ip_stock = stock.accepted_Ip_stock or False
-            if stock.batch_id and hasattr(stock.batch_id, 'tray_capacity'):
-                tray_capacity = stock.batch_id.tray_capacity or 0
-
-        tray_list = []
-
-        # Condition 1: If accepted_Ip_stock is True, get from TrayId table
-        if accepted_Ip_stock:
-            trays = TrayId.objects.filter(lot_id=stock_lot_id).order_by('id')
-            for idx, tray_obj in enumerate(trays):
-                tray_list.append({
-                    'sno': idx + 1,
-                    'tray_id': tray_obj.tray_id,
-                    'tray_qty': tray_obj.tray_quantity,  # Assuming this field exists in TrayId model
-                })
-            
+        # ✅ NEW: Calculate remaining quantity and top tray quantity
+        remaining_qty = available_qty - total_rejection_qty
+        
+        if remaining_qty <= 0:
             return Response({
-                'success': True,
-                'accepted_Ip_stock': True,
-                'batch_rejection': False,
-                'total_rejection_qty': 0,
-                'tray_capacity': tray_capacity,
-                'trays': tray_list,
-            })
-
-        # Condition 2 & 3: Check rejection reason store (existing logic)
-        reason_store = IP_Rejection_ReasonStore.objects.filter(lot_id=stock_lot_id).order_by('-id').first()
-        batch_rejection = False
-        total_rejection_qty = 0
+                'success': False, 
+                'error': 'No remaining quantity for accepted tray scan'
+            }, status=400)
         
-        if reason_store:
-            batch_rejection = reason_store.batch_rejection
-            total_rejection_qty = reason_store.total_rejection_quantity
-
-        if batch_rejection and total_rejection_qty > 0 and tray_capacity > 0:
-            # Batch rejection: split total_rejection_qty by tray_capacity, get tray_ids from TrayId
-            tray_ids = list(TrayId.objects.filter(lot_id=stock_lot_id).values_list('tray_id', flat=True))
-            num_trays = ceil(total_rejection_qty / tray_capacity)
-            qty_left = total_rejection_qty
-            
-            for i in range(num_trays):
-                qty = tray_capacity if qty_left > tray_capacity else qty_left
-                tray_id = tray_ids[i] if i < len(tray_ids) else ""
-                tray_list.append({
-                    'sno': i + 1,
-                    'tray_id': tray_id,
-                    'tray_qty': qty,
-                })
-                qty_left -= qty
+        # Calculate top tray quantity (remainder after dividing by tray capacity)
+        top_tray_qty = remaining_qty % tray_capacity
+        
+        # If remainder is 0, it means we need full tray capacity for top tray
+        if top_tray_qty == 0:
+            top_tray_qty = tray_capacity
+        
+        # ✅ NEW: Check for existing draft data
+        has_draft = IP_Accepted_TrayID_Store.objects.filter(lot_id=lot_id, is_draft=True).exists()
+        
+        # Get draft tray_id if exists
+        draft_tray_id = ""
+        if has_draft:
+            draft_record = IP_Accepted_TrayID_Store.objects.filter(
+                lot_id=lot_id, 
+                is_draft=True
+            ).first()
+            if draft_record:
+                draft_tray_id = draft_record.top_tray_id
+                delink_tray_id = draft_record.delink_tray_id
+                delink_tray_qty = draft_record.delink_tray_qty
         else:
-            # Not batch rejection: get from IP_Accepted_TrayID_Store
-            trays = IP_Accepted_TrayID_Store.objects.filter(lot_id=stock_lot_id).order_by('id')
-            for idx, obj in enumerate(trays):
-                tray_list.append({
-                    'sno': idx + 1,
-                    'tray_id': obj.tray_id,
-                    'tray_qty': obj.tray_qty,
-                })
-
+            draft_tray_id = ""
+            delink_tray_id = ""
+            delink_tray_qty = None
+        
+        # Get verification status
+        top_tray_verified = stock.ip_top_tray_qty_verified or False
+        verified_tray_qty = stock.ip_verified_tray_qty or 0
+        
         return Response({
             'success': True,
-            'accepted_Ip_stock': accepted_Ip_stock,
-            'batch_rejection': batch_rejection,
-            'total_rejection_qty': total_rejection_qty,
+            'model_no': model_no,
             'tray_capacity': tray_capacity,
-            'trays': tray_list,
+            'available_qty': available_qty,
+            'total_rejection_qty': total_rejection_qty,
+            'remaining_qty': remaining_qty,
+            'top_tray_qty': top_tray_qty,  # ✅ NEW: Single top tray quantity
+            'has_draft': has_draft,
+            'draft_tray_id': draft_tray_id,  # ✅ NEW: Draft tray ID if exists
+            'delink_tray_id': delink_tray_id,
+            'delink_tray_qty': delink_tray_qty,
+            'top_tray_verified': top_tray_verified,
+            'verified_tray_qty': verified_tray_qty,
+            # ✅ REMOVED: No longer sending rows array since we only need single top tray
         })
         
     except Exception as e:
         return Response({'success': False, 'error': str(e)}, status=500)
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class IPTrayValidateAPIView(APIView):
-    def post(self, request):
-        try:
-            # Parse request data
-            data = request.data if hasattr(request, 'data') else json.loads(request.body.decode('utf-8'))
-            
-            # Get parameters
-            lot_id_input = str(data.get('batch_id', '') or data.get('lot_id', '')).strip()
-            tray_id = str(data.get('tray_id', '')).strip()
-            
-            print("="*50)
-            print(f"[DEBUG] Raw request data: {data}")
-            print(f"[DEBUG] Extracted lot_id: '{lot_id_input}' (length: {len(lot_id_input)})")
-            print(f"[DEBUG] Extracted tray_id: '{tray_id}' (length: {len(tray_id)})")
-            
-            if not lot_id_input or not tray_id:
-                return JsonResponse({
-                    'success': False, 
-                    'error': 'Both lot_id and tray_id are required'
-                }, status=400)
+# ✅ NEW: Updated check_tray_id function with proper validation for top tray
+@require_GET
+def check_tray_id(request):
+    tray_id = request.GET.get('tray_id', '')
+    lot_id = request.GET.get('lot_id', '')
 
-            # Step 1: Check if lot_id exists in ModelMasterCreation (optional validation)
-            print(f"[DEBUG] Checking if lot_id exists in ModelMasterCreation: '{lot_id_input}'")
-            try:
-                model_master_creation = ModelMasterCreation.objects.get(lot_id=lot_id_input)
-                print(f"[DEBUG] Found ModelMasterCreation: batch_id='{model_master_creation.batch_id}', lot_id='{model_master_creation.lot_id}'")
-            except ModelMasterCreation.DoesNotExist:
-                print(f"[DEBUG] No ModelMasterCreation found with lot_id: '{lot_id_input}'")
-                # Continue anyway since we're checking TrayId which uses lot_id directly
-
-            # Step 2: Check if the tray exists in TrayId for this lot_id
-            print(f"[DEBUG] Checking if tray '{tray_id}' exists in TrayId for lot_id: '{lot_id_input}'")
-            
-            tray_exists = TrayId.objects.filter(
-                lot_id=lot_id_input,  # Use lot_id directly
-                tray_id=tray_id
-            ).exists()
-            
-            print(f"[DEBUG] Tray exists in TrayId: {tray_exists}")
-            
-            # Additional debugging: show all trays for this lot_id in TrayId
-            all_trays = TrayId.objects.filter(
-                lot_id=lot_id_input
-            ).values_list('tray_id', flat=True)
-            print(f"[DEBUG] All trays in TrayId for lot_id '{lot_id_input}': {list(all_trays)}")
-            
-            # Also check if tray exists anywhere in TrayId (for debugging)
-            tray_anywhere = TrayId.objects.filter(tray_id=tray_id)
-            if tray_anywhere.exists():
-                tray_lot_ids = list(tray_anywhere.values_list('lot_id', flat=True))
-                print(f"[DEBUG] Tray '{tray_id}' found in TrayId for lot_ids: {tray_lot_ids}")
-            
-            print(f"[DEBUG] Final result - exists: {tray_exists}")
-            print("="*50)
-            
+    try:
+        # Get the tray object if it exists
+        tray_obj = TrayId.objects.filter(tray_id=tray_id).first()
+        
+        if not tray_obj:
             return JsonResponse({
-                'success': True, 
-                'exists': tray_exists,
-                'debug_info': {
-                    'lot_id_received': lot_id_input,
-                    'tray_id_received': tray_id,
-                    'all_trays_in_ip_store': list(all_trays),
-                    'tray_exists_in_ip_store': tray_exists
-                }
+                'exists': False,
+                'error': 'Tray ID not found',
+                'already_rejected': False,
+                'not_in_same_lot': False
             })
-            
-        except Exception as e:
-            print(f"[DEBUG] ERROR: {str(e)}")
-            import traceback
-            traceback.print_exc()
+        # ✅ ADD THIS: Only allow if IP_tray_verified is True
+        if not getattr(tray_obj, 'IP_tray_verified', False):
             return JsonResponse({
-                'success': False, 
-                'error': str(e)
-            }, status=500)
-
-
+                'exists': False,
+                'error': 'Tray id is not verified',
+                'tray_status': 'not_verified'
+            })
+        
+        # ✅ VALIDATION 1: Check if tray belongs to same lot
+        same_lot = str(tray_obj.lot_id) == str(lot_id) if tray_obj.lot_id else False
+        
+        # ✅ VALIDATION 2: Check if tray is already rejected
+        already_rejected = tray_obj.rejected_tray or False
+        
+        # ✅ VALIDATION 3: Check if tray is already used in IP_Rejected_TrayScan
+        already_used_in_rejection = IP_Rejected_TrayScan.objects.filter(
+            lot_id=lot_id,
+            rejected_tray_id=tray_id
+        ).exists()
+        
+        # ✅ VALIDATION 4: Check if tray is already used in IP_Accepted_TrayID_Store
+        already_used_in_acceptance = IP_Accepted_TrayID_Store.objects.filter(
+            lot_id=lot_id,
+            top_tray_id=tray_id
+        ).exists()
+        
+        # Determine if tray is valid
+        is_valid = (
+            tray_obj and 
+            same_lot and 
+            not already_rejected and 
+            not already_used_in_rejection and
+            not already_used_in_acceptance
+        )
+        
+        return JsonResponse({
+            'exists': is_valid,
+            'already_rejected': already_rejected or already_used_in_rejection,
+            'not_in_same_lot': not same_lot,
+            'already_used_in_acceptance': already_used_in_acceptance,
+            'tray_status': 'valid' if is_valid else 'invalid'
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'exists': False,
+            'error': 'System error',
+            'already_rejected': False,
+            'not_in_same_lot': False
+        })
 
 
 @csrf_exempt
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def save_accepted_tray_scan(request):
+def save_single_top_tray_scan(request):
     try:
         data = request.data
         lot_id = data.get('lot_id')
-        rows = data.get('rows', [])
-        draft_save = data.get('draft_save', False)  # Get draft_save parameter
+        tray_id = data.get('tray_id')
+        tray_qty = data.get('tray_qty')
+        draft_save = data.get('draft_save', False)
+        delink_trays = data.get('delink_trays', [])  # ✅ NEW: Get delink tray data
         user = request.user
 
-        if not lot_id or not rows:
-            return Response({'success': False, 'error': 'Missing lot_id or rows'}, status=400)
+        if not lot_id or not tray_id or not tray_qty:
+            return Response({
+                'success': False, 
+                'error': 'Missing lot_id, tray_id, or tray_qty'
+            }, status=400)
 
-        # Validate all tray_ids exist in TrayId table
-        for idx, row in enumerate(rows):
-            tray_id = row.get('tray_id')
-            if not tray_id or not TrayId.objects.filter(tray_id=tray_id).exists():
-                return Response({
-                    'success': False,
-                    'error': f'Tray ID "{tray_id}" is not existing (Row {idx+1}).'
-                }, status=400)
+        # ✅ UPDATED: Validation - Prevent same tray ID for delink and top tray
+        delink_tray_ids = [delink['tray_id'] for delink in delink_trays if delink.get('tray_id')]
+        if tray_id in delink_tray_ids:
+            return Response({
+                'success': False,
+                'error': 'To be delink tray should not be as Top tray'
+            }, status=400)
 
-        # Remove existing tray IDs for this lot (to avoid duplicates)
+        # Validate top tray_id exists and is valid
+        top_tray_obj = TrayId.objects.filter(tray_id=tray_id).first()
+        if not top_tray_obj:
+            return Response({
+                'success': False,
+                'error': f'Top tray ID "{tray_id}" does not exist.'
+            }, status=400)
+        
+        # Validate top tray belongs to same lot
+        if str(top_tray_obj.lot_id) != str(lot_id):
+            return Response({
+                'success': False,
+                'error': f'Top tray ID "{tray_id}" does not belong to this lot.'
+            }, status=400)
+        
+        # Validate top tray is not rejected
+        if top_tray_obj.rejected_tray:
+            return Response({
+                'success': False,
+                'error': f'Top tray ID "{tray_id}" is already rejected.'
+            }, status=400)
+
+        # ✅ NEW: Validate all delink trays (only if not draft and delink_trays exist)
+        if not draft_save and delink_trays:
+            for delink in delink_trays:
+                delink_tray_id = delink.get('tray_id')
+                if not delink_tray_id:
+                    continue
+                    
+                delink_tray_obj = TrayId.objects.filter(tray_id=delink_tray_id).first()
+                if not delink_tray_obj:
+                    return Response({
+                        'success': False,
+                        'error': f'Delink tray ID "{delink_tray_id}" does not exist.'
+                    }, status=400)
+                
+                # Validate delink tray belongs to same lot
+                if str(delink_tray_obj.lot_id) != str(lot_id):
+                    return Response({
+                        'success': False,
+                        'error': f'Delink tray ID "{delink_tray_id}" does not belong to this lot.'
+                    }, status=400)
+                
+                # Validate delink tray is not rejected
+                if delink_tray_obj.rejected_tray:
+                    return Response({
+                        'success': False,
+                        'error': f'Delink tray ID "{delink_tray_id}" is already rejected.'
+                    }, status=400)
+
+         # Remove existing records for this lot (to avoid duplicates)
         IP_Accepted_TrayID_Store.objects.filter(lot_id=lot_id).delete()
 
-        total_qty = 0
-        for row in rows:
-            tray_id = row.get('tray_id')
-            tray_qty = row.get('tray_qty')
-            if not tray_id or tray_qty is None:
-                continue
-            total_qty += int(tray_qty)
-            
-            # Create with appropriate boolean flags based on draft_save parameter
-            IP_Accepted_TrayID_Store.objects.create(
-                lot_id=lot_id,
-                tray_id=tray_id,
-                tray_qty=tray_qty,
-                user=user,
-                is_draft=draft_save,      # True if Draft button clicked
-                is_save=not draft_save    # True if Submit button clicked
-            )
+        # Prepare delink tray info for saving (only first delink tray for now)
+        delink_tray_id = delink_tray_ids[0] if delink_tray_ids else None
+        delink_tray_qty = None
+        if delink_trays and delink_trays[0].get('tray_qty'):
+            delink_tray_qty = delink_trays[0]['tray_qty']
 
-        # Save/Update IP_Accepted_TrayScan for this lot
-        accepted_scan, created = IP_Accepted_TrayScan.objects.get_or_create(
+        # Save new record
+        IP_Accepted_TrayID_Store.objects.create(
             lot_id=lot_id,
+            top_tray_id=tray_id,
+            top_tray_qty=tray_qty,
             user=user,
-            defaults={'accepted_tray_quantity': total_qty}
+            is_draft=draft_save,
+            is_save=not draft_save,
+            delink_tray_id=delink_tray_id,
+            delink_tray_qty=delink_tray_qty
         )
-        if not created:
-            accepted_scan.accepted_tray_quantity = total_qty
-            accepted_scan.save(update_fields=['accepted_tray_quantity'])
+
+        # ✅ NEW: Handle TrayId table updates only for final submit (not draft)
+        delink_count = 0
+        if not draft_save:
+            # Update top tray in TrayId table
+            top_tray_obj.ip_top_tray = True
+            top_tray_obj.ip_top_tray_qty = tray_qty
+            top_tray_obj.save(update_fields=['ip_top_tray', 'ip_top_tray_qty'])
+            
+            # Update delink trays in TrayId table
+            for delink in delink_trays:
+                delink_tray_id = delink.get('tray_id')
+                if delink_tray_id:
+                    delink_tray_obj = TrayId.objects.filter(tray_id=delink_tray_id).first()
+                    if delink_tray_obj:
+                        delink_tray_obj.delink_tray = True
+                        delink_tray_obj.lot_id = None
+                        delink_tray_obj.batch_id = None
+                        delink_tray_obj.scanned = False
+                        delink_tray_obj.IP_tray_verified = False
+                        delink_tray_obj.top_tray = False
+                        delink_tray_obj.save(update_fields=[
+                            'delink_tray', 'lot_id', 'batch_id', 'scanned', 'IP_tray_verified', 'top_tray'
+                        ])
+                        delink_count += 1
 
         # Update TotalStockModel flags only if it's a final save (not draft)
         if not draft_save:
@@ -1058,43 +1416,37 @@ def save_accepted_tray_scan(request):
                 stock.accepted_tray_scan_status = True
                 stock.next_process_module = "Brass QC"
                 stock.last_process_module = "Input Screening"
-                stock.ip_onhold_picking = False  # Reset onhold picking status
-                stock.save(update_fields=['accepted_tray_scan_status', 'next_process_module', 'last_process_module', 'ip_onhold_picking'])
+                stock.ip_onhold_picking = False
+                stock.created_at = timezone.now()  # Set created_at to now
+                stock.save(update_fields=[
+                    'accepted_tray_scan_status', 
+                    'next_process_module', 
+                    'last_process_module', 
+                    'ip_onhold_picking',
+                    'created_at'
+                ])
 
-        return Response({'success': True, 'message': 'Accepted tray scan saved.'})
+        # ✅ UPDATED: Enhanced response message
+        if draft_save:
+            message = 'Top tray scan saved as draft successfully.'
+        else:
+            message = f'Top tray scan completed successfully.'
+            if delink_count > 0:
+                message += f' {delink_count} tray(s) marked for delink.'
+
+        return Response({
+            'success': True, 
+            'message': message,
+            'delink_count': delink_count,
+            'top_tray_id': tray_id,
+            'is_draft': draft_save
+        })
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return Response({'success': False, 'error': str(e)}, status=500)
-
-
-@require_GET
-def check_tray_id(request):
-    tray_id = request.GET.get('tray_id', '')
-    lot_id = request.GET.get('lot_id', '')  # This is your stock_lot_id
-
-    # 1. Must exist in TrayId table and lot_id must match
-    tray_obj = TrayId.objects.filter(tray_id=tray_id).first()
-    exists = bool(tray_obj)
-    same_lot = exists and str(tray_obj.lot_id) == str(lot_id)
-
-    # 2. Must NOT be in IP_Rejected_TrayScan for this lot
-    already_rejected = False
-    if exists and same_lot and lot_id:
-        already_rejected = IP_Rejected_TrayScan.objects.filter(
-            lot_id=lot_id,
-            rejected_tray_id=tray_id
-        ).exists()
-
-    # Only valid if exists, same lot, and not already rejected
-    is_valid = exists and same_lot and not already_rejected
-
-    return JsonResponse({
-        'exists': is_valid,
-        'already_rejected': already_rejected,
-        'not_in_same_lot': exists and not same_lot
-    })
-
-
+    
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def ip_get_rejected_tray_scan_data(request):
@@ -1135,14 +1487,63 @@ def Ip_check_accepted_tray_draft(request):
     except Exception as e:
         return Response({'success': False, 'error': str(e)}, status=500)
 
-
-
 class IS_Completed_Table(APIView):
     renderer_classes = [TemplateHTMLRenderer]
     template_name = 'Input_Screening/IS_Completed_Table.html'
 
     def get(self, request):
+        from django.utils import timezone
+        from datetime import datetime, timedelta
+
         user = request.user
+
+        # Get all related brass_saved_time values for completed batches
+        completed_batches = ModelMasterCreation.objects.filter(
+            total_batch_quantity__gt=0,
+        ).values_list('batch_id', flat=True)
+
+        # Get min/max brass_saved_time from TotalStockModel for these batches
+        brass_time_qs = TotalStockModel.objects.filter(
+            batch_id__batch_id__in=completed_batches
+        )
+        min_brass_time = brass_time_qs.order_by('brass_saved_time').values_list('brass_saved_time', flat=True).first()
+        max_brass_time = brass_time_qs.order_by('-brass_saved_time').values_list('brass_saved_time', flat=True).first()
+
+        # Default: yesterday and today based on brass_saved_time, fallback to system date if not found
+        if min_brass_time and max_brass_time:
+            today = max_brass_time.date()
+            yesterday = today - timedelta(days=1)
+        else:
+            today = timezone.now().date()
+            yesterday = today - timedelta(days=1)
+
+        # Get date filter parameters from request
+        from_date_str = request.GET.get('from_date')
+        to_date_str = request.GET.get('to_date')
+
+        # Calculate date range
+        if from_date_str and to_date_str:
+            try:
+                from_date = datetime.strptime(from_date_str, '%Y-%m-%d').date()
+                to_date = datetime.strptime(to_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                from_date = yesterday
+                to_date = today
+        else:
+            from_date = yesterday
+            to_date = today
+
+        # Convert dates to datetime objects for filtering (include full day)
+        from_datetime = timezone.make_aware(datetime.combine(from_date, datetime.min.time()))
+        to_datetime = timezone.make_aware(datetime.combine(to_date, datetime.max.time()))
+
+        # Get batch_ids where brass_saved_time is in range
+        batch_ids_in_range = list(
+            TotalStockModel.objects.filter(
+                brass_saved_time__range=(from_datetime, to_datetime)
+            ).values_list('batch_id__batch_id', flat=True)
+        )
+       
         
         # Create subqueries for all fields
         last_process_module_subquery = TotalStockModel.objects.filter(
@@ -1209,9 +1610,11 @@ class IS_Completed_Table(APIView):
         # FIXED: Use a more explicit approach for the rejection quantity
         # Instead of trying to reference the lot_id directly, we'll get it step by step
         
-        # Only show rows where accepted_Ip_stock is True
+        # 🔥 UPDATED: Build queryset with date filtering and existing filters
         queryset = ModelMasterCreation.objects.filter(
-            total_batch_quantity__gt=0
+            total_batch_quantity__gt=0,
+            batch_id__in=batch_ids_in_range
+
         ).annotate(
             last_process_module=Subquery(last_process_module_subquery),
             next_process_module=Subquery(next_process_module_subquery),
@@ -1232,15 +1635,17 @@ class IS_Completed_Table(APIView):
                       
             stock_lot_id=Subquery(lot_id_subquery),
             wiping_status=Subquery(wiping_status_subquery),
-            last_process_date_time=Subquery(TotalStockModel.objects.filter(
+            brass_saved_time=Subquery(TotalStockModel.objects.filter(
                 batch_id=OuterRef('pk')
-            ).values('last_process_date_time')[:1]),
+            ).values('brass_saved_time')[:1]),
             
         ).filter(
             Q(accepted_Ip_stock=True) |
             Q(rejected_ip_stock=True) |
             Q(few_cases_accepted_Ip_stock=True)
-        ).order_by('-last_process_date_time')
+        ).order_by('-brass_saved_time')
+
+        print(f"📊 Found {queryset.count()} records in date range {from_date} to {to_date}")
         
         # Pagination
         page_number = request.GET.get('page', 1)
@@ -1279,12 +1684,11 @@ class IS_Completed_Table(APIView):
             'total_ip_accepted_quantity',
             'total_stock',
             'wiping_status',
-            'last_process_date_time',
+            'brass_saved_time',
             'plating_stk_no',
             'polishing_stk_no',
             'category',
             'version__version_internal',
-            'last_process_date_time',
         ))
 
         # MANUAL APPROACH: Add rejection quantities manually
@@ -1331,32 +1735,44 @@ class IS_Completed_Table(APIView):
                 images = [static('assets/images/imagePlaceholder.png')]
             data['model_images'] = images
             
-                        # Fallback logic for accepted quantity
+            # Fallback logic for accepted quantity
             total_ip_accepted_quantity = data.get('total_ip_accepted_quantity')
             lot_id = data.get('stock_lot_id')
             accepted_tray_quantity = 0
 
             if not total_ip_accepted_quantity or total_ip_accepted_quantity == 0:
-                # Try to get accepted_tray_quantity from IP_Accepted_TrayScan
-                accepted_scan = IP_Accepted_TrayScan.objects.filter(lot_id=lot_id).order_by('-id').first()
-                if accepted_scan and accepted_scan.accepted_tray_quantity:
-                    accepted_tray_quantity = accepted_scan.accepted_tray_quantity
-                # Set the display value
-                data['display_accepted_qty'] = accepted_tray_quantity or 0
+                # Fetch total_rejection_quantity from IP_Rejection_ReasonStore
+                total_rejection_qty = 0
+                rejection_store = IP_Rejection_ReasonStore.objects.filter(lot_id=lot_id).order_by('-id').first()
+                if rejection_store and rejection_store.total_rejection_quantity:
+                    total_rejection_qty = rejection_store.total_rejection_quantity
+            
+                # Fetch dp_physical_qty from TotalStockModel
+                dp_physical_qty = 0
+                total_stock_obj = TotalStockModel.objects.filter(lot_id=lot_id).first()
+                if total_stock_obj and total_stock_obj.dp_physical_qty:
+                    dp_physical_qty = total_stock_obj.dp_physical_qty
+            
+                # Calculate display_accepted_qty
+                data['display_accepted_qty'] = max(dp_physical_qty - total_rejection_qty, 0)
             else:
                 data['display_accepted_qty'] = total_ip_accepted_quantity
-
         
         print("=== END MANUAL LOOKUP ===")
-            
+        
+        # 🔥 NEW: Add date information to context
         context = {
             'master_data': master_data,
             'page_obj': page_obj,
             'paginator': paginator,
             'user': user,
+            'from_date': from_date.strftime('%Y-%m-%d'),  # 🔥 NEW: Pass dates to template
+            'to_date': to_date.strftime('%Y-%m-%d'),      # 🔥 NEW: Pass dates to template
+            'date_filter_applied': bool(from_date_str and to_date_str),  # 🔥 NEW: Flag to show if custom dates used
         }
         return Response(context, template_name=self.template_name)
-
+    
+    
 class IS_AcceptTable(APIView):
     renderer_classes = [TemplateHTMLRenderer]
     template_name = 'Input_Screening/IS_AcceptTable.html'
@@ -1838,6 +2254,241 @@ class IPSaveHoldUnholdReasonAPIView(APIView):
 
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
+        
+        
+        
+# Add these views to your views.py
 
-
+@method_decorator(csrf_exempt, name='dispatch')
+@method_decorator(login_required, name='dispatch')
+class SaveRejectionDraftAPIView(APIView):
+    """
+    Save rejection data as draft
+    """
+    permission_classes = [IsAuthenticated]
     
+    def post(self, request):
+        try:
+            data = request.data if hasattr(request, 'data') else json.loads(request.body.decode('utf-8'))
+            lot_id = data.get('lot_id')
+            batch_id = data.get('batch_id')
+            rejection_data = data.get('rejection_data', [])  # List of {reason_id, qty}
+            tray_scans = data.get('tray_scans', [])  # List of {tray_id, tray_qty}
+            is_batch_rejection = data.get('is_batch_rejection', False)
+            
+            if not lot_id:
+                return JsonResponse({'success': False, 'error': 'lot_id is required'}, status=400)
+            
+            # Prepare draft data
+            draft_data = {
+                'batch_id': batch_id,
+                'rejection_data': rejection_data,
+                'tray_scans': tray_scans,
+                'is_batch_rejection': is_batch_rejection,
+                'total_rejection_qty': sum(int(item.get('qty', 0)) for item in rejection_data)
+            }
+            
+            # Save or update draft
+            draft_obj, created = IP_Rejection_Draft.objects.update_or_create(
+                lot_id=lot_id,
+                user=request.user,
+                defaults={
+                    'draft_data': draft_data
+                }
+            )
+            
+            # ✅ NEW: Update ip_onhold_picking to True in TotalStockModel
+            try:
+                total_stock = TotalStockModel.objects.get(lot_id=lot_id)
+                total_stock.ip_onhold_picking = True
+                total_stock.save(update_fields=['ip_onhold_picking'])
+                print(f"✅ Updated ip_onhold_picking=True for lot_id: {lot_id}")
+            except TotalStockModel.DoesNotExist:
+                print(f"⚠️ TotalStockModel not found for lot_id: {lot_id}")
+                # Don't fail the draft save if TotalStockModel is not found
+            except Exception as stock_error:
+                print(f"❌ Error updating TotalStockModel for lot_id {lot_id}: {str(stock_error)}")
+                # Don't fail the draft save if TotalStockModel update fails
+            
+            return JsonResponse({
+                'success': True, 
+                'message': 'Draft saved successfully',
+                'created': created
+            })
+            
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_rejection_draft(request):
+    """
+    Get draft rejection data for a lot
+    """
+    lot_id = request.GET.get('lot_id')
+    if not lot_id:
+        return Response({'success': False, 'error': 'Missing lot_id'}, status=400)
+    
+    try:
+        draft = IP_Rejection_Draft.objects.filter(
+            lot_id=lot_id, 
+            user=request.user
+        ).first()
+        
+        if draft:
+            return Response({
+                'success': True,
+                'has_draft': True,
+                'draft_data': draft.draft_data,
+                'updated_at': draft.updated_at.isoformat()
+            })
+        else:
+            return Response({
+                'success': True,
+                'has_draft': False,
+                'draft_data': None
+            })
+            
+    except Exception as e:
+        return Response({'success': False, 'error': str(e)}, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_delink_tray_data(request):
+    """
+    Get delink tray data based on latest rejection reason store for the popup lot.
+    Only show as many rows as needed to cover total_rejection_quantity / tray_capacity.
+    """
+    try:
+        # 1. Get the latest IP_Rejection_ReasonStore record
+        reason_store = IP_Rejection_ReasonStore.objects.order_by('-id').first()
+        if not reason_store:
+            return Response({'success': False, 'error': 'No rejection reason found.'}, status=404)
+
+        lot_id = reason_store.lot_id
+        total_rejection_qty = reason_store.total_rejection_quantity or 0
+
+        # 2. Get tray_capacity from TotalStockModel
+        stock = TotalStockModel.objects.filter(lot_id=lot_id).first()
+        tray_capacity = stock.batch_id.tray_capacity if stock and stock.batch_id and hasattr(stock.batch_id, 'tray_capacity') else 10
+
+        # 3. Calculate number of rows to show
+        num_rows = (total_rejection_qty // tray_capacity) + (1 if total_rejection_qty % tray_capacity else 0)
+
+        # 4. Get all unscanned trays for this lot
+        unscanned_trays = TrayId.objects.filter(
+            lot_id=lot_id,
+            scanned=False
+        ).values('tray_id', 'tray_quantity', 'id').order_by('id')
+
+        # 5. Limit to num_rows
+        delink_data = []
+        for idx, tray in enumerate(unscanned_trays):
+            if idx >= num_rows:
+                break
+            delink_data.append({
+                'sno': idx + 1,
+                'tray_id': tray['tray_id'],
+                'tray_quantity': tray['tray_quantity'] or 0,
+                'id': tray['id']
+            })
+
+        return Response({
+            'success': True,
+            'delink_trays': delink_data,
+            'total_count': len(delink_data),
+            'lot_id': lot_id,
+            'total_rejection_qty': total_rejection_qty,
+            'tray_capacity': tray_capacity,
+            'num_rows': num_rows
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return Response({'success': False, 'error': str(e)}, status=500)
+
+
+# ✅ UPDATED: Enhanced delink_check_tray_id function
+@require_GET
+def delink_check_tray_id(request):
+    """
+    Validate tray ID for delink process
+    Check if tray exists in same lot and is not already rejected
+    """
+    tray_id = request.GET.get('tray_id', '')
+    current_lot_id = request.GET.get('lot_id', '')
+    
+    try:
+        # Get the tray object if it exists
+        tray_obj = TrayId.objects.filter(tray_id=tray_id).first()
+        
+        if not tray_obj:
+            # Tray doesn't exist
+            return JsonResponse({
+                'exists': False,
+                'valid_for_delink': False,
+                'error': 'Tray ID not found',
+                'status_message': 'Not Found'
+            })
+            
+        # ✅ NEW: Only allow if IP_tray_verified is True
+        if not getattr(tray_obj, 'IP_tray_verified', False):
+            return JsonResponse({
+                'exists': False,
+                'valid_for_delink': False,
+                'error': 'Tray id is not verified',
+                'status_message': 'Tray id is not verified',
+                'tray_status': 'not_verified'
+            })
+        
+        # ✅ VALIDATION 1: Check if tray belongs to same lot
+        if tray_obj.lot_id:
+            if str(tray_obj.lot_id).strip() != str(current_lot_id).strip():
+                return JsonResponse({
+                    'exists': True,
+                    'valid_for_delink': False,
+                    'error': 'Different lot',
+                    'status_message': 'Different Lot',
+                    'tray_status': 'different_lot'
+                })
+        else:
+            # Tray has no lot_id assigned
+            return JsonResponse({
+                'exists': True,
+                'valid_for_delink': False,
+                'error': 'No lot assigned',
+                'status_message': 'No Lot Assigned',
+                'tray_status': 'no_lot'
+            })
+        
+        # ✅ VALIDATION 2: Check if tray is already rejected
+        if tray_obj.rejected_tray:
+            return JsonResponse({
+                'exists': True,
+                'valid_for_delink': False,
+                'error': 'Already rejected',
+                'status_message': 'Already Rejected',
+                'tray_status': 'already_rejected'
+            })
+        
+        # ✅ SUCCESS: Tray exists, same lot, and not rejected
+        return JsonResponse({
+            'exists': True,
+            'valid_for_delink': True,
+            'status_message': 'Available for Delink',
+            'tray_status': 'available',
+            'tray_quantity': tray_obj.tray_quantity or 0
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'exists': False,
+            'valid_for_delink': False,
+            'error': 'System error',
+            'status_message': 'System Error'
+        })

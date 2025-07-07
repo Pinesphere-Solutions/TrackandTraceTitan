@@ -1,584 +1,601 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
+
+
 <style nonce="{{ csp_nonce }}">
 
   
-/* Count display styling for submit button area */
-.table-actions .data-count {
-  position: absolute;
-  top: -35px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--clr-primary);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(18, 106, 131, 0.3);
-  border: 2px solid white;
-}
-
-.table-actions .data-count::before {
-  content: '';
-  position: absolute;
-  bottom: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 6px solid var(--clr-primary);
-}
-
-/* Responsive count display */
-@media (max-width: 768px) {
+  /* Count display styling for submit button area */
   .table-actions .data-count {
-    font-size: 0.8rem;
-    padding: 5px 10px;
-    top: -32px;
-  }
-}
-
-@media (max-width: 480px) {
-  .table-actions .data-count {
-    position: relative;
-    top: 0;
-    margin-bottom: 10px;
-    transform: none;
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--clr-primary);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(18, 106, 131, 0.3);
+    border: 2px solid white;
   }
   
   .table-actions .data-count::before {
-    display: none;
-  }
-}
-  
-    /* Sticky submit/cancel buttons at bottom */
-  .table-actions {
-    position: fixed !important;
-    bottom: 45px !important; /* Above footer */
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    z-index: 1000 !important;
-    background: rgba(255, 255, 255, 0.95) !important;
-    backdrop-filter: blur(10px) !important;
-    border: 1px solid var(--clr-muted) !important;
-    border-radius: 12px !important;
-    padding: 1rem 2rem !important;
-    margin: 0 !important;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15) !important;
-    display: flex !important;
-    justify-content: center !important;
-    gap: 1rem !important;
-    min-width: 300px !important;
-      pointer-events: auto !important;
-
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid var(--clr-primary);
   }
   
-  /* Adjust for sidebar when expanded */
-  body:not(.sidebar-icon-only) .table-actions {
-    left: calc(50% + 112px) !important; /* Center with sidebar offset */
-  }
-  
-  /* Adjust for collapsed sidebar */
-  .sidebar-icon-only .table-actions {
-    left: calc(50% + 27px) !important; /* Center with collapsed sidebar offset */
-  }
-  
-  /* Enhanced button styling for sticky position */
-  .table-actions .btn {
-    min-width: 120px !important;
-    padding: 0.875rem 2rem !important;
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.5px !important;
-    border-radius: 8px !important;
-    transition: all 0.3s ease !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-  }
-  
-  /* Enhanced hover effects for sticky buttons */
-  .table-actions .btn:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2) !important;
-  }
-  
-  /* Submit button specific styling */
-  .table-actions .btn:first-child {
-    background: var(--clr-primary) !important;
-    color: white !important;
-    border: 2px solid var(--clr-primary) !important;
-  }
-  
-  .table-actions .btn:first-child:hover {
-    background: var(--clr-secondary) !important;
-    border-color: var(--clr-secondary) !important;
-  }
-  
-  /* Cancel button specific styling (red) */
-  .table-actions .btn:last-child {
-    background: transparent !important;
-    color: #dc3545 !important;
-    border: 2px solid #dc3545 !important;
-  }
-  
-  .table-actions .btn:last-child:hover {
-    background: #dc3545 !important;
-    color: white !important;
-  }
-  
- 
-  /* Responsive adjustments for sticky buttons */
+  /* Responsive count display */
   @media (max-width: 768px) {
-    .table-actions {
-      left: 50% !important;
-      min-width: 280px !important;
-      padding: 0.75rem 1.5rem !important;
-      bottom: 35px !important;
+    .table-actions .data-count {
+      font-size: 0.5rem;
+      padding: 5px 10px;
+      top: -32px;
     }
-    
-    body:not(.sidebar-icon-only) .table-actions,
-    .sidebar-icon-only .table-actions {
-      left: 50% !important; /* Full center on mobile */
-    }
-    
-    .table-actions .btn {
-      min-width: 100px !important;
-      padding: 0.75rem 1.5rem !important;
-      font-size: 0.9rem !important;
+    .table-actions{
+      left: 30% !important;
     }
   }
   
   @media (max-width: 480px) {
-    .table-actions {
-      flex-direction: column !important;
-      gap: 0.5rem !important;
-      min-width: 250px !important;
+    .table-actions .data-count {
+      position: relative;
+      top: 0;
+      margin-bottom: 10px;
+      transform: none;
     }
     
+    .table-actions .data-count::before {
+      display: none;
+    }
+  }
+    
+      /* Sticky submit/cancel buttons at bottom */
+    .table-actions {
+      position: fixed !important;
+    bottom: 45px !important;
+    left: 45% !important;
+    transform: translateX(-50%) !important;
+    z-index: 1000 !important;
+    border-radius: 12px !important;
+    padding: 1rem 2rem !important;
+    margin: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    gap: 1rem !important;
+    min-width: 300px !important;
+    pointer-events: auto !important;
+    transform: translateY(30%) !important;
+  
+    }
+    
+    /* Adjust for sidebar when expanded */
+    body:not(.sidebar-icon-only) {
+      left: calc(50% + 112px) !important; /* Center with sidebar offset */
+    }
+    
+    /* Adjust for collapsed sidebar */
+    .sidebar-icon-only {
+      left: calc(50% + 27px) !important; /* Center with collapsed sidebar offset */
+    }
+    
+    /* Enhanced button styling for sticky position */
     .table-actions .btn {
-      width: 100% !important;
-      min-width: auto !important;
+      min-width: 120px !important;
+      padding: 0.875rem 2rem !important;
+      font-weight: 700 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.5px !important;
+      border-radius: 8px !important;
+      transition: all 0.3s ease !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+      background-color: #fff;
     }
-  }
-  :root {
-    --clr-primary: #126a83;      /* Teal */
-    --clr-secondary: #023E4D;    /* Deep Navy */
-    --clr-tertiary: #FF6B6B;     /* Soft Coral */
-    --clr-bg: #F5F9FA;           /* Light background */
-    --clr-surface: #FFFFFF;      /* Surface white */
-    --clr-text: #212529;         /* Default text */
-    --clr-muted: #6C757D;        /* Muted text */
-  }
-  /* Full page layout */
-  body {
-    margin: 0;
-    background: var(--clr-bg);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: var(--clr-text);
-    overflow-x: hidden;
-  }
-  /* Main card container */
-  .bulk-card {
-    background: var(--clr-surface);
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-    margin: 2rem auto;
-    max-width: 1300px; /* Reduced width since we removed one column */
-    overflow: hidden;
-    animation: slideIn 0.8s ease-out;
-  }
-  @keyframes slideIn {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-  /* Header with animated background */
-  .card-header {
-    background: var(--clr-secondary);
-    color: var(--clr-surface);
-    padding: 0.5rem 2rem;
-    position: relative;
-    overflow: hidden;
-  }
-  .card-header h1 {
-    margin: 0;
-    font-size: 1.4rem;
-    font-weight: 600;
-  }
-  .card-header::after {
-    content: "";
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: conic-gradient(from 45deg, var(--clr-tertiary), var(--clr-secondary));
-    animation: spin 10s linear infinite;
-    opacity: 0.15;
-  }
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-  /* Lottie animation in header */
-  .header-lottie {
-    position: absolute;
-    right: 1rem;
-    top: 1rem;
-    width: 60px;
-    height: 60px;
-    opacity: 0.35;
-  }
-  /* Body styling */
-  .card-body {
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-  .action-area {
-    display: flex;
-    justify-content: flex-end;
-  }
-  .btn {
-    border: none;
-    border-radius: 6px;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.3s, box-shadow 0.3s;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .btn-outline {
-    background: transparent;
-    border: 2px solid var(--clr-primary);
-    color: var(--clr-primary);
-  }
-  .btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-  }
-  .btn svg.icon {
-    margin-right: 0.5rem;
-  }
-  /* Split area: Upload area & File list */
-  .upload-file-area {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-  }
-  .file-upload-area {
-    flex: 1 1 460px;
-    border: 2px dashed var(--clr-muted);
-    border-radius: 8px;
-    padding: 2rem;
-    text-align: center;
-    cursor: pointer;
-    transition: background 0.3s, border-color 0.3s;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 70px;
-  }
-  .file-upload-area:hover {
-    background: rgba(18,106,131,0.05);
-  }
-  .file-upload-area p {
-    margin: 0;
-    font-size: 1rem;
-    color: var(--clr-muted);
-  }
-  .upload-link {
-    color: var(--clr-primary);
-    font-weight: 600;
-    text-decoration: underline;
-  }
-  .lottie-upload {
-    width: 80px;
-    height: 80px;
-  }
-  .file-upload-area.dragover {
-    background: rgba(18,106,131,0.1);
-    border-color: var(--clr-primary);
-  }
-  /* File List styling */
-  .file-list {
-    flex: 1 1 300px;
-    display: grid;
-    gap: 1rem;
-  }
-  .file-card {
-    background: var(--clr-surface);
-    border: 1px solid var(--clr-muted);
-    border-radius: 8px;
-    padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: box-shadow 0.3s;
-    animation: fadeIn 0.5s ease-in;
-  }
-  .file-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  }
-  .file-info {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-  .file-icon {
-    width: 36px;
-    height: 36px;
-    background: var(--clr-bg);
-    color: var(--clr-primary);
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .file-details {
-    overflow: hidden;
-  }
-  .file-name {
-    font-weight: 500;
-    font-size: 0.9rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 150px;
-  }
-  .file-size {
-    font-size: 0.8rem;
-    color: var(--clr-muted);
-    margin-top: 2px;
-  }
-  .remove-file {
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: var(--clr-bg);
-    color: var(--clr-text);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background 0.3s, color 0.3s;
-  }
-  .remove-file:hover {
-    background: var(--clr-tertiary);
-    color: var(--clr-surface);
-  }
-  /* Data Table Section */
-  .data-table-card {
-    margin: 0rem 5px 0.5rem 3px;
-    animation: slideIn 0.8s ease-out;
-  }
-  .table-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
-  .table-header h2 {
-    font-size: 1.4rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    color: var(--clr-text);
-    margin: 0;
-  }
-  .table-header h2 .icon {
-    margin-right: 0.5rem;
-  }
-  .table-container {
-    overflow-x: auto; /* Changed to auto for horizontal scrolling */
-    overflow-y: auto;
-    max-height: 320px;
-    margin-bottom: 35px !important; /* Additional margin to ensure scroll visibility */
-    padding-bottom: 20px !important; /* Space for sticky buttons */
-    position: relative !important;
-    z-index: 1 !important; /* Ensure table content is below buttons but scroll is visible */
+    
+    /* Enhanced hover effects for sticky buttons */
+    .table-actions .btn:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    /* Submit button specific styling */
+    .table-actions .btn:first-child {
+      background: var(--clr-primary) !important;
+      color: white !important;
+      border: 2px solid var(--clr-primary) !important;
+    }
+    
+    .table-actions .btn:first-child:hover {
+      background: var(--clr-secondary) !important;
+      border-color: var(--clr-secondary) !important;
+    }
+    
+    /* Cancel button specific styling (red) */
+    .table-actions .btn:last-child {
+      background: #fff !important;
+      color: #dc3545 !important;
+      border: 2px solid #dc3545 !important;
+    }
+    
+    .table-actions .btn:last-child:hover {
+      background: #dc3545 !important;
+      color: white !important;
+    }
+    
    
-  }
-
-/* Ensure table scroll track is visible above buttons */
-.table-container::-webkit-scrollbar {
-  width: 8px !important;
-  height: 1px !important; /* Add this for horizontal scrollbar */
-  z-index: 999 !important;
-}
-
-.table-container::-webkit-scrollbar:horizontal {
-  height: 3px !important;
-}
-
-.table-container::-webkit-scrollbar-track {
-  background: #f1f1f1 !important;
-  border-radius: 6px !important;
-  z-index: 999 !important;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-  background: #888 !important;
-  border-radius: 6px !important;
-  z-index: 999 !important;
-}
-
-.table-container::-webkit-scrollbar-thumb:hover {
-  background: #555 !important;
-}
-
-  .data-table {
-    width: 100%;
-    min-width: 1100px; /* Reduced minimum width since we removed one column */
-    border-collapse: collapse; /* Collapse borders for grid view */
-    background: var(--clr-bg);
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      margin-bottom: 5px !important;
-
-  }
-  .data-table th,
-  .data-table td {
-    padding: 0.75rem 1rem;
-    text-align: left;
-    border: 1px solid var(--clr-muted);  /* Grid lines for rows and columns */
-  }
-
-  /* Action Column */
-  .data-table .actions {
-    width: 80px;
-    text-align: right;
-  }
-  /* Redesigned Delete Button */
-  .btn-delete {
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: var(--clr-bg);
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background 0.3s, transform 0.2s;
-  }
-  .btn-delete:hover {
-    background: var(--clr-tertiary);
-    transform: scale(1.1);
-  }
-  .btn-delete .icon {
-    width: 18px;
-    height: 18px;
-    stroke: var(--clr-text);
-    stroke-width: 2;
-  }
-  .cell-input {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid var(--clr-primary);
-    border-radius: 6px;
-    min-width: 100px; /* Ensure minimum input width */
-    font-family: inherit;
-    font-size: 0.9rem;
-  }
-  .cell-input:focus { 
-    outline: none; 
-    border-color: var(--clr-secondary);
-    box-shadow: 0 0 0 2px rgba(18, 106, 131, 0.2);
-  }
-  
-  /* Simple dropdown styling - no conflicts */
-  .simple-dropdown {
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-    background-position: right 10px center;
-    background-repeat: no-repeat;
-    background-size: 16px;
-    padding-right: 40px !important;
-  }
-  
-  .simple-dropdown:focus {
-    border-color: var(--clr-secondary) !important;
-    box-shadow: 0 0 0 2px rgba(18, 106, 131, 0.2) !important;
-  }
-  
-  .simple-dropdown option {
-    padding: 8px;
-    background: white;
-    color: #333;
-  }
-  
-  /* Auto-filled field styling */
-  .auto-filled {
-    background-color: #e8f5e8 !important;
-    border-left: 3px solid #28a745 !important;
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .table-row-animation { animation: fadeIn 0.5s ease-in; }
-
-  /* Override any row gutter padding for the card-header so it touches the bulk-card edges */
-  .bulk-card > .card-header {
-    margin-left: -14px !important;
-    margin-right: -14px !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-  
-  /* Then add inner padding if desired to the header-content */
-  .header-content {
-    padding: 1rem 1rem; /* Adjust as needed */
-  }
-  @media (max-width: 425px) {
-  .card-header h1{
-    font-size: 12px !important;
-  }
-  .btn-outline{
-    padding: 0.5rem 0.5rem !important;
-    font-size: 10px !important;
-    font-weight: 600 !important;
-  }
-  }
-  /* Responsive adjustments */
-  @media (max-width: 426px){
-    .file-upload-area p {
-    font-size: 12px !important;
+    /* Responsive adjustments for sticky buttons */
+    @media (max-width: 768px) {
+      .table-actions {
+        left: 30% !important;
+        min-width: 280px !important;
+        padding: 0.75rem 1.5rem !important;
+        bottom: 35px !important;
+      }
+      
+      body:not(.sidebar-icon-only),
+      .sidebar-icon-only {
+        left: 50% !important; /* Full center on mobile */
+      }
+      
+      .table-actions .btn {
+        min-width: 100px !important;
+        padding: 0.75rem 1.5rem !important;
+        font-size: 0.9rem !important;
+      }
     }
-  }
-  @media (max-width: 426px) {
-  .card-header h1{
-    font-size: 12px !important;
-  }
-  .btn-outline{
-    padding: 0.5rem 0.5rem !important;
-    font-size: 10px !important;
-    font-weight: 600 !important;
-  }
-  }
-/* Place this at the very end of your <style> block */
-@media screen and (min-width: 768px) and (max-width: 1024px) {
-  body .bulk-card .data-table-card .table-container {
-    margin-bottom: 260px !important;
-  }
-  .table-actions {
-    bottom: 80px !important;
+    
+    @media (max-width: 480px) {
+      .table-actions {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+        min-width: 250px !important;
+      }
+      
+      .table-actions .btn {
+        width: 100% !important;
+        min-width: auto !important;
+      }
+    }
+    :root {
+      --clr-primary: #126a83;      /* Teal */
+      --clr-secondary: #023E4D;    /* Deep Navy */
+      --clr-tertiary: #FF6B6B;     /* Soft Coral */
+      --clr-bg: #F5F9FA;           /* Light background */
+      --clr-surface: #FFFFFF;      /* Surface white */
+      --clr-text: #212529;         /* Default text */
+      --clr-muted: #6C757D;        /* Muted text */
+    }
+    /* Full page layout */
+    body {
+      margin: 0;
+      background: var(--clr-bg);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--clr-text);
+      overflow-x: hidden;
+    }
+    /* Main card container */
+    .bulk-card {
+      background: var(--clr-surface);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      margin: 2rem auto;
+      max-width: 1300px; /* Reduced width since we removed one column */
+      overflow: hidden;
+      animation: slideIn 0.8s ease-out;
+    }
+    @keyframes slideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    /* Header with animated background */
+    .card-header {
+      background: var(--clr-secondary);
+      color: var(--clr-surface);
+      padding: 0.5rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .card-header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+    .card-header::after {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(from 45deg, var(--clr-tertiary), var(--clr-secondary));
+      animation: spin 10s linear infinite;
+      opacity: 0.15;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    /* Lottie animation in header */
+    .header-lottie {
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+      width: 60px;
+      height: 60px;
+      opacity: 0.35;
+    }
+    /* Body styling */
+    .card-body {
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    .action-area {
+      display: flex;
+      justify-content: flex-end;
+    }
+    .btn {
+      border: none;
+      border-radius: 6px;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--clr-primary);
+      color: var(--clr-primary);
+    }
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+    .btn svg.icon {
+      margin-right: 0.5rem;
+    }
+    /* Split area: Upload area & File list */
+    .upload-file-area {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+    .file-upload-area {
+      flex: 1 1 460px;
+      border: 2px dashed var(--clr-muted);
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.3s, border-color 0.3s;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
+    }
+    .file-upload-area:hover {
+      background: rgba(18,106,131,0.05);
+    }
+    .file-upload-area p {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--clr-muted);
+    }
+    .upload-link {
+      color: var(--clr-primary);
+      font-weight: 600;
+      text-decoration: underline;
+    }
+    .lottie-upload {
+      width: 80px;
+      height: 80px;
+    }
+    .file-upload-area.dragover {
+      background: rgba(18,106,131,0.1);
+      border-color: var(--clr-primary);
+    }
+    /* File List styling */
+    .file-list {
+      flex: 1 1 300px;
+      display: grid;
+      gap: 1rem;
+    }
+    .file-card {
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-muted);
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: box-shadow 0.3s;
+      animation: fadeIn 0.5s ease-in;
+    }
+    .file-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .file-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--clr-bg);
+      color: var(--clr-primary);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .file-details {
+      overflow: hidden;
+    }
+    .file-name {
+      font-weight: 500;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 150px;
+    }
+    .file-size {
+      font-size: 0.8rem;
+      color: var(--clr-muted);
+      margin-top: 2px;
+    }
+    .remove-file {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: var(--clr-bg);
+      color: var(--clr-text);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s;
+    }
+    .remove-file:hover {
+      background: var(--clr-tertiary);
+      color: var(--clr-surface);
+    }
+    /* Data Table Section */
+    .data-table-card {
+      margin: 0rem 5px 0.5rem 3px;
+      animation: slideIn 0.8s ease-out;
+    }
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .table-header h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      color: var(--clr-text);
+      margin: 0;
+    }
+    .table-header h2 .icon {
+      margin-right: 0.5rem;
+    }
+    .table-container {
+      overflow-x: auto; /* Changed to auto for horizontal scrolling */
+      overflow-y: auto;
+      max-height: 320px;
+      margin-bottom: 35px !important; /* Additional margin to ensure scroll visibility */
+      padding-bottom: 20px !important; /* Space for sticky buttons */
+      position: relative !important;
+      z-index: 1 !important; /* Ensure table content is below buttons but scroll is visible */
+     
+    }
+  
+  /* Ensure table scroll track is visible above buttons */
+  .table-container::-webkit-scrollbar {
+    width: 8px !important;
+    height: 1px !important; /* Add this for horizontal scrollbar */
+    z-index: 999 !important;
   }
   
+  .table-container::-webkit-scrollbar:horizontal {
+    height: 3px !important;
+  }
+  
+  .table-container::-webkit-scrollbar-track {
+    background: #f1f1f1 !important;
+    border-radius: 6px !important;
+    z-index: 999 !important;
+  }
+  
+  .table-container::-webkit-scrollbar-thumb {
+    background: #888 !important;
+    border-radius: 6px !important;
+    z-index: 999 !important;
+  }
+  
+  .table-container::-webkit-scrollbar-thumb:hover {
+    background: #555 !important;
+  }
+  
+    .data-table {
+      width: 100%;
+      min-width: 1100px; /* Reduced minimum width since we removed one column */
+      border-collapse: collapse; /* Collapse borders for grid view */
+      background: var(--clr-bg);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        margin-bottom: 5px !important;
+  
+    }
+    .data-table th,
+    .data-table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border: 1px solid var(--clr-muted);  /* Grid lines for rows and columns */
+    }
+  
+    /* Action Column */
+    .data-table .actions {
+      width: 80px;
+      text-align: right;
+    }
+    /* Redesigned Delete Button */
+    .btn-delete {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: var(--clr-bg);
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .btn-delete:hover {
+      background: var(--clr-tertiary);
+      transform: scale(1.1);
+    }
+    .btn-delete .icon {
+      width: 18px;
+      height: 18px;
+      stroke: var(--clr-text);
+      stroke-width: 2;
+    }
+    .cell-input {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid var(--clr-primary);
+      border-radius: 6px;
+      min-width: 100px; /* Ensure minimum input width */
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .cell-input:focus { 
+      outline: none; 
+      border-color: var(--clr-secondary);
+      box-shadow: 0 0 0 2px rgba(18, 106, 131, 0.2);
+    }
+    
+    /* Simple dropdown styling - no conflicts */
+    .simple-dropdown {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 10px center;
+      background-repeat: no-repeat;
+      background-size: 16px;
+      padding-right: 40px !important;
+    }
+    
+    .simple-dropdown:focus {
+      border-color: var(--clr-secondary) !important;
+      box-shadow: 0 0 0 2px rgba(18, 106, 131, 0.2) !important;
+    }
+    
+    .simple-dropdown option {
+      padding: 8px;
+      background: white;
+      color: #333;
+    }
+    
+    /* Auto-filled field styling */
+    .auto-filled {
+      background-color: #e8f5e8 !important;
+      border-left: 3px solid #28a745 !important;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .table-row-animation { animation: fadeIn 0.5s ease-in; }
+  
+    /* Override any row gutter padding for the card-header so it touches the bulk-card edges */
+    .bulk-card > .card-header {
+      margin-left: -14px !important;
+      margin-right: -14px !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+    
+    /* Then add inner padding if desired to the header-content */
+    .header-content {
+      padding: 1rem 1rem; /* Adjust as needed */
+    }
+    @media (max-width: 425px) {
+    .card-header h1{
+      font-size: 12px !important;
+    }
+    .btn-outline{
+      padding: 0.5rem 0.5rem !important;
+      font-size: 10px !important;
+      font-weight: 600 !important;
+    }
+    }
+    /* Responsive adjustments */
+    @media (max-width: 426px){
+      .file-upload-area p {
+      font-size: 12px !important;
+      }
+    }
+    @media (max-width: 426px) {
+    .card-header h1{
+      font-size: 12px !important;
+    }
+    .btn-outline{
+      padding: 0.5rem 0.5rem !important;
+      font-size: 10px !important;
+      font-weight: 600 !important;
+    }
+    }
+/*   /* Place this at the very end of your <style> block */
+  @media screen and (min-width: 768px) and (max-width: 1024px) {
+    body .bulk-card .data-table-card .table-container {
+      margin-bottom: 260px !important;
+      
+    }
+    .table-actions {
+      bottom: 40px !important;
+    }
+    
+    
+  } 
+  @media screen and (min-width: 768px) and (max-width: 1024px) {
+  /* Add space below the data table section */
+  #data-table-section {
+    margin-bottom: 100px !important;
+  }
+
+  /* Add space above the sticky Submit/Cancel buttons */
+  .table-actions {
+    margin-top: 40px !important;
+  }
 }
 
-</style>
+  
+  </style>
 
 <div class="bulk-card">
   <div class="card-header" style="
@@ -1578,6 +1595,12 @@ function renderTable() {
     return hasData;
   }).length;
   dataCount.textContent = `${validRowCount} ${validRowCount === 1 ? 'Record' : 'Records'} Exists`;
+
+  // Move the counter to the table header
+const tableHeader = document.querySelector('#data-table-section .table-header');
+if (tableHeader && !tableHeader.querySelector('.data-count')) {
+  tableHeader.appendChild(dataCount);
+}
   tableActionsContainer.style.position = 'relative';
   tableActionsContainer.appendChild(dataCount);
   tableActionsContainer.className = 'table-actions';
