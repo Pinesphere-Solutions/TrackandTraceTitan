@@ -40,7 +40,6 @@ urlpatterns = [
     
     path('nickel_inspection/', include('Nickel_Inspection.urls')),
     path('iqf/', include('IQF.urls')),
-    path('adminportal/',include('adminportal.urls')),
     path('modelmaster/', TemplateView.as_view(template_name="modelmaster.html"), name='modelmaster'),
     path('viewmasters/', TemplateView.as_view(template_name="viewmasters.html"), name='viewmasters'),
     path('visualaid/', TemplateView.as_view(template_name="VisualAid.html"), name='VisualAid'),

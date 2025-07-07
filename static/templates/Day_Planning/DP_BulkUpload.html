@@ -4,8 +4,17 @@
 
 
 <style nonce="{{ csp_nonce }}">
-
-  
+  @media (min-width: 900px) and (max-width: 1300px) {
+  .table-actions .btn {
+        min-width: 100px !important;
+        padding: 10px !important;
+        font-size: 17px !important;
+  }
+  #add-model-btn {
+    padding: 10px !important;
+    font-size: 17px !important;
+  }
+}
   /* Count display styling for submit button area */
   .table-actions .data-count {
     position: absolute;
@@ -570,29 +579,18 @@
       font-weight: 600 !important;
     }
     }
-/*   /* Place this at the very end of your <style> block */
-  @media screen and (min-width: 768px) and (max-width: 1024px) {
-    body .bulk-card .data-table-card .table-container {
-      margin-bottom: 260px !important;
-      
+
+  
+  @media screen and (min-width: 770px) and (max-width: 1024px) {
+    .table-container {
+      padding-bottom: 120px !important; /* Add space for sticky buttons */
     }
     .table-actions {
       bottom: 40px !important;
+      /* Remove margin-top, as it has no effect on fixed elements */
     }
-    
-    
-  } 
-  @media screen and (min-width: 768px) and (max-width: 1024px) {
-  /* Add space below the data table section */
-  #data-table-section {
-    margin-bottom: 100px !important;
   }
 
-  /* Add space above the sticky Submit/Cancel buttons */
-  .table-actions {
-    margin-top: 40px !important;
-  }
-}
 
   
   </style>
@@ -1582,9 +1580,19 @@ function renderTable() {
   dataTableContainer.innerHTML = '';
   dataTableContainer.appendChild(table);
 
-  // Add Submit and Cancel buttons below the table
+
+  // Add spacer div at bottom (only in tablet view)
+if (window.innerWidth >= 770 && window.innerWidth <= 1024) {
+  tableActionsContainer.style.transform = 'translateY(0%)'; // Fix overlap
+  const visualSpacer = document.createElement('div'); // Add visual padding
+  visualSpacer.style.height = '40px';
+  dataTableContainer.appendChild(visualSpacer);
+}
+
+
+// Add Submit and Cancel buttons below the table
   const tableActionsContainer = document.createElement('div');
-    // Add count display above submit/cancel buttons
+// Add count display above submit/cancel buttons
   const dataCount = document.createElement('div');
   dataCount.className = 'data-count';
   const validRowCount = tableData.filter(row => {
@@ -1857,6 +1865,12 @@ cancelButton.addEventListener('click', () => {
     // If user clicks "No, keep editing" or cancels, do nothing - just stay on the page
   });
 });
+
+/* Tab view -- adding space above buttons */
+const spacer = document.createElement('div');
+spacer.style.height = '20px'; // Adjust space as needed for tab view + pc
+tableActionsContainer.appendChild(spacer);
+
   
   tableActionsContainer.appendChild(submitButton);
   tableActionsContainer.appendChild(cancelButton);

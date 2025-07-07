@@ -827,26 +827,12 @@
           <p>Only for admins</p>
         </div>
       </div>
-
-      <!--  <div class="header-badges">
-                    <div class="badge enterprise">
-                        <span>👥</span>
-                        <span>Enterprise Dashboard</span>
-                    </div>
-                    <div class="badge admin">
-                        <span>🛡️</span>
-                        <span>Admin Access</span>
-                    </div>
-                </div> -->
-
-      <!-- Place this code immediately after the closing </div> of the User Creation & Management card-content, before the Users Table Section. -->
     </div>
   </div>
 </header>
 
 <!-- Main Content -->
 <main class="main">
-  <!-- Add this markup just above your existing <nav id="step-breadcrumbs"> (do not remove the old nav, just add this above it) -->
   <nav aria-label="Breadcrumb" class="breadcrumb">
     <ol>
       <li id="bc-user"><a>User Creation</a></li>
@@ -877,42 +863,39 @@
               <div class="form-group">
                 <label for="userID">User ID</label>
                 <input type="text" id="userId" name="custom_user_id" readonly value="{{ next_user_id }}" />
-
-
               </div>
               <div class="form-group">
                 <label for="fullName">First Name</label>
                 <input type="text" id="firstName" name="first_name" required placeholder="Enter First Name" />
-
               </div>
               <div class="form-group">
                 <label for="fullName">Second Name</label>
                 <input type="text" id="lastName" name="last_name" required placeholder="Enter Last Name" />
-
               </div>
               <div class="form-group">
                 <label for="email">Email ID</label>
                 <input type="email" id="email" name="email" required placeholder="Enter Email ID" />
-
               </div>
+              <!-- Department Dropdown + Add -->
               <div class="form-group">
-                 <label for="department">Department</label>
-                 <span id="departmentOptions"></span>
-  <div style="display:flex;gap:1.1em;">
-    <select id="department" name="department" required></select>
-    <button type="button" id="addDepartmentBtn" class="btn btn-sm btn-primary" title="Add Department">Add</button>
-  </div>
-</div>
-<div class="form-group">
-  <label for="role">Role</label>
-  <span id="roleOptions"></span>
-  <div style="display:flex;gap:1.1em;">
-    <select id="role" name="role" required></select>
-    <button type="button" id="addRoleBtn" class="btn btn-sm btn-primary" title="Add Role">Add</button>
-  </div>
-              
+                <label for="department">Department</label>
+                <div style="display:flex;gap:1.1em;">
+                  <select id="departmentSelect" required></select>
+                  <input type="text" id="newDepartmentInput" placeholder="Add Department" />
+                  <button type="button" id="addDepartmentBtn" class="btn btn-sm btn-primary" title="Add Department">Add</button>
+                </div>
               </div>
-           
+
+              <!-- Role Dropdown + Add -->
+              <div class="form-group">
+                <label for="role">Role</label>
+                <div style="display:flex;gap:1.1em;">
+                  <select id="roleSelect" required></select>
+                  <input type="text" id="newRoleInput" placeholder="Add Role" />
+                  <button type="button" id="addRoleBtn" class="btn btn-sm btn-primary" title="Add Role">Add</button>
+                </div>
+              </div>
+             
               <div class="form-group">
                 <label for="manager">Manager Name</label>
                 <input type="text" id="manager" name="manager" />
@@ -942,7 +925,6 @@
                 </div>
               </div>
             </div>
-
             <div
               style="
                 display: flex;
@@ -982,10 +964,8 @@
           style="padding: 0.75rem 1rem"
         >
           <div class="module-provision-grid">
-            <!-- Module Selection -->
             <div>
               <div class="module-provision-title">Select Modules</div>
-
               <div
                 id="moduleTilesGrid"
                 style="
@@ -1000,7 +980,6 @@
                 <!-- Tiles will be injected here -->
               </div>
             </div>
-            <!-- Add this block after your Select Modules title, before any chosen modules section -->
             <div style="margin-bottom: 1.2rem">
               <div
                 id="moduleBtnGrid"
@@ -1029,7 +1008,7 @@
             <div class="card-title">
               <span>👥</span>
               <span>User Management</span>
-              <span class="badge-count" id="userCount">3</span>
+              <span class="badge-count" id="userCount">0</span>
             </div>
             <div style="display: flex; gap: 1rem">
               <div class="search-input">
@@ -1041,7 +1020,8 @@
                 />
               </div>
               <select id="filterDepartment">
-                
+                <option value="all">All Departments</option>
+                <!-- Populated dynamically -->
               </select>
             </div>
           </div>
@@ -1051,6 +1031,7 @@
             <table class="table" id="usersTable">
               <thead>
                 <tr id="tableHeader">
+                  <th data-column="userId">User ID</th>
                   <th data-column="fullName">Full Name</th>
                   <th data-column="email">Email</th>
                   <th data-column="department">Department</th>
@@ -1092,18 +1073,13 @@
       <div class="form-group">
         <label for="editDepartment">Department</label>
         <select id="editDepartment" name="department" required>
-          
+          <!-- Populated dynamically -->
         </select>
       </div>
       <div class="form-group">
         <label for="editRole">Role</label>
         <select id="editRole" name="role" required>
-          <option value="Manager">Manager</option>
-          <option value="Senior Developer">Senior Developer</option>
-          <option value="Developer">Developer</option>
-          <option value="Analyst">Analyst</option>
-          <option value="Designer">Designer</option>
-          <option value="Coordinator">Coordinator</option>
+          <!-- Populated dynamically -->
         </select>
       </div>
       <div class="modal-actions">
@@ -1121,423 +1097,344 @@
 </div>
 
 
-<!-- Scripts -->
+<!-- Script for dynamic data handling and user interactions -->
 <script nonce="{{ csp_nonce }}">
-  // Sample data
-  let users = [
-    {
-      id: 1,
-      fullName: "John Mitchell",
-      email: "john.mitchell@titanwatch.com",
-      department: "Engineering",
-      role: "Senior Developer",
-      manager: "Sarah Wilson",
-      employmentStatus: "On-role",
-      modules: ["Day Planning"],
-      createdAt: "2024-01-15",
-    },
-    {
-      id: 2,
-      fullName: "Emily Chen",
-      email: "emily.chen@titanwatch.com",
-      department: "HR",
-      role: "HR Manager",
-      manager: "David Brown",
-      employmentStatus: "On-role",
-      modules: ["Brass QC"],
-      createdAt: "2024-02-03",
-    },
-    {
-      id: 3,
-      fullName: "Marcus Rodriguez",
-      email: "marcus.rodriguez@titanwatch.com",
-      department: "Finance",
-      role: "Financial Analyst",
-      manager: "Lisa Thompson",
-      employmentStatus: "Off-role",
-      modules: ["IP Inspection"],
-      createdAt: "2024-01-28",
-    },
-  ];
+// --- Dynamic Data Logic ---
 
-  let currentEditId = null;
-  let assignedModules = [];
+let users = [];
+let departments = [];
+let roles = [];
+let currentEditId = null;
 
-  // Initialize the application
-  document.addEventListener("DOMContentLoaded", function () {
-    renderUsersTable();
-    updateColumnVisibility();
-    setupEventListeners();
-    updateModuleCounts();
+function flattenObject(obj, prefix = "") {
+  let result = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const prefixedKey = prefix ? `${prefix}.${key}` : key;
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      Object.assign(result, flattenObject(value, prefixedKey));
+    } else {
+      result[prefixedKey] = value;
+    }
+  }
+  return result;
+}
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    // ✅ Add Department Button
+  document.getElementById("addDepartmentBtn").addEventListener("click", async function () {
+    const name = document.getElementById("department").value.trim();
+    if (!name) return alert("Please enter a department name.");
+    const res = await fetch("/adminportal/api/departments/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrftoken")
+      },
+      credentials: "same-origin",
+      body: JSON.stringify({ name })
+    });
+    const result = await res.json();
+    if (res.ok) {
+      Swal.fire('Success', 'Department added!', 'success');
+      document.getElementById("department").value = '';
+      fetchDepartments(); // Refresh dropdown
+    } else {
+      Swal.fire('Error', result.name?.[0] || "Failed to add department", 'error');
+    }
   });
 
-  // Setup event listeners
-  function setupEventListeners() {
-    // User form submission
-    document
-      .getElementById("userForm")
-      .addEventListener("submit", handleUserSubmit);
-
-    // Edit form submission
-    document
-      .getElementById("editForm")
-      .addEventListener("submit", handleEditSubmit);
-
-    // Search functionality
-    document
-      .getElementById("searchUsers")
-      .addEventListener("input", filterUsers);
-
-    // Department filter
-    document
-      .getElementById("filterDepartment")
-      .addEventListener("change", filterUsers);
-
-    // Column visibility checkboxes
-    const checkboxes = document.querySelectorAll('[id^="col-"]');
-    checkboxes.forEach((checkbox) => {
-      checkbox.addEventListener("change", updateColumnVisibility);
+  // ✅ Add Role Button
+  document.getElementById("addRoleBtn").addEventListener("click", async function () {
+    const name = document.getElementById("role").value.trim();
+    if (!name) return alert("Please enter a role name.");
+    const res = await fetch("/adminportal/api/roles/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrftoken")
+      },
+      credentials: "same-origin",
+      body: JSON.stringify({ name })
     });
-  }
-
-  // Handle user form submission
- async function handleUserSubmit(e) {
-    e.preventDefault();
-
-    const data = {
-      first_name: document.getElementById("fullName").value,
-      last_name: document.getElementById("fullName").value,
-      email: document.getElementById("email").value,
-      profile: {
-        department: document.getElementById("department").value,
-        role: document.getElementById("role").value,
-        manager: document.getElementById("manager").value,
-        employment_status: document.querySelector('input[name="employmentStatus"]:checked').value
-      }
-    };
-
-    try {
-      const response = await fetch("/api/users/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": getCookie('csrftoken')  // add CSRF utility below
-        },
-        body: JSON.stringify(data)
-      });
-
-      const result = await response.json();
-      console.log("Server Response:", result);
-
-      if (response.ok) {
-        alert("User created successfully!");
-        document.getElementById("userForm").reset();
-      } else {
-        alert("Error: " + JSON.stringify(result));
-      }
-    } catch (error) {
-      console.error("Error submitting user form:", error);
-      alert("An unexpected error occurred");
+    const result = await res.json();
+    if (res.ok) {
+      Swal.fire('Success', 'Role added!', 'success');
+      document.getElementById("role").value = '';
+      fetchRoles(); // Refresh dropdown
+    } else {
+      Swal.fire('Error', result.name?.[0] || "Failed to add role", 'error');
     }
-  }
+  });
 
-  // Add CSRF helper if not already present
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== "") {
-      const cookies = document.cookie.split(";");
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === name + "=") {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
+  fetchDepartments();
+  fetchRoles();
+  fetchUsers();
+
+  // ✅ Safely bind form submit only after DOM is ready
+  const form = document.getElementById("userForm");
+  if (form) {
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      console.log("Form submit intercepted"); // Debug check
+
+      await fetchUsers();
+      const email = document.getElementById("email").value.trim().toLowerCase();
+
+      if (users.some(u => (u.email || "").toLowerCase() === email)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Duplicate Email',
+          text: 'A user with this email already exists. Please use a different email.'
+        });
+        return;
+      }
+
+      const data = {
+        first_name: document.getElementById("firstName").value,
+        last_name: document.getElementById("lastName").value,
+        email: email,
+        profile: {
+          department: document.getElementById("departmentSelect").value,
+          role: document.getElementById("roleSelect").value,
+          manager: document.getElementById("manager").value,
+          employment_status: document.querySelector('input[name="employmentStatus"]:checked').value
         }
-      }
-    }
-    return cookieValue;
-  }
-  // Handle edit form submission
-  function handleEditSubmit(e) {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const userIndex = users.findIndex((u) => u.id === currentEditId);
-
-    if (userIndex !== -1) {
-      users[userIndex] = {
-        ...users[userIndex],
-        fullName: formData.get("fullName"),
-        email: formData.get("email"),
-        department: formData.get("department"),
-        role: formData.get("role"),
       };
 
-      renderUsersTable();
-      closeEditModal();
-      alert("User updated successfully!");
-    }
-  }
+      try {
+        const response = await fetch("/adminportal/api/users/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+          },
+          credentials: "same-origin",
+          body: JSON.stringify(data)
+        });
+        const result = await response.json();
 
-  // Render users table
-  function renderUsersTable() {
-    const tbody = document.getElementById("usersTableBody");
-    const filteredUsers = getFilteredUsers();
-
-    tbody.innerHTML = "";
-
-    if (filteredUsers.length === 0) {
-      tbody.innerHTML = `
-                    <tr>
-                      <td>{{ user.profile.custom_user_id }}</td>
-  <td>{{ user.first_name }}</td>
-  <td>{{ user.last_name }}</td>
-  <td>{{ user.email }}</td>
-  <td>{{ user.profile.department }}</td>
-  <td>{{ user.profile.role }}</td>
-  <td>{{ user.profile.manager }}</td>
-  <td>{{ user.profile.employment_status }}</td>
-                        <td colspan="9" class="empty-state">
-                            <div>
-                                <div style="font-size: 3rem; margin-bottom: 1rem;">👥</div>
-                                <h3>No users found</h3>
-                                <p>Try adjusting your search or filter criteria</p>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-      return;
-    }
-
-    filteredUsers.forEach((user) => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-      <td data-column="userId">${user.profile?.custom_user_id || '—'}</td>
-
-                    <td data-column="fullName">${user.fullName}</td>
-                    <td data-column="email">${user.email}</td>
-                    <td data-column="department"><span class="table-badge department">${user.profile?.department || ''}</span></td>
-<td data-column="role">${user.profile?.role || ''}</td>
-<td data-column="manager">${user.profile?.manager || ''}</td>
-
-                    <td data-column="status">
-                        <span class="table-badge ${
-                          user.employmentStatus === "On-role"
-                            ? "on-role"
-                            : "off-role"
-                        }">
-                            ${user.employmentStatus}
-                        </span>
-                    </td>
-                    <td data-column="modules">
-                        ${user.modules
-                          .slice(0, 2)
-                          .map(
-                            (m) =>
-                              `<span class="table-badge module">${m}</span>`
-                          )
-                          .join(" ")}
-                        ${
-                          user.modules.length > 2
-                            ? `<span class="table-badge module">+${
-                                user.modules.length - 2
-                              }</span>`
-                            : ""
-                        }
-                    </td>
-                    <td data-column="created">${user.createdAt}</td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="action-btn edit" onclick="editUser(${
-                              user.id
-                            })" title="Edit">✏️</button>
-                            <button class="action-btn delete" onclick="deleteUser(${
-                              user.id
-                            })" title="Delete">🗑️</button>
-                        </div>
-                    </td>
-                `;
-      tbody.appendChild(row);
-    });
-
-    document.getElementById("userCount").textContent = filteredUsers.length;
-  }
-
-  // Get filtered users
-  function getFilteredUsers() {
-    const searchTerm = document
-      .getElementById("searchUsers")
-      .value.toLowerCase();
-    const departmentFilter = document.getElementById("filterDepartment").value;
-
-    return users.filter((user) => {
-      const matchesSearch =
-        user.fullName.toLowerCase().includes(searchTerm) ||
-        user.email.toLowerCase().includes(searchTerm);
-      const matchesDepartment =
-        departmentFilter === "all" || user.department === departmentFilter;
-      return matchesSearch && matchesDepartment;
-    });
-  }
-
-  // Filter users
-  function filterUsers() {
-    renderUsersTable();
-    updateColumnVisibility();
-  }
-
-  // Update column visibility
-  function updateColumnVisibility() {
-    const columns = [
-      "fullName",
-      "email",
-      "department",
-      "role",
-      "manager",
-      "status",
-      "modules",
-      "created",
-    ];
-
-    columns.forEach((column) => {
-      const checkbox = document.getElementById(`col-${column}`);
-      const isVisible = checkbox.checked;
-
-      // Update header
-      const headerCell = document.querySelector(`th[data-column="${column}"]`);
-      if (headerCell) {
-        headerCell.style.display = isVisible ? "" : "none";
-      }
-
-      // Update body cells
-      const bodyCells = document.querySelectorAll(
-        `td[data-column="${column}"]`
-      );
-      bodyCells.forEach((cell) => {
-        cell.style.display = isVisible ? "" : "none";
-      });
-    });
-  }
-
-  // Edit user
-  function editUser(id) {
-    const user = users.find((u) => u.id === id);
-    if (user) {
-      currentEditId = id;
-      document.getElementById("editFullName").value = user.fullName;
-      document.getElementById("editEmail").value = user.email;
-      document.getElementById("editDepartment").value = user.department;
-      document.getElementById("editRole").value = user.role;
-      document.getElementById("editModal").classList.add("show");
-    }
-  }
-
-  // Delete user
-  function deleteUser(id) {
-    const user = users.find((u) => u.id === id);
-    if (user && confirm(`Are you sure you want to delete ${user.fullName}?`)) {
-      users = users.filter((u) => u.id !== id);
-      renderUsersTable();
-      alert(`${user.fullName} has been deleted.`);
-    }
-  }
-
-  // Close edit modal
-  function closeEditModal() {
-    document.getElementById("editModal").classList.remove("show");
-    currentEditId = null;
-  }
-
-  // Drag and drop functionality
-  let draggedElement = null;
-
-  function allowDrop(ev) {
-    ev.preventDefault();
-    ev.currentTarget.classList.add("drag-over");
-  }
-
-  function drag(ev) {
-    draggedElement = ev.target.closest(".module-item");
-    draggedElement.classList.add("dragging");
-    ev.dataTransfer.setData("text/plain", "");
-  }
-
-  function drop(ev) {
-    ev.preventDefault();
-    ev.currentTarget.classList.remove("drag-over");
-
-    if (draggedElement) {
-      const targetContainer = ev.currentTarget;
-      const sourceContainer = draggedElement.parentNode;
-
-      // Remove empty state if dropping into assigned modules
-      if (targetContainer.id === "assignedModules") {
-        const emptyState = targetContainer.querySelector(".empty-state");
-        if (emptyState) {
-          emptyState.style.display = "none";
+        if (response.ok) {
+          Swal.fire({
+            icon: 'success',
+            title: 'User Created',
+            text: "User created successfully!\nUser ID: " + result.custom_user_id
+          });
+          document.getElementById("userForm").reset();
+          document.getElementById("userId").value = result.profile?.custom_user_id || "";
+          fetchUsers();
+        } else {
+          let msg = "";
+          if (result.error) {
+            msg = result.error;
+          } else {
+            const flatErrors = flattenObject(result);
+            msg = Object.entries(flatErrors)
+              .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`)
+              .join("\n");
+          }
+          Swal.fire({ icon: 'error', title: 'Error', text: msg });
         }
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Unexpected Error',
+          text: 'An unexpected error occurred. Please try again.'
+        });
+        console.log("Submit error:", error);
       }
-
-      // Move the element
-      targetContainer.appendChild(draggedElement);
-      draggedElement.classList.remove("dragging");
-
-      // Update assigned modules array
-      updateAssignedModules();
-
-      // Show/hide empty state for assigned modules
-      const assignedContainer = document.getElementById("assignedModules");
-      const moduleItems = assignedContainer.querySelectorAll(".module-item");
-      const emptyState = document.getElementById("emptyAssigned");
-
-      if (moduleItems.length === 0) {
-        emptyState.style.display = "block";
-        document.getElementById("priorityNote").style.display = "none";
-      } else {
-        emptyState.style.display = "none";
-        document.getElementById("priorityNote").style.display = "block";
-      }
-
-      updateModuleCounts();
-      draggedElement = null;
-    }
+    });
   }
 
-  // Update assigned modules array
-  function updateAssignedModules() {
-    const assignedContainer = document.getElementById("assignedModules");
-    const moduleItems = assignedContainer.querySelectorAll(".module-item");
+  document.getElementById("searchUsers").addEventListener("input", renderUsersTable);
+  document.getElementById("filterDepartment").addEventListener("change", renderUsersTable);
+});
 
-    assignedModules = Array.from(moduleItems).map((item) =>
-      item.getAttribute("data-module")
-    );
+// -- the rest of your original functions --
+
+async function fetchUsers() {
+  const res = await fetch('/adminportal/api/users/');
+  users = await res.json();
+  renderUsersTable();
+  updateUserCount();
+}
+async function fetchDepartments() {
+  const res = await fetch('/adminportal/api/departments/');
+  departments = await res.json();
+  const select = document.getElementById('departmentSelect');
+  if (select) {
+    select.innerHTML = '<option value="">Select Department</option>';
+    departments.forEach(dep => {
+      select.innerHTML += `<option value="${dep.name}">${dep.name}</option>`;
+    });
   }
+}
 
-  // Update module counts
-  function updateModuleCounts() {
-    const availableCount = document
-      .getElementById("availableModules")
-      .querySelectorAll(".module-item").length;
-    const assignedCount = document
-      .getElementById("assignedModules")
-      .querySelectorAll(".module-item").length;
 
-    document.getElementById("availableCount").textContent = availableCount;
-    document.getElementById("assignedCount").textContent = assignedCount;
+async function fetchRoles() {
+  const res = await fetch('/adminportal/api/roles/');
+  roles = await res.json();
+  const select = document.getElementById('roleSelect');
+  if (select) {
+    select.innerHTML = '<option value="">Select Role</option>';
+    roles.forEach(role => {
+      select.innerHTML += `<option value="${role.name}">${role.name}</option>`;
+    });
   }
+}
 
-  // Remove drag-over class when dragging leaves
-  document.addEventListener("dragleave", function (e) {
-    if (e.target.classList.contains("module-list")) {
-      e.target.classList.remove("drag-over");
-    }
+
+
+function renderUsersTable() {
+  const tbody = document.getElementById("usersTableBody");
+  tbody.innerHTML = "";
+  const filteredUsers = getFilteredUsers();
+  if (filteredUsers.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="10" class="empty-state">
+          <div>
+            <div style="font-size: 3rem; margin-bottom: 1rem;">👥</div>
+            <h3>No users found</h3>
+            <p>Try adjusting your search or filter criteria</p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+  filteredUsers.forEach(user => {
+    const profile = user.profile || {};
+    const department = profile.department || {};
+    const role = profile.role || {};
+    const fullName = [user.first_name, user.last_name].filter(Boolean).join(" ");
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td data-column="userId">${profile.custom_user_id || '—'}</td>
+      <td data-column="fullName">${fullName}</td>
+      <td data-column="email">${user.email}</td>
+      <td data-column="department"><span class="table-badge department">${department.name || ''}</span></td>
+      <td data-column="role">${role.name || ''}</td>
+      <td data-column="manager">${profile.manager || ''}</td>
+      <td data-column="status">
+        <span class="table-badge ${profile.employment_status === "On-role" ? "on-role" : "off-role"}">
+          ${profile.employment_status || ''}
+        </span>
+      </td>
+      <td data-column="modules">—</td>
+      <td data-column="created">${profile.created_at ? profile.created_at.split("T")[0] : ''}</td>
+      <td>
+        <div class="action-buttons">
+          <button class="action-btn edit" onclick="editUser('${user.id}')" title="Edit">✏️</button>
+          <button class="action-btn delete" onclick="deleteUser('${user.id}')" title="Delete">🗑️</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(row);
   });
+}
 
-  // Close modal when clicking outside
-  document.getElementById("editModal").addEventListener("click", function (e) {
-    if (e.target === this) {
+function getFilteredUsers() {
+  const searchTerm = (document.getElementById("searchUsers")?.value || "").toLowerCase();
+  const departmentFilter = document.getElementById("filterDepartment")?.value || "all";
+  return users.filter(user => {
+    const profile = user.profile || {};
+    const fullName = [user.first_name, user.last_name].filter(Boolean).join(" ");
+    const matchesSearch =
+      fullName.toLowerCase().includes(searchTerm) ||
+      (user.email || "").toLowerCase().includes(searchTerm);
+    const matchesDepartment =
+      departmentFilter === "all" || String(profile.department) === departmentFilter;
+    return matchesSearch && matchesDepartment;
+  });
+}
+
+function updateUserCount() {
+  document.getElementById("userCount").textContent = getFilteredUsers().length;
+}
+
+function editUser(id) {
+  const user = users.find(u => String(u.id) === String(id));
+  if (user) {
+    currentEditId = id;
+    document.getElementById("editFullName").value = [user.first_name, user.last_name].filter(Boolean).join(" ");
+    document.getElementById("editEmail").value = user.email;
+    document.getElementById("editDepartment").value = user.profile?.department?.id || "";
+    document.getElementById("editRole").value = user.profile?.role?.id || "";
+    document.getElementById("editModal").classList.add("show");
+  }
+}
+
+async function deleteUser(id) {
+  const user = users.find(u => String(u.id) === String(id));
+  if (user && confirm(`Are you sure you want to delete ${user.first_name} ${user.last_name}?`)) {
+    await fetch(`/adminportal/api/users/${id}/`, {
+      method: "DELETE",
+      headers: { "X-CSRFToken": getCookie("csrftoken") },
+      credentials: "same-origin"
+    });
+    fetchUsers();
+    alert("User has been deleted.");
+  }
+}
+
+function closeEditModal() {
+  document.getElementById("editModal").classList.remove("show");
+  currentEditId = null;
+}
+
+document.getElementById("editForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  if (!currentEditId) return;
+  const fullName = document.getElementById("editFullName").value.split(" ");
+  const first_name = fullName[0] || "";
+  const last_name = fullName.slice(1).join(" ") || "";
+  const data = {
+    first_name,
+    last_name,
+    email: document.getElementById("editEmail").value,
+    profile: {
+      department: document.getElementById("editDepartment").value,
+      role: document.getElementById("editRole").value
+    }
+  };
+  try {
+    const response = await fetch(`/adminportal/api/users/${currentEditId}/`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrftoken")
+      },
+      credentials: "same-origin",
+      body: JSON.stringify(data)
+    });
+    if (response.ok) {
       closeEditModal();
+      fetchUsers();
+      alert("User updated successfully!");
+    } else {
+      alert("Failed to update user.");
     }
-  });
+  } catch (err) {
+    alert("Error updating user.");
+  }
+});
 </script>
+
 
 <script nonce="{{ csp_nonce }}">
   // Expand/collapse logic
@@ -2796,209 +2693,50 @@
   };
 </script>
 
-<script nonce="{{ csp_nonce }}">
-  // filepath: a:\Workspace\Server_Setup_TTT\New_TTT_V2\static\templates\Settings.html
 
-  function updateBreadcrumbStage(step) {
-    // Remove all active/page states
-    document.querySelectorAll(".breadcrumb li").forEach((li) => {
-      li.classList.remove("active");
-      if (li.querySelector('[aria-current="page"]')) {
-        const text = li.querySelector('[aria-current="page"]').textContent;
-        li.innerHTML = `<a>${text}</a>`;
-      }
-    });
 
-    // Set active/page state
-    if (step === 1) {
-      document.getElementById("bc-user").classList.add("active");
-      document.getElementById(
-        "bc-user"
-      ).innerHTML = `<span aria-current="page">User Creation</span>`;
-    } else if (step === 2) {
-      document.getElementById("bc-modules").classList.add("active");
-      document.getElementById(
-        "bc-modules"
-      ).innerHTML = `<span aria-current="page">Select Modules</span>`;
-    } else if (step === 3) {
-      document.getElementById("bc-table").classList.add("active");
-      document.getElementById(
-        "bc-table"
-      ).innerHTML = `<span aria-current="page">User Table</span>`;
-    }
-  }
 
-  // Call this inside your showStep function
-  const prevShowStep = showStep;
-  showStep = function (step) {
-    prevShowStep(step);
-    updateBreadcrumbStage(step);
-  };
-  updateBreadcrumbStage(1);
 
-  // Make breadcrumb navigation clickable
-  document.getElementById("bc-user").onclick = function () {
-    showStep(1);
-  };
-  document.getElementById("bc-modules").onclick = function () {
-    showStep(2);
-  };
-  document.getElementById("bc-table").onclick = function () {
-    showStep(3);
-  };
-</script>
+
 
 <script nonce="{{ csp_nonce }}">
-// Fetch and populate departments and roles
-async function fetchDepartments() {
-  const res = await fetch('/adminportal/api/departments/');
-  const data = await res.json();
-  const select = document.getElementById('department');
-  select.innerHTML = '<option value="">Select Department</option>';
-  data.forEach(dep => {
-    select.innerHTML += `<option value="${dep.name}">${dep.name}</option>`;
-  });
-}
-async function fetchRoles() {
-  const res = await fetch('/adminportal/api/roles/');
-  const data = await res.json();
-  const select = document.getElementById('role');
-  select.innerHTML = '<option value="">Select Role</option>';
-  data.forEach(role => {
-    select.innerHTML += `<option value="${role.name}">${role.name}</option>`;
-  });
-}
-
-// Add new department
-document.getElementById('addDepartmentBtn').onclick = async function() {
-  const name = prompt('Enter new department name:');
-  if (name) {
-    const res = await fetch('/adminportal/api/departments/', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
-      body: JSON.stringify({name})
-    });
-    if (res.ok) {
-      await fetchDepartments();
-      document.getElementById('department').value = name;
-    } else {
-      alert('Failed to add department');
-    }
-  }
-};
-// Add new role
-document.getElementById('addRoleBtn').onclick = async function() {
-  const name = prompt('Enter new role name:');
-  if (name) {
-    const res = await fetch('/adminportal/api/roles/', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
-      body: JSON.stringify({name})
-    });
-    if (res.ok) {
-      await fetchRoles();
-      document.getElementById('role').value = name;
-    } else {
-      alert('Failed to add role');
-    }
-  }
-};
-
-// Call on page load
-document.addEventListener('DOMContentLoaded', function() {
-  fetchDepartments();
-  fetchRoles();
+document.addEventListener("DOMContentLoaded", function () {
+  populateDepartments();
+  populateRoles();
 });
-</script>
 
-<script nonce="{{ request.csp_nonce }}">
-  // Auto-populate Department and Role dropdowns
-  async function fetchAndPopulateDropdowns() {
-    try {
-      const deptRes = await fetch("/adminportal/api/departments/");
-      const departments = await deptRes.json();
-      const deptSelect = document.getElementById("department");
-      deptSelect.innerHTML = departments
-        .map(d => `<option value="${d.name}">${d.name}</option>`)
-        .join("");
-    } catch (err) {
-      console.error("Failed to load departments", err);
-    }
-
-    try {
-      const roleRes = await fetch("/adminportal/api/roles/");
-      const roles = await roleRes.json();
-      const roleSelect = document.getElementById("role");
-      roleSelect.innerHTML = roles
-        .map(r => `<option value="${r.name}">${r.name}</option>`)
-        .join("");
-    } catch (err) {
-      console.error("Failed to load roles", err);
-    }
-  }
-
-  // Handle form submission
-  async function handleUserSubmit(e) {
-    e.preventDefault();
-
-    const data = {
-      first_name: document.getElementById("firstName").value,
-      last_name: document.getElementById("lastName").value,
-      email: document.getElementById("email").value,
-      profile: {
-        department: document.getElementById("department").value,
-        role: document.getElementById("role").value,
-        manager: document.getElementById("manager").value,
-        employment_status: document.querySelector('input[name="employmentStatus"]:checked').value
-      }
-    };
-
-    try {
-      const response = await fetch("/adminportal/api/users/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": getCookie("csrftoken")
-        },
-        body: JSON.stringify(data)
+function populateDepartments() {
+  fetch("/adminportal/api/departments/")
+    .then(response => response.json())
+    .then(data => {
+      const departmentSelect = document.getElementById("department");
+      departmentSelect.innerHTML = '';
+      data.forEach(dept => {
+        const option = document.createElement("option");
+        option.value = dept.id; // ✅ use ID
+        option.text = dept.name;
+        departmentSelect.appendChild(option);
       });
+    });
+}
 
-      const result = await response.json();
-      if (response.ok) {
-        alert("User created successfully!\nUser ID: " + result.id);
-        document.getElementById("userForm").reset();
-        document.getElementById("userId").value = result.id;
-      } else {
-        alert("Error: " + JSON.stringify(result));
-      }
-    } catch (error) {
-      console.error("Submit error:", error);
-    }
-  }
-
-  // Get CSRF token from cookies
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== "") {
-      const cookies = document.cookie.split(";");
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === name + "=") {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
-  }
-
-  // Load dropdowns and attach submit event
-  document.addEventListener("DOMContentLoaded", function () {
-    fetchAndPopulateDropdowns();
-    const form = document.getElementById("userForm");
-    form.addEventListener("submit", handleUserSubmit);
-  });
+function populateRoles() {
+  fetch("/adminportal/api/roles/")
+    .then(response => response.json())
+    .then(data => {
+      const roleSelect = document.getElementById("role");
+      roleSelect.innerHTML = '';
+      data.forEach(role => {
+        const option = document.createElement("option");
+        option.value = role.id; // ✅ use ID
+        option.text = role.name;
+        roleSelect.appendChild(option);
+      });
+    });
+}
 </script>
+
+
 
 
 {% endblock content %}

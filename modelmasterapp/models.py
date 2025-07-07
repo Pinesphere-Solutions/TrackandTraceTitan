@@ -8,6 +8,8 @@ from django.utils.timezone import now
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import User
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 
 # Create your models here.
 class ModelImage(models.Model):
@@ -946,8 +948,7 @@ class TrayAutoSaveData(models.Model):
     
 
 
-from django.db.models.signals import post_delete
-from django.dispatch import receiver
+
 
 @receiver(post_delete, sender=ModelMasterCreation)
 def delete_related_trayids(sender, instance, **kwargs):
@@ -957,30 +958,31 @@ def delete_related_trayids(sender, instance, **kwargs):
 from django.db import models
 from django.contrib.auth.models import User
 
-# 🔹 Department master table
+
+# User Management Models
+
+# ✅ Dept master (Place Department first)
 class Department(models.Model):
     name = models.CharField(max_length=100, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
     def __str__(self):
         return self.name
 
-# 🔹 Role master table
+# ✅ User Role Master - (Then Role)
 class Role(models.Model):
     name = models.CharField(max_length=100, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
     def __str__(self):
         return self.name
 
-# 🔹 User extended profile
+# ✅ Then UserProfile
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     custom_user_id = models.CharField(max_length=10, unique=True, blank=True)
-    
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
-    role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True)
-    
+
+    department = models.CharField(max_length=100)  # <-- store as string
+    role = models.CharField(max_length=100)  # <-- store as string
+
     manager = models.CharField(max_length=100, blank=True, null=True)
     employment_status = models.CharField(
         max_length=20,
@@ -990,3 +992,4 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.custom_user_id}"
+

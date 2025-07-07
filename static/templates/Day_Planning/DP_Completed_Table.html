@@ -5,7 +5,66 @@
  {% block content %}
 
 <style>
- @media (max-width: 1024px) {
+    
+  
+  /* --- TABLET GLOBAL FONT OVERRIDE: FORCE 20PX ON ALL TABLE CONTENT --- */
+  @media (min-width: 800px) and (max-width: 1300px) and (min-height: 600px) and (max-height: 900px) and (orientation: landscape) {
+    #order-listing,
+    #order-listing th,
+    #order-listing td,
+    #order-listing thead th,
+    #order-listing tbody td,
+    #order-listing tfoot td,
+    #order-listing input,
+    #order-listing select,
+    #order-listing button,
+    #order-listing span,
+    #order-listing div,
+    #order-listing a {
+      font-size: 20px !important;
+      line-height: 1.3 !important;
+    }
+  }
+/* Tablet: Override with narrower columns for 900px–1300px width */
+@media (min-width: 900px) and (max-width: 1300px) {
+  #order-listing th:nth-child(1) { min-width: 95px !important; max-width: 100px !important; }    /* S.No */
+  #order-listing th:nth-child(2) { min-width: 160px !important; max-width: 180px !important; }    /* Last Updated */
+  #order-listing th:nth-child(3) { min-width: 100px !important; max-width: 120px !important; }   /* Plating Stk No */
+  #order-listing th:nth-child(4) { min-width: 120px !important; max-width: 120px !important; }   /* Polishing Stk No */
+  #order-listing th:nth-child(5) { min-width: 100px !important; max-width: 110px !important; }   /* Plating Color */
+  #order-listing th:nth-child(6) { min-width: 100px !important; max-width: 100px !important; }   /* Category */
+  #order-listing th:nth-child(7) { min-width: 90px !important; max-width: 110px !important; }    /* Polish Finish */
+  #order-listing th:nth-child(8) { min-width: 100px !important; max-width: 110px !important; }     /* Version */
+  #order-listing th:nth-child(9) { min-width: 130px !important; max-width: 150px !important; }   /* Tray Cate-Capacity */
+  #order-listing th:nth-child(10) { min-width: 100px !important; max-width: 120px !important; }    /* Source */
+  #order-listing th:nth-child(11) { min-width: 100px !important; max-width: 130px !important; }    /* No of Trays */
+  #order-listing th:nth-child(12) { min-width: 120px !important; max-width: 140px !important; }   /* Input Qty */
+  #order-listing th:nth-child(13) { min-width: 120px !important; max-width: 130px !important; }   /* Process Status */
+  #order-listing th:nth-child(14) { min-width: 80px !important; max-width: 100px !important; }   /* Action */
+  #order-listing th:nth-child(15) { min-width: 90px !important; max-width: 110px !important; }   /* Lot Status */
+  #order-listing th:nth-child(16) { min-width: 100px !important; max-width: 120px !important; }  /* Current Stage */
+  #order-listing th:nth-child(17) { min-width: 120px !important; max-width: 140px !important; }   /* Remarks */
+}
+
+
+/* Right-align filter icons */
+#order-listing th .fa-filter {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+#order-listing th .fa-filter:hover {
+  opacity: 1;
+}
+
+
+@media (max-width: 1024px) {
   .table-responsive {
     overflow-x: visible !important;
     overflow-y: visible !important;
@@ -22,7 +81,6 @@
   line-height: 1.3 !important;
   word-break: keep-all !important;
   hyphens: none !important;
-  font-size: 13px !important;
   font-weight: 600 !important;
   background: #028084 !important;
   color: #e5fcff !important;
@@ -31,7 +89,7 @@
   max-width: 140px;
 }
 
-/* Specific width adjustments for better text wrapping */
+/* Specific width adjustments for laptop/pc */
 #order-listing th:nth-child(1) { min-width: 60px; max-width: 80px; }   /* S.No */
 #order-listing th:nth-child(2) { min-width: 90px; max-width: 110px; }  /* Last Updated */
 #order-listing th:nth-child(3) { min-width: 95px; max-width: 140px; } /* Plating Stk No */
@@ -56,7 +114,7 @@
   right: 8px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 11px;
+  
   opacity: 0.7;
   cursor: pointer;
   transition: opacity 0.2s;
@@ -212,40 +270,25 @@
   }
 .pagination-wrapper {
   position: fixed !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
+  left:0;
   bottom: 32px !important;
-  width: 350px !important;
-  max-width: 85vw !important;
+  width: 100% !important;
   z-index: 1001 !important;
-  background: rgba(245, 247, 255, 0.95) !important;
-  backdrop-filter: blur(10px) !important;
-  border-top: 1px solid #e0e0e0 !important;
-  border-radius: 8px 8px 0 0 !important;
   padding: 8px 0 !important;
   display: flex !important;
   justify-content: center !important;
-  box-shadow: 0 -2px 8px rgba(0,0,0,0.08) !important;
 }
 
 /* Remove sidebar adjustments since we're centering it */
 body:not(.sidebar-icon-only) .pagination-wrapper {
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  width: 350px !important;
-}
 
-.sidebar-icon-only .pagination-wrapper {
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  width: 350px !important;
+  width: 100% !important;
 }
 
 /* Mobile responsive */
 @media (max-width: 768px) {
   .pagination-wrapper {
-    width: 280px !important;
-    max-width: 90vw !important;
+    width: 100% !important;
   }
 }
 
@@ -274,12 +317,6 @@ body:not(.sidebar-icon-only) .pagination-wrapper {
   }
 }
 
-@media (max-width: 600px) {
-  .pagination-wrapper {
-    bottom: 40px;
-    padding: 4px 0 0 0;
-  }
-}
   
 .pagination .page-link {
   padding: 2px 8px !important;
@@ -467,7 +504,7 @@ body:not(.sidebar-icon-only) .pagination-wrapper {
 #order-listing th,
 #order-listing td {
   background-clip: padding-box;
-  font-size: 11px !important;
+
 }
 @media (min-width: 1800px) and (max-width: 2000px) and (min-height: 1100px) and (max-height: 1300px) {
   #order-listing,
@@ -477,14 +514,7 @@ body:not(.sidebar-icon-only) .pagination-wrapper {
     font-weight: 600 !important;
   }
 }
-@media (min-width: 600px) and (max-width: 1024px) {
-  #order-listing,
-  #order-listing th,
-  #order-listing td {
-    font-size: 14px !important;
-    font-weight: 600 !important;
-  }
-}
+
 
 #order-listing,
 #order-listing th,
@@ -554,12 +584,10 @@ body:not(.sidebar-icon-only) .pagination-wrapper {
   /* Remove right space after the table and make table stretch fully */
   .content-wrapper,
   .row,
-  .col-12,
   .grid-margin,
   .stretch-card,
   .card,
   .card-body,
-  .table-responsive,
   #order-listing {
     margin-right: 0 !important;
     padding-right: 0 !important;
@@ -961,7 +989,7 @@ border-collapse: collapse;
 #order-listing td {
 border-right: 1px solid #d1d1d1;
 border-bottom: 1px solid #e0e0e0;
-font-size: 12px;
+
 }
 #order-listing th:last-child,
 #order-listing td:last-child {
@@ -1094,10 +1122,6 @@ display: none; /* Chrome, Safari, Opera */
     }
   }
 </style>
-
-<div class="content-wrapper">
-  
-  <div class="row">
     <div class="col-12 grid-margin stretch-card">
       <div class="card">
         <div class="card-body">
@@ -1453,10 +1477,19 @@ display: none; /* Chrome, Safari, Opera */
                 <!-- No buttons for read-only modal -->
               </div>
             </div>
-        <!-- Pagination Section -->
+  
+        </div>
+        
+      </div>
+    </div>
+  </div>
+  </div>
+</div>  
+</div>
+         <!-- Pagination Section -->
             <div class="pagination-wrapper">
               <nav aria-label="Page navigation">
-                                <ul class="pagination justify-content-end mb-0">
+                <ul class="pagination justify-content-end mb-0">
                   {# Previous button #}
                   {% if page_obj.has_previous %}
                     <li>
@@ -1512,12 +1545,6 @@ display: none; /* Chrome, Safari, Opera */
                 </ul>
               </nav>
             </div>
-        </div>
-        
-      </div>
-    </div>
-  </div>
-   
 
    <script nonce="{{ csp_nonce }}">
     document.addEventListener("DOMContentLoaded", function () {

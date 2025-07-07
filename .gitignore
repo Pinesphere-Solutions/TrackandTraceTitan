@@ -1,5 +1,5 @@
-echo "new_ttt_v2-web.tar" >> .gitignore
-"new_ttt_v2-web.tar" 
-new_ttt_v2-web.tar
+# Ignore assets folder
+assets/
 
-new_ttt_v2-web.tar 
+# Ignore generated tar file
+new_ttt_v2-web.tar

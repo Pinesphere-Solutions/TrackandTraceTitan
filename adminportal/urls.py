@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from .views import *
 from .views import AdminPanelView, UserListCreateAPIView, UserDetailAPIView
 from .views import DepartmentListCreateAPIView, RoleListCreateAPIView
@@ -10,5 +10,6 @@ urlpatterns = [
     path("api/users/", UserListCreateAPIView.as_view(), name="user-create"),
     path("api/departments/", DepartmentListCreateAPIView.as_view(), name="departments"),
     path("api/roles/", RoleListCreateAPIView.as_view(), name="roles"),
+    
 
 ]
