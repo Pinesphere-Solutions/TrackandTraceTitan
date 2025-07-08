@@ -35690,7 +35690,8 @@ div.tagsinput span.tag a {
   width: 5px;
   height: 5px;
   position: absolute;
-  margin-top: 0px;
+  top: 18px;           /* Move dot further down (adjust as needed) */
+  left: 0;
   border-radius: 50%;
   background: #b2b2b2;
 }
@@ -47938,3 +47939,8 @@ div.tagsinput span.tag a {
   right: -1rem;
 }
 /*# sourceMappingURL=../maps/vertical-layout-light/style.css.map */
+@media only screen and (max-width: 900px) {
+  .sidebar .nav.sub-menu .nav-item::before {
+    top: 28px !important; /* Move dot further down for tablet/mobile */
+  }
+}

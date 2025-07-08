@@ -5,7 +5,20 @@
  {% block content %}
 
 <style>
-    
+  
+  /* Tablet: Increase tray scan status circle size */
+  
+  @media (min-width: 900px) and (max-width: 1300px) {
+      .tray-scan-status-circle {
+        width: 30px !important;
+        height: 30px !important;
+        font-size: 1.35rem !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
+        max-width: 40px !important;
+        max-height: 40px !important;
+      }
+    }
   
   /* --- TABLET GLOBAL FONT OVERRIDE: FORCE 20PX ON ALL TABLE CONTENT --- */
   @media (min-width: 800px) and (max-width: 1300px) and (min-height: 600px) and (max-height: 900px) and (orientation: landscape) {
@@ -33,7 +46,7 @@
   #order-listing th:nth-child(3) { min-width: 120px !important; max-width: 140px !important; }   /* Plating Stk No */
   #order-listing th:nth-child(4) { min-width: 130px !important; max-width: 140px !important; }   /* Polishing Stk No */
   #order-listing th:nth-child(5) { min-width: 120px !important; max-width: 130px !important; }   /* Plating Color */
-  #order-listing th:nth-child(6) { min-width: 100px !important; max-width: 100px !important; }   /* Category */
+  #order-listing th:nth-child(6) { min-width: 120px !important; max-width: 130px !important; }   /* Category */
   #order-listing th:nth-child(7) { min-width: 90px !important; max-width: 110px !important; }    /* Polish Finish */
   #order-listing th:nth-child(8) { min-width: 120px !important; max-width: 130px !important; }     /* Version */
   #order-listing th:nth-child(9) { min-width: 140px !important; max-width: 150px !important; }   /* Tray Cate-Capacity */
@@ -69,6 +82,8 @@
   .table-responsive {
     overflow-x: visible !important;
     overflow-y: visible !important;
+    scrollbar-width: auto !important;         /* For Firefox */
+  -ms-overflow-style: auto !important; 
   }
 }
 
@@ -95,7 +110,7 @@
 
 #order-listing th:nth-child(1) { min-width: 60px; max-width: 80px; }   /* S.No */
 #order-listing th:nth-child(2) { min-width: 90px; max-width: 100px; }  /* Last Updated */
-#order-listing th:nth-child(3) { min-width: 95px; max-width: 140px; } /* Plating Stk No */
+#order-listing th:nth-child(3) { min-width: 95px; max-width: 140px; left: 190px !important; } /* Plating Stk No */
 #order-listing th:nth-child(4) { min-width: 120px; max-width: 130px; } /* Polishing Stk No */
 #order-listing th:nth-child(5) { min-width: 80px; max-width: 90px; }  /* Plating Color */
 #order-listing th:nth-child(6) { min-width: 100px; max-width: 100px; }  /* Category */
@@ -295,10 +310,7 @@ body:not(.sidebar-icon-only) .pagination-wrapper {
   }
 }
 
-/* Add bottom padding to table container to prevent overlap */
-.table-responsive {
-  padding-bottom: 80px !important; /* Space for fixed pagination */
-}
+
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
@@ -308,9 +320,7 @@ body:not(.sidebar-icon-only) .pagination-wrapper {
     padding: 8px 0 !important;
   }
   
-  .table-responsive {
-    padding-bottom: 70px !important;
-  }
+ 
 }
 
 @media (max-width: 600px) {
@@ -447,11 +457,7 @@ body:not(.sidebar-icon-only) .pagination-wrapper {
     margin-left: 0 !important;
     margin-right: 0 !important;
   }
-  .table-responsive {
-    min-height: 420px !important;
-    height: 60vh !important;
-    max-height: 520px !important;
-  }
+
   .content-wrapper > h5,
   .card-body > h5.text-left.mt-0.mb-4 {
     margin-top: 0 !important;
@@ -566,16 +572,16 @@ body:not(.sidebar-icon-only) .pagination-wrapper {
       min-height: 700px !important;
       margin-bottom: 0 !important;
     }
+        /* Increase card-body height for better table visibility */
     .card-body {
-      min-height: 650px !important;
-      padding: 0 !important;
-      margin-right: 0 !important;
-      width: 100% !important;
-      max-width: 100% !important;
+      min-height: 520px !important;
+      height: auto !important;
+      max-height: 700px !important;
+      overflow: visible !important;
       box-sizing: border-box !important;
-      margin-bottom: 0 !important;
-  padding-bottom: 0 !important;
     }
+    
+
     #order-listing tr,
     #order-listing td,
     #order-listing th {
@@ -641,8 +647,7 @@ body:not(.sidebar-icon-only) .pagination-wrapper {
     padding-left: 2px !important;
     transition: opacity 0.3s ease;
     flex: 1;
-   overflow-y: visible !important;
-  overflow-x: visible !important;
+  
     transition: opacity 0.3s ease;
 
   }
@@ -1001,28 +1006,29 @@ padding: 4px 8px !important;
 
 
 
-
-  
-  .table-responsive {
-max-height: 500px;
-/* max-height: calc(100vh - 400px)  !important; /* Adjust if needed */
-overflow-y: auto !important;
-overflow-x: auto !important;
-scrollbar-width: none;
--ms-overflow-style: none;
-margin-bottom: 0 !important;
-padding-bottom: 0 !important;
-min-height: 400px !important;
-max-width: 1500px !important;
-margin-right: 0 !important;
-padding-right: 0 !important;
-box-sizing: border-box !important;
-margin-left: 5px !important;
-margin-bottom: 0 !important;
-padding-bottom: 0 !important;
-
+/* --- Reduce table background frame height and ensure scrollbar is visible --- */
+.table-responsive {
+  max-height: 380px !important;    /* Reduce this value as needed */
+  min-height: 130px !important;    /* Optional: set a reasonable min-height */
+  height: auto !important;         /* Let it grow with content, but not exceed max-height */
+  background: #fff !important;     /* Ensure background is white */
+  padding-bottom: 32px !important; /* Add space for scrollbar and pagination */
+  margin-bottom: 0 !important;
+  box-sizing: border-box !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
 }
 
+/* Make sure the scrollbar is always visible */
+.table-responsive::-webkit-scrollbar {
+  display: block !important;
+  height: 8px !important;
+  background: #f3f3f3 !important;
+}
+.table-responsive::-webkit-scrollbar-thumb {
+  background: #bdbdbd !important;
+  border-radius: 4px !important;
+}
   /* Allow tooltip to overflow outside the cell */
   #order-listing td[style*="position: relative"] {
     overflow: visible !important;
@@ -1040,11 +1046,13 @@ padding-bottom: 0 !important;
   }
   
   thead th {
-    position: sticky;
+    position: sticky !important;
     top: 0;
     background-color: white;
     z-index: 10;
   }
+ 
+
   /* Reduce row height for .row class */
 .row {
 --bs-gutter-x: 30px;
@@ -1063,7 +1071,13 @@ scrollbar-width: thin; /* For Firefox */
 -ms-overflow-style: auto; /* For IE/Edge */
 }
 .table-responsive::-webkit-scrollbar {
-display: none; /* Chrome, Safari, Opera */
+display: block !important;                /* For Chrome, Safari, Opera */
+  height: 8px !important;                   /* Set a visible height */
+  background: #e0e0e0 !important;
+}
+.table-responsive::-webkit-scrollbar-thumb {
+  background: #bdbdbd !important;
+  border-radius: 4px !important;
 }
   .playpause-toggle:checked ~ .play-icon {
     display: none !important;
@@ -1119,6 +1133,8 @@ display: none; /* Chrome, Safari, Opera */
     }
   }
 </style>
+
+
     <div class="col-12 grid-margin stretch-card">
       <div class="card">
         <div class="card-body">
@@ -1272,7 +1288,8 @@ display: none; /* Chrome, Safari, Opera */
                     {{ row.total_batch_quantity }}
                   </td>
                   <td>
-                    <div
+                                        <div
+                      class="tray-scan-status-circle"
                       style="background: {% if row.Moved_to_D_Picker %}#0c8249{% else %}#c3c2c2{% endif %}; color: white; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
                       T
                     </div>
@@ -2213,7 +2230,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const platingStkNoCell = row.children[2]; // 3rd column (index starts at 0)
     if (platingStkNoCell) {
       platingStkNoCell.style.position = "sticky";
-      platingStkNoCell.style.left = "170px"; // Match the `left` value of the header
+      platingStkNoCell.style.left = "190px"; // Match the `left` value of the header
       platingStkNoCell.style.zIndex = "10";
       platingStkNoCell.style.background = "#fff"; // Ensure consistent background
     }
@@ -2223,7 +2240,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const platingStkNoHeader = table.querySelector("thead th:nth-child(3)");
   if (platingStkNoHeader) {
     platingStkNoHeader.style.position = "sticky";
-    platingStkNoHeader.style.left = "170px"; // Match the `left` value of the column
+    platingStkNoHeader.style.left = "190px"; // Match the `left` value of the column
     platingStkNoHeader.style.zIndex = "20";
     platingStkNoHeader.style.background = "#fff"; // Ensure consistent background
   }
