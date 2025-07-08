@@ -1,0 +1,42 @@
+2025-07-08 10:05:49,139 INFO: Opened login page.
+2025-07-08 10:05:59,210 INFO: Testing login with empty fields.
+2025-07-08 10:06:09,290 INFO: Testing login with invalid credentials.
+2025-07-08 10:07:56,821 INFO: Opened login page.
+2025-07-08 10:07:57,286 INFO: Logo is displayed.
+2025-07-08 10:07:57,328 INFO: Heading is present: Hello! let's get started
+2025-07-08 10:07:57,363 INFO: Subheading is present: Sign in to continue.
+2025-07-08 10:07:57,392 INFO: Username field is present.
+2025-07-08 10:07:57,427 INFO: Password field is present.
+2025-07-08 10:07:57,473 INFO: Sign In button is present.
+2025-07-08 10:07:57,539 INFO: Testing login with empty fields.
+2025-07-08 10:07:58,666 INFO: Validation error displayed for empty fields.
+2025-07-08 10:07:58,764 INFO: Testing login with invalid credentials.
+2025-07-08 10:08:00,121 INFO: No error message for invalid login (check implementation).
+2025-07-08 10:09:29,629 INFO: Opened login page.
+2025-07-08 10:09:29,872 INFO: Logo is displayed.
+2025-07-08 10:09:29,916 INFO: Heading is present: Hello! let's get started
+2025-07-08 10:09:29,951 INFO: Subheading is present: Sign in to continue.
+2025-07-08 10:09:29,981 INFO: Username field is present.
+2025-07-08 10:09:30,001 INFO: Password field is present.
+2025-07-08 10:09:30,018 INFO: Sign In button is present.
+2025-07-08 10:09:30,083 INFO: Testing login with empty fields.
+2025-07-08 10:09:31,195 INFO: Validation error displayed for empty fields.
+2025-07-08 10:09:31,261 INFO: Testing login with invalid credentials.
+2025-07-08 10:09:32,517 INFO: No error message for invalid login (check implementation).
+2025-07-08 10:09:32,558 INFO: Testing login with valid credentials.
+2025-07-08 10:09:35,015 INFO: Redirected to: http://192.168.1.5:8000/adminportal/index/
+2025-07-08 10:09:35,017 INFO: \u274c Login succeeded but did NOT land on dashboard.
+2025-07-08 10:10:41,545 INFO: Opened login page.
+2025-07-08 10:10:41,616 INFO: Logo is displayed.
+2025-07-08 10:10:41,652 INFO: Heading is present: Hello! let's get started
+2025-07-08 10:10:41,698 INFO: Subheading is present: Sign in to continue.
+2025-07-08 10:10:41,728 INFO: Username field is present.
+2025-07-08 10:10:41,775 INFO: Password field is present.
+2025-07-08 10:10:41,807 INFO: Sign In button is present.
+2025-07-08 10:10:41,916 INFO: Testing login with empty fields.
+2025-07-08 10:10:43,072 INFO: Validation error displayed for empty fields.
+2025-07-08 10:10:43,142 INFO: Testing login with invalid credentials.
+2025-07-08 10:10:44,632 INFO: No error message for invalid login (check implementation).
+2025-07-08 10:10:44,706 INFO: Testing login with valid credentials.
+2025-07-08 10:10:47,186 INFO: Redirected to: http://192.168.1.5:8000/adminportal/index/
+2025-07-08 10:10:47,186 INFO: \u274c Login succeeded but did NOT land on dashboard.

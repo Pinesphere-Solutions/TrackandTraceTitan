@@ -4,6 +4,28 @@
 
 
 <style nonce="{{ csp_nonce }}">
+    /* Font size 13px for table and form elements on laptop/PC only (not tablet) */
+  @media (min-width: 1301px) {
+    .data-table th,
+    .data-table td,
+    .cell-input,
+    .simple-dropdown,
+    .table-header h2,
+    .card-header h1,
+    .btn,
+    .form-control,
+    .file-upload-area p,
+    .file-name,
+    .file-size,
+    .remove-file,
+    .data-count {
+      font-size: 13px !important;
+    }
+  }
+    .table-header h2 {
+    margin-bottom: -20px !important; /* Reduce space below heading */
+    padding-bottom: 0 !important;
+  }
   @media (min-width: 900px) and (max-width: 1300px) {
   .table-actions .btn {
         min-width: 100px !important;
@@ -456,7 +478,7 @@
       border-radius: 8px;
       overflow: hidden;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        margin-bottom: 5px !important;
+      margin-bottom: 5px !important;
   
     }
     .data-table th,
@@ -1991,5 +2013,56 @@ tableActionsContainer.appendChild(spacer);
     });
   });
 </script>
-  
+
+
+<!-- Script for handling the Single Upload button and bulkCard visibility in single section view and while scrolling up to display the above section as it is -->
+<script nonce="{{ csp_nonce }}">
+document.addEventListener('DOMContentLoaded', function() {
+  var addModelBtn = document.getElementById('add-model-btn');
+  var bulkCard = document.querySelector('.bulk-card');
+  var dataTableSection = document.getElementById('data-table-section');
+
+  // ✅ Helper to show bulkCard and re-enable Single Upload button
+  function showBulkCard() {
+    if (bulkCard) {
+      bulkCard.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    if (addModelBtn) {
+      addModelBtn.disabled = false;
+      addModelBtn.style.opacity = '1';
+      addModelBtn.style.pointerEvents = 'auto';
+    }
+  }
+
+  // ✅ Hide bulkCard and show table section when Single Upload is clicked
+  if (addModelBtn) {
+    addModelBtn.addEventListener('click', function() {
+      if (bulkCard && dataTableSection) {
+        bulkCard.style.display = 'none';
+        dataTableSection.style.display = 'block';
+      }
+    });
+  }
+
+  // ✅ Scroll listener to detect scroll-up & show bulkCard again
+  let lastScrollTop = window.scrollY;
+
+  window.addEventListener('scroll', function() {
+    const currentScroll = window.scrollY;
+
+    // ✅ Detect scrolling up with 30px threshold
+    if (currentScroll < lastScrollTop && (lastScrollTop - currentScroll > 30)) {
+      if (bulkCard && bulkCard.style.display === 'none') {
+        showBulkCard(); // Restore bulk-card when scrolling upward
+      }
+    }
+
+    lastScrollTop = currentScroll;
+  });
+});
+</script>
+
+
+
 {% endblock %}

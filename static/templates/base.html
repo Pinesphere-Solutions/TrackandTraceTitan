@@ -5,6 +5,82 @@
 
 
 <style>
+
+    /* Show sidebar icon tooltips ONLY when minimized and always at the very front */
+    body.sidebar-icon-only .sidebar .nav .nav-item .menu-icon[data-tooltip]:hover::after,
+    body.sidebar-icon-only .sidebar .nav .nav-item i[data-tooltip]:hover::after,
+    body.sidebar-icon-only .sidebar .nav .nav-item .fa[data-tooltip]:hover::after,
+    body.sidebar-icon-only .sidebar .nav .nav-item .ti[data-tooltip]:hover::after {
+      content: attr(data-tooltip);
+      position: fixed !important;      /* Use fixed so it's always on top */
+      left: 60px !important;           /* Adjust as needed for your sidebar width */
+      top: auto;
+      bottom: auto;
+      background: #222;
+      color: #fff;
+      padding: 4px 14px;
+      border-radius: 6px;
+      white-space: nowrap;
+      font-size: 14px;
+      z-index: 9999999 !important;     /* Highest z-index */
+      pointer-events: none;
+      opacity: 0.98;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      transform: none !important;
+    }
+    
+    /* Position the tooltip vertically aligned with the icon */
+    body.sidebar-icon-only .sidebar .nav .nav-item .menu-icon[data-tooltip]:hover,
+    body.sidebar-icon-only .sidebar .nav .nav-item i[data-tooltip]:hover,
+    body.sidebar-icon-only .sidebar .nav .nav-item .fa[data-tooltip]:hover,
+    body.sidebar-icon-only .sidebar .nav .nav-item .ti[data-tooltip]:hover {
+      /* Custom property to help JS position the tooltip if needed */
+    }
+
+
+    /* Sidebar menu icons: always black by default */
+  .sidebar .nav .nav-item .menu-icon,
+  .sidebar .nav .nav-item i,
+  .sidebar .nav .nav-item .fa,
+  .sidebar .nav .nav-item .ti {
+    color: #222 !important; /* Black */
+    transition: color 0.2s;
+  }
+  
+  /* Active menu: icon and text white, bg teal */
+  .sidebar .nav .nav-item.active > .nav-link .menu-icon,
+  .sidebar .nav .nav-item.active > .nav-link i,
+  .sidebar .nav .nav-item.active > .nav-link .fa,
+  .sidebar .nav .nav-item.active > .nav-link .ti,
+  .sidebar .nav .nav-item.active > .nav-link .menu-title {
+    color: #fff !important;
+    background: #028084 !important;
+    border-radius: 8px;
+  }
+  
+  /* Also for active sub-menu */
+  .sidebar .nav .sub-menu .nav-link.active .menu-icon,
+  .sidebar .nav .sub-menu .nav-link.active i,
+  .sidebar .nav .sub-menu .nav-link.active .fa,
+  .sidebar .nav .sub-menu .nav-link.active .ti {
+    color: #fff !important;
+  }
+     @media (min-width: 1200px) and (pointer: fine) {
+      /* Only laptops/desktops with mouse/trackpad */
+      .navbar .navbar-menu-wrapper .ti-settings,
+      .navbar .navbar-menu-wrapper .ti-eye,
+      .navbar .navbar-menu-wrapper .ti-bell,
+      .navbar .navbar-menu-wrapper .ti-user,
+      .navbar .navbar-menu-wrapper .ti-file,
+      .navbar .navbar-menu-wrapper .fa,
+      .navbar .navbar-menu-wrapper .icon-menu {
+        font-size: 20px !important;
+        min-width: 10px;
+        min-height: 20px;
+        line-height: 1;
+        vertical-align: middle;
+      }
+    }
 @media only screen and (max-width: 900px)  {
 .sidebar .nav .nav-item .nav-link .menu-title {
   color: inherit;
@@ -31,16 +107,73 @@
   overflow-x: hidden !important;
   max-height: calc(100vh - 32px); /* 32px = footer height */
   padding-bottom: 40px; /* Space for footer */
-}
- 
-
-  .sidebar{
-  overflow: hidden;
+  z-index: 100 !important;
+  position: relative;
   flex-wrap: nowrap;
   flex-direction: column;
   margin-bottom: 110px !important;
 }
- 
+/* Force sidebar menu icons/titles to display in a single vertical column, never wrap */
+.sidebar .nav {
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  width: 100% !important;
+}
+.sidebar .nav .nav-item {
+  width: 100% !important;
+  display: block !important;
+}
+.sidebar .nav .nav-item .nav-link {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  white-space: normal !important;
+  overflow: hidden !important;
+    word-break: break-word !important;
+
+}
+.sidebar .nav .nav-item .menu-title {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: normal !important;
+    word-break: break-word !important;
+
+}
+body.sidebar-icon-only .sidebar {
+
+  background: #028084 !important;
+}
+body.sidebar-icon-only .sidebar .nav .nav-item .menu-icon,
+body.sidebar-icon-only .sidebar .nav .nav-item i,
+body.sidebar-icon-only .sidebar .nav .nav-item .fa,
+body.sidebar-icon-only .sidebar .nav .nav-item .ti {
+  color: #fff !important;
+  margin-left: 12px !important; /* Move icons 8px to the right */
+}
+/* Remove sub-menu dot icon */
+
+/* Style for sub-menu dot icon: grey and move a little down */
+/* .sidebar .nav .sub-menu .nav-link:before {
+  content: "•";
+  color: #bbb;
+  display: inline-block;
+  margin-right: 7px;
+  font-size: 15px;
+  vertical-align: middle;
+  position: relative;
+  top: 2px;
+} */ 
+ .navbar-brand-wrapper {
+  background: #fff !important; /* or your header bg color */
+  z-index: 120 !important;
+  position: relative;
+}
 
 /* Start of global font handling for tablet device */
         @media (min-width: 800px) and (max-width: 1300px) and (min-height: 600px) and (max-height: 900px) and (orientation: landscape) {
@@ -62,7 +195,7 @@
            @media (min-width: 800px) and (max-width: 1300px) and (min-height: 600px) and (max-height: 900px) and (orientation: landscape) {
         html, body, *, *::before, *::after,
         #order-listing th, #order-listing td {
-          font-size: 17px !important;
+          font-size: 20px !important;
         }
       }
             @media (min-width: 800px) and (max-width: 1300px) and (min-height: 600px) and (max-height: 900px) and (orientation: landscape) {
@@ -113,9 +246,7 @@
   body.sidebar-icon-only .sidebar .nav .nav-item .ti {
     color: #fff !important;
   }
-  body.sidebar-icon-only .sidebar {
-    background: #028084 !important;
-  }
+
     /* Make all Day Planning sub-menu links black except the active one */
   #ui-basic .sub-menu .nav-link {
     color: #000 !important;
@@ -195,14 +326,17 @@
 .sidebar .nav .sub-menu .nav-link {
   color: #000 !important;
 }
-/* Make active sub-menu links white with teal background */
+/* Make active sub-menu links white with teal background with cropping at left */
 .sidebar .nav .sub-menu .nav-link.active {
   color: #fff !important;
   font-weight: 700 !important;
   background: #028084 !important;
   border-radius: 8px !important;
   box-shadow: 0 2px 8px rgba(2, 128, 132, 0.3) !important;
-  transform: translateX(2px) !important;
+  padding-left: 10px !important; /* or more, as needed */
+  padding-right: 10px !important;
+   left: 5px; /* adjust as needed */
+  z-index: 1;
 }
 
 /* Override any existing white text styling for inactive submenus */
@@ -873,12 +1007,12 @@ tr.dp-row-action-highlight > td:nth-child(2) {
     <!-- partial:partials/_navbar.html -->
     <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
       <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start">
-<div class="navbar-brand-wrapper d-flex align-items-center justify-content-start position-relative" style="min-width: 150px; margin-top: 10px;">
+<div class="navbar-brand-wrapper d-flex align-items-center justify-content-start position-relative" style="min-width: 140px; margin-top: 0px;">
  
   <div class="d-flex align-items-center" style="margin-left: -30px; margin-top: 18px;">
        
     <a class="navbar-brand brand-logo me-2" href="{% url 'index' %}">
-      <img src="{% static 'assets/logo/t_t.png' %}" class="me-1" alt="logo" style="height:55px; width:auto; margin-top: -23px; margin-right: -20px;"/>
+      <img src="{% static 'assets/logo/t_t.png' %}" class="me-1" alt="logo" style="height:53px; width:auto; margin-top: -15px; margin-right: -20px;"/>
     </a>
     <a class="navbar-brand brand-logo me-2" href="{% url 'index' %}">
       <img src="{% static 'assets/logo/beta.png' %}" class="me-1" alt="logo" style="height:10px; width:auto;margin-top: 10px"/>
@@ -1080,13 +1214,13 @@ tr.dp-row-action-highlight > td:nth-child(2) {
 <ul class="nav">
 <li class="nav-item">
 <a class="nav-link" href="{% url 'index' %}">
-<i class="icon-grid menu-icon"></i>
+<i class="icon-grid menu-icon" data-tooltip="Dashboard"></i>
 <span class="menu-title">Dashboard</span>
 </a>
 </li>
 <li class="nav-item">
 <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
-<i class="icon-watch menu-icon"></i>
+    <i class="icon-watch menu-icon" data-tooltip="Day Planning"></i>
 <span class="menu-title">Day Planning</span>
 <i class="menu-arrow"></i>
 </a>

@@ -26,21 +26,22 @@
     }
   }
 /* Tablet: Override with narrower columns for 900px–1300px width */
+
 @media (min-width: 900px) and (max-width: 1300px) {
-  #order-listing th:nth-child(1) { min-width: 95px !important; max-width: 100px !important; }    /* S.No */
-  #order-listing th:nth-child(2) { min-width: 160px !important; max-width: 180px !important; }    /* Last Updated */
-  #order-listing th:nth-child(3) { min-width: 100px !important; max-width: 120px !important; }   /* Plating Stk No */
-  #order-listing th:nth-child(4) { min-width: 120px !important; max-width: 120px !important; }   /* Polishing Stk No */
-  #order-listing th:nth-child(5) { min-width: 100px !important; max-width: 110px !important; }   /* Plating Color */
+    #order-listing th:nth-child(1) { min-width: 80px !important; max-width: 100px !important; }    /* S.No */
+  #order-listing th:nth-child(2) { min-width: 170px !important; max-width: 180px !important; }    /* Last Updated */
+  #order-listing th:nth-child(3) { min-width: 120px !important; max-width: 140px !important; }   /* Plating Stk No */
+  #order-listing th:nth-child(4) { min-width: 130px !important; max-width: 140px !important; }   /* Polishing Stk No */
+  #order-listing th:nth-child(5) { min-width: 120px !important; max-width: 130px !important; }   /* Plating Color */
   #order-listing th:nth-child(6) { min-width: 100px !important; max-width: 100px !important; }   /* Category */
   #order-listing th:nth-child(7) { min-width: 90px !important; max-width: 110px !important; }    /* Polish Finish */
-  #order-listing th:nth-child(8) { min-width: 100px !important; max-width: 110px !important; }     /* Version */
-  #order-listing th:nth-child(9) { min-width: 130px !important; max-width: 150px !important; }   /* Tray Cate-Capacity */
-  #order-listing th:nth-child(10) { min-width: 100px !important; max-width: 120px !important; }    /* Source */
+  #order-listing th:nth-child(8) { min-width: 120px !important; max-width: 130px !important; }     /* Version */
+  #order-listing th:nth-child(9) { min-width: 140px !important; max-width: 150px !important; }   /* Tray Cate-Capacity */
+  #order-listing th:nth-child(10) { min-width: 130px !important; max-width: 140px !important; }    /* Source */
   #order-listing th:nth-child(11) { min-width: 100px !important; max-width: 130px !important; }    /* No of Trays */
-  #order-listing th:nth-child(12) { min-width: 120px !important; max-width: 140px !important; }   /* Input Qty */
+  #order-listing th:nth-child(12) { min-width: 130px !important; max-width: 140px !important; }   /* Input Qty */
   #order-listing th:nth-child(13) { min-width: 120px !important; max-width: 130px !important; }   /* Process Status */
-  #order-listing th:nth-child(14) { min-width: 80px !important; max-width: 100px !important; }   /* Action */
+  #order-listing th:nth-child(14) { min-width: 120px !important; max-width: 160px !important; }   /* Action */
   #order-listing th:nth-child(15) { min-width: 90px !important; max-width: 110px !important; }   /* Lot Status */
   #order-listing th:nth-child(16) { min-width: 100px !important; max-width: 120px !important; }  /* Current Stage */
   #order-listing th:nth-child(17) { min-width: 120px !important; max-width: 140px !important; }   /* Remarks */
@@ -89,12 +90,14 @@
   max-width: 140px;
 }
 
+
 /* Specific width adjustments for laptop/pc */
+
 #order-listing th:nth-child(1) { min-width: 60px; max-width: 80px; }   /* S.No */
-#order-listing th:nth-child(2) { min-width: 90px; max-width: 110px; }  /* Last Updated */
+#order-listing th:nth-child(2) { min-width: 90px; max-width: 100px; }  /* Last Updated */
 #order-listing th:nth-child(3) { min-width: 95px; max-width: 140px; } /* Plating Stk No */
-#order-listing th:nth-child(4) { min-width: 90px; max-width: 130px; } /* Polishing Stk No */
-#order-listing th:nth-child(5) { min-width: 90px; max-width: 110px; }  /* Plating Color */
+#order-listing th:nth-child(4) { min-width: 120px; max-width: 130px; } /* Polishing Stk No */
+#order-listing th:nth-child(5) { min-width: 80px; max-width: 90px; }  /* Plating Color */
 #order-listing th:nth-child(6) { min-width: 100px; max-width: 100px; }  /* Category */
 #order-listing th:nth-child(7) { min-width: 90px; max-width: 110px; }  /* Polish Finish */
 #order-listing th:nth-child(8) { min-width: 90px; max-width: 90px; }   /* Version */
@@ -107,7 +110,7 @@
 #order-listing th:nth-child(15) { min-width: 90px; max-width: 110px; } /* Lot Status */
 #order-listing th:nth-child(16) { min-width: 90px; max-width: 150px; } /* Current Stage */
 #order-listing th:nth-child(17) { min-width: 90px; max-width: 100px; } /* Remarks */
- 
+
 /* Right-align filter icons */
 #order-listing th .fa-filter {
   position: absolute;
@@ -467,12 +470,11 @@ body:not(.sidebar-icon-only) .pagination-wrapper {
 }
 
 /* Freeze Date and Time (second column) */
-/* ...existing code... */
 #order-listing th:nth-child(2),
 #order-listing td:nth-child(2) {
-  min-width: 90px !important;
-  max-width: 110px !important;
-  width: 100px !important;
+  min-width: 110px !important;
+  max-width: 120px !important;
+  
   position: sticky;
   left: 80px; /* match width of first column */
   z-index: 25;
@@ -521,6 +523,7 @@ body:not(.sidebar-icon-only) .pagination-wrapper {
 #order-listing td {
   font-size: 13px !important;
   font-weight: 600 !important;
+  border: 1.5px solid #000 !important; /* Black border for all table grid lines */
 }
     body.sidebar-icon-only .main-panel,
     body.sidebar-icon-only .content-wrapper,
@@ -675,13 +678,7 @@ transition: background 0.3s;
     vertical-align: middle;
   }
 
-  /* Show tooltip on hover */
-  .model-hover-trigger:hover .model-image-tooltip {
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    display: flex !important;
-  }
-
+ 
   .readonly-modal-header {
     background: #f3f3f3;
     border-radius: 8px 8px 0 0;
@@ -1167,15 +1164,15 @@ display: none; /* Chrome, Safari, Opera */
                       S.No <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Last<br>Updated
+                      Last <br> Updated
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Plating Stock No
+                      Plating <br> Stk No
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Polishing Stk No
+                      Polishing <br> Stk No
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
@@ -1195,7 +1192,7 @@ display: none; /* Chrome, Safari, Opera */
                     </th>
                     
                     <th>
-                      Tray Cate-Capacity
+                      Tray Cate- <br> Capacity
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
@@ -1210,7 +1207,7 @@ display: none; /* Chrome, Safari, Opera */
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Process Status
+                      Process <br> Status
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
@@ -1670,191 +1667,7 @@ display: none; /* Chrome, Safari, Opera */
   </script>
 
 
-  <!-- Script for Model / Stock No - Image Mouse Hover -->
-  <script nonce="{{ csp_nonce }}">
-    document.addEventListener("DOMContentLoaded", function () {
-      document
-        .querySelectorAll(".model-hover-trigger")
-        .forEach(function (trigger) {
-          const tooltip = trigger.querySelector(".model-image-tooltip");
-          let currentIndex = 0;
-          let tooltipPinned = false;
-          const images = Array.from(
-            tooltip.querySelectorAll(".img-gallery img")
-          );
-
-          function showImages(start) {
-            images.forEach((img, i) => {
-              img.style.display =
-                i >= start && i < start + 3 ? "block" : "none";
-            });
-          }
-          showImages(currentIndex);
-
-          function adjustTooltipPosition() {
-            // Reset to default
-            tooltip.style.left = "50%";
-            tooltip.style.top = "110%";
-            tooltip.style.right = "";
-            tooltip.style.bottom = "";
-            tooltip.style.transform = "translateX(-50%)";
-            tooltip.style.maxWidth = "350px";
-            tooltip.style.maxHeight = "300px";
-            tooltip.style.overflow = "auto";
-
-            // Get bounding rectangles
-            const tooltipRect = tooltip.getBoundingClientRect();
-            const triggerRect = trigger.getBoundingClientRect();
-            const viewportWidth = window.innerWidth;
-            const viewportHeight = window.innerHeight;
-
-            // Horizontal adjustment
-            if (tooltipRect.right > viewportWidth) {
-              tooltip.style.left = "auto";
-              tooltip.style.right = "0";
-              tooltip.style.transform = "none";
-            } else if (tooltipRect.left < 0) {
-              tooltip.style.left = "0";
-              tooltip.style.transform = "none";
-            }
-
-            // Vertical adjustment
-            if (tooltipRect.bottom > viewportHeight) {
-              tooltip.style.top = "auto";
-              tooltip.style.bottom = "110%";
-            } else if (tooltipRect.top < 0) {
-              tooltip.style.top = "0";
-              tooltip.style.bottom = "auto";
-            }
-          }
-
-          trigger.addEventListener("mouseenter", function () {
-            if (!tooltipPinned) {
-              tooltip.style.opacity = "1";
-              tooltip.style.pointerEvents = "auto";
-              setTimeout(adjustTooltipPosition, 10);
-            }
-          });
-          trigger.addEventListener("mousemove", function () {
-            if (!tooltipPinned) adjustTooltipPosition();
-          });
-          trigger.addEventListener("mouseleave", function () {
-            if (!tooltipPinned) {
-              tooltip.style.opacity = "0";
-              tooltip.style.pointerEvents = "none";
-            }
-          });
-          tooltip.addEventListener("mouseenter", function () {
-            if (!tooltipPinned) {
-              tooltip.style.opacity = "1";
-              tooltip.style.pointerEvents = "auto";
-            }
-          });
-          tooltip.addEventListener("mouseleave", function () {
-            if (!tooltipPinned) {
-              tooltip.style.opacity = "0";
-              tooltip.style.pointerEvents = "none";
-            }
-          });
-
-          // Pin tooltip on click
-          trigger.addEventListener("click", function (e) {
-            e.preventDefault();
-            tooltipPinned = true;
-            tooltip.style.opacity = "1";
-            tooltip.style.pointerEvents = "auto";
-            adjustTooltipPosition();
-          });
-
-          // Unpin tooltip if user clicks outside
-          document.addEventListener("mousedown", function (e) {
-            if (!trigger.contains(e.target) && !tooltip.contains(e.target)) {
-              tooltipPinned = false;
-              tooltip.style.opacity = "0";
-              tooltip.style.pointerEvents = "none";
-            }
-          });
-
-          tooltip
-            .querySelector(".img-scroll-left")
-            .addEventListener("click", function (e) {
-              e.stopPropagation();
-              if (currentIndex > 0) {
-                currentIndex--;
-                showImages(currentIndex);
-              }
-            });
-          tooltip
-            .querySelector(".img-scroll-right")
-            .addEventListener("click", function (e) {
-              e.stopPropagation();
-              if (currentIndex < images.length - 3) {
-                currentIndex++;
-                showImages(currentIndex);
-              }
-            });
-
-          // Add click event to images for modal slider
-          images.forEach(function (img, idx) {
-            img.style.cursor = "pointer";
-            img.addEventListener("click", function (e) {
-              e.stopPropagation();
-              openImageSlider(
-                images.map((i) => i.src),
-                idx
-              );
-            });
-          });
-        });
-
-      // Modal slider functions (unchanged)
-      const modal = document.getElementById("imageSliderModal");
-      const closeModal = document.getElementById("closeImageSliderModal");
-      const slidesContainer = modal.querySelector(".slides");
-      let sliderImages = [];
-      let currentSlide = 0;
-
-      function openImageSlider(srcArray, startIdx) {
-        sliderImages = srcArray;
-        slidesContainer.innerHTML = "";
-        sliderImages.forEach((src) => {
-          const slide = document.createElement("div");
-          slide.className = "slide";
-          const img = document.createElement("img");
-          img.src = src;
-          slide.appendChild(img);
-          slidesContainer.appendChild(slide);
-        });
-        currentSlide = startIdx;
-        showSlide(currentSlide);
-        modal.classList.add("open");
-      }
-
-      function showSlide(n) {
-        const slides = slidesContainer.querySelectorAll(".slide");
-        if (!slides.length) return;
-        currentSlide = (n + slides.length) % slides.length;
-        slides.forEach((slide, idx) => {
-          slide.classList.toggle("active", idx === currentSlide);
-        });
-      }
-
-      modal.querySelector("#prevBtn").addEventListener("click", function (e) {
-        e.stopPropagation();
-        showSlide(currentSlide - 1);
-      });
-      modal.querySelector("#nextBtn").addEventListener("click", function (e) {
-        e.stopPropagation();
-        showSlide(currentSlide + 1);
-      });
-      closeModal.addEventListener("click", function () {
-        modal.classList.remove("open");
-      });
-      modal.addEventListener("click", function (e) {
-        if (e.target === modal) modal.classList.remove("open");
-      });
-    });
-  </script>
+  
 
 <script nonce="{{ csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function () {
@@ -2117,8 +1930,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
-    <!-- Script for opening Day Planning - Tray Scan modal with read-only view while hitting view.png -->
-
+<!-- Script for opening Day Planning - Tray Scan modal with read-only view while hitting view.png -->
 <script nonce="{{ csp_nonce }}">
 // Updated script for opening Day Planning - Tray Scan modal
 document.addEventListener("DOMContentLoaded", function () {
@@ -2571,7 +2383,125 @@ document.addEventListener("DOMContentLoaded", function() {
   console.log('✅ HTML5 date filtering initialization complete');
 });
 </script>
+<!-- Plating Stk No - Fullscreen image modal with Info & Close (matches Pick Table) -->
+<script nonce="{{ csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function () {
+  let hoverTimeout;
 
+  document.querySelectorAll(".model-hover-trigger").forEach(function (trigger) {
+    const tooltip = trigger.querySelector(".model-image-tooltip");
+
+    // Remove existing hover event listeners by cloning (prevents double triggers)
+    const newTrigger = trigger.cloneNode(true);
+    trigger.parentNode.replaceChild(newTrigger, trigger);
+
+    // Hover: show modal with first image
+    newTrigger.addEventListener("mouseenter", function () {
+      hoverTimeout = setTimeout(() => {
+        const firstImg = newTrigger.querySelector(".model-image-tooltip img");
+        if (firstImg) showDirectImageModal(firstImg.src);
+      }, 200);
+    });
+    newTrigger.addEventListener("mouseleave", function () {
+      clearTimeout(hoverTimeout);
+    });
+
+    // Click: show modal with first image
+    newTrigger.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const firstImg = newTrigger.querySelector(".model-image-tooltip img");
+      if (firstImg) showDirectImageModal(firstImg.src);
+    });
+  });
+
+  function showDirectImageModal(imageSrc) {
+    // Remove any existing modal
+    const existingModal = document.getElementById('directImageModal');
+    if (existingModal) existingModal.remove();
+
+    // Create modal
+    const modal = document.createElement("div");
+    modal.id = 'directImageModal';
+    modal.style.cssText = `
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.8);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100000; backdrop-filter: blur(2px);
+    `;
+
+    // Add the image
+    const largeImg = document.createElement("img");
+    largeImg.src = imageSrc;
+    largeImg.style.cssText = `
+      max-width: 90%; max-height: 90%; border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3); object-fit: contain;
+    `;
+    modal.appendChild(largeImg);
+
+    // Close button
+    const closeBtn = document.createElement("button");
+    closeBtn.innerHTML = "&times;";
+    closeBtn.style.cssText = `
+      position: absolute; top: 20px; right: 20px; width: 50px; height: 50px;
+      background: #dc3545; color: white; border: none; border-radius: 50%;
+      font-size: 24px; font-weight: bold; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(220,53,69,0.4);
+      transition: all 0.3s ease;
+    `;
+    closeBtn.addEventListener("click", function () { modal.remove(); });
+    closeBtn.addEventListener("mouseenter", function () {
+      closeBtn.style.transform = "scale(1.1)";
+      closeBtn.style.background = "#c82333";
+    });
+    closeBtn.addEventListener("mouseleave", function () {
+      closeBtn.style.transform = "scale(1)";
+      closeBtn.style.background = "#dc3545";
+    });
+    modal.appendChild(closeBtn);
+
+    // Info button
+    const infoBtn = document.createElement("button");
+    infoBtn.innerHTML = "ℹ";
+    infoBtn.style.cssText = `
+      position: absolute; top: 20px; left: 20px; width: 50px; height: 50px;
+      background: #007bff; color: white; border: none; border-radius: 50%;
+      font-size: 20px; font-weight: bold; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,123,255,0.4);
+      transition: all 0.3s ease;
+    `;
+    infoBtn.addEventListener("click", function () {
+      alert("Model information will be displayed here.");
+    });
+    infoBtn.addEventListener("mouseenter", function () {
+      infoBtn.style.transform = "scale(1.1)";
+      infoBtn.style.background = "#0056b3";
+    });
+    infoBtn.addEventListener("mouseleave", function () {
+      infoBtn.style.transform = "scale(1)";
+      infoBtn.style.background = "#007bff";
+    });
+    modal.appendChild(infoBtn);
+
+    // Close on outside click
+    modal.addEventListener("click", function (e) {
+      if (e.target === modal) modal.remove();
+    });
+
+    // Close on Escape key
+    const escapeHandler = function(e) {
+      if (e.key === 'Escape') {
+        modal.remove();
+        document.removeEventListener('keydown', escapeHandler);
+      }
+    };
+    document.addEventListener('keydown', escapeHandler);
+
+    document.body.appendChild(modal);
+  }
+});
+</script>
 
 
   {% endblock %}

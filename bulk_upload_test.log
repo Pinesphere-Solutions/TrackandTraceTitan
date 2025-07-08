@@ -1,0 +1,277 @@
+2025-07-08 10:40:14,357 INFO: Opened Bulk Upload page.
+2025-07-08 10:40:17,197 INFO: Clicked Single Upload button.
+2025-07-08 10:40:17,299 INFO: Data table is visible.
+2025-07-08 10:42:06,947 INFO: Opened Bulk Upload page.
+2025-07-08 10:42:07,279 INFO: Clicked Single Upload button.
+2025-07-08 10:42:07,346 INFO: Data table is visible.
+2025-07-08 10:43:54,746 INFO: Opened Bulk Upload page.
+2025-07-08 10:43:56,318 INFO: Clicked Single Upload button.
+2025-07-08 10:43:56,863 INFO: Data table is visible.
+2025-07-08 10:43:57,982 INFO: \u274c Error while entering data: Message: element click intercepted: Element <td class="editable-cell"></td> is not clickable at point (502, 525). Other element would receive the click: <footer class="footer">...</footer>
+  (Session info: chrome=138.0.7204.97)
+Stacktrace:
+	GetHandleVerifier [0x0x7ff7ed7c6f95+76917]
+	GetHandleVerifier [0x0x7ff7ed7c6ff0+77008]
+	(No symbol) [0x0x7ff7ed579dea]
+	(No symbol) [0x0x7ff7ed5d8269]
+	(No symbol) [0x0x7ff7ed5d5c02]
+	(No symbol) [0x0x7ff7ed5d2c41]
+	(No symbol) [0x0x7ff7ed5d1b31]
+	(No symbol) [0x0x7ff7ed5c3368]
+	(No symbol) [0x0x7ff7ed5f846a]
+	(No symbol) [0x0x7ff7ed5c2c16]
+	(No symbol) [0x0x7ff7ed5f8680]
+	(No symbol) [0x0x7ff7ed62065c]
+	(No symbol) [0x0x7ff7ed5f8243]
+	(No symbol) [0x0x7ff7ed5c1431]
+	(No symbol) [0x0x7ff7ed5c21c3]
+	GetHandleVerifier [0x0x7ff7eda9d2cd+3051437]
+	GetHandleVerifier [0x0x7ff7eda97923+3028483]
+	GetHandleVerifier [0x0x7ff7edab58bd+3151261]
+	GetHandleVerifier [0x0x7ff7ed7e185e+185662]
+	GetHandleVerifier [0x0x7ff7ed7e971f+218111]
+	GetHandleVerifier [0x0x7ff7ed7cfb14+112628]
+	GetHandleVerifier [0x0x7ff7ed7cfcc9+113065]
+	GetHandleVerifier [0x0x7ff7ed7b6c98+10616]
+	BaseThreadInitThunk [0x0x7ffb7bf5259d+29]
+	RtlUserThreadStart [0x0x7ffb7c90af58+40]
+
+2025-07-08 10:45:27,188 INFO: Opened Bulk Upload page.
+2025-07-08 10:45:27,673 INFO: Clicked Single Upload button.
+2025-07-08 10:45:27,707 INFO: Data table is visible.
+2025-07-08 10:45:28,410 INFO: Entered Plating Stk No: 1805SSA02
+2025-07-08 10:45:28,561 INFO: \u274c Error while entering data: Message: stale element reference: stale element not found in the current frame
+  (Session info: chrome=138.0.7204.97); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#stale-element-reference-exception
+Stacktrace:
+	GetHandleVerifier [0x0x7ff7ed7c6f95+76917]
+	GetHandleVerifier [0x0x7ff7ed7c6ff0+77008]
+	(No symbol) [0x0x7ff7ed579dea]
+	(No symbol) [0x0x7ff7ed581789]
+	(No symbol) [0x0x7ff7ed58482c]
+	(No symbol) [0x0x7ff7ed5848ff]
+	(No symbol) [0x0x7ff7ed5d117a]
+	(No symbol) [0x0x7ff7ed5d1247]
+	(No symbol) [0x0x7ff7ed5c6abc]
+	(No symbol) [0x0x7ff7ed5f846a]
+	(No symbol) [0x0x7ff7ed5c2c16]
+	(No symbol) [0x0x7ff7ed5f8680]
+	(No symbol) [0x0x7ff7ed62065c]
+	(No symbol) [0x0x7ff7ed5f8243]
+	(No symbol) [0x0x7ff7ed5c1431]
+	(No symbol) [0x0x7ff7ed5c21c3]
+	GetHandleVerifier [0x0x7ff7eda9d2cd+3051437]
+	GetHandleVerifier [0x0x7ff7eda97923+3028483]
+	GetHandleVerifier [0x0x7ff7edab58bd+3151261]
+	GetHandleVerifier [0x0x7ff7ed7e185e+185662]
+	GetHandleVerifier [0x0x7ff7ed7e971f+218111]
+	GetHandleVerifier [0x0x7ff7ed7cfb14+112628]
+	GetHandleVerifier [0x0x7ff7ed7cfcc9+113065]
+	GetHandleVerifier [0x0x7ff7ed7b6c98+10616]
+	BaseThreadInitThunk [0x0x7ffb7bf5259d+29]
+	RtlUserThreadStart [0x0x7ffb7c90af58+40]
+
+2025-07-08 10:47:56,381 INFO: Opened Bulk Upload page.
+2025-07-08 10:47:56,548 INFO: Clicked Single Upload button.
+2025-07-08 10:47:57,107 INFO: Data table is visible.
+2025-07-08 10:47:57,884 INFO: Entered Plating Stk No: 1805SSA02
+2025-07-08 10:48:08,564 INFO: \u274c Error while entering data: Message: no such element: Unable to locate element: {"method":"tag name","selector":"input"}
+  (Session info: chrome=138.0.7204.97); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x0x7ff6ab116f95+76917]
+	GetHandleVerifier [0x0x7ff6ab116ff0+77008]
+	(No symbol) [0x0x7ff6aaec9dea]
+	(No symbol) [0x0x7ff6aaf20256]
+	(No symbol) [0x0x7ff6aaf2050c]
+	(No symbol) [0x0x7ff6aaf12d4c]
+	(No symbol) [0x0x7ff6aaf484af]
+	(No symbol) [0x0x7ff6aaf12c16]
+	(No symbol) [0x0x7ff6aaf48680]
+	(No symbol) [0x0x7ff6aaf7065c]
+	(No symbol) [0x0x7ff6aaf48243]
+	(No symbol) [0x0x7ff6aaf11431]
+	(No symbol) [0x0x7ff6aaf121c3]
+	GetHandleVerifier [0x0x7ff6ab3ed2cd+3051437]
+	GetHandleVerifier [0x0x7ff6ab3e7923+3028483]
+	GetHandleVerifier [0x0x7ff6ab4058bd+3151261]
+	GetHandleVerifier [0x0x7ff6ab13185e+185662]
+	GetHandleVerifier [0x0x7ff6ab13971f+218111]
+	GetHandleVerifier [0x0x7ff6ab11fb14+112628]
+	GetHandleVerifier [0x0x7ff6ab11fcc9+113065]
+	GetHandleVerifier [0x0x7ff6ab106c98+10616]
+	BaseThreadInitThunk [0x0x7ffb7bf5259d+29]
+	RtlUserThreadStart [0x0x7ffb7c90af58+40]
+
+2025-07-08 10:51:36,013 INFO: Opened Bulk Upload page.
+2025-07-08 10:51:36,276 INFO: Clicked Single Upload button.
+2025-07-08 10:51:36,392 INFO: Data table is visible.
+2025-07-08 10:51:37,197 INFO: Entered Plating Stk No: 1805SSA02
+2025-07-08 10:51:49,718 INFO: Entered Polishing Stk No: 1805XSA02
+2025-07-08 10:51:51,714 INFO: Entered Plating Colour: IPS
+2025-07-08 10:51:52,701 INFO: Entered Input Qty: 45
+2025-07-08 10:51:53,076 INFO: Clicked Submit.
+2025-07-08 10:55:02,552 INFO: Opened Bulk Upload page.
+2025-07-08 10:55:02,795 INFO: Clicked Single Upload button.
+2025-07-08 10:55:03,352 INFO: Data table is visible.
+2025-07-08 10:55:04,125 INFO: Entered Plating Stk No: 1805SSA02
+2025-07-08 10:55:17,141 INFO: Entered Polishing Stk No: 1805XSA02
+2025-07-08 10:55:19,634 INFO: Entered Plating Colour: IPS
+2025-07-08 10:55:21,604 INFO: Entered Input Qty: 45
+2025-07-08 10:55:23,380 INFO: Clicked Submit.
+2025-07-08 10:58:16,127 INFO: Opened Bulk Upload page.
+2025-07-08 10:58:16,363 INFO: Clicked Single Upload button.
+2025-07-08 10:58:16,940 INFO: Data table is visible.
+2025-07-08 10:58:17,737 INFO: Entered Plating Stk No: 1805SSA02
+2025-07-08 10:58:30,734 INFO: Entered Polishing Stk No: 1805XSA02
+2025-07-08 10:58:33,205 INFO: Entered Plating Colour: IPS
+2025-07-08 10:58:35,167 INFO: Entered Input Qty: 45
+2025-07-08 10:58:36,974 INFO: Clicked Submit.
+2025-07-08 11:01:34,122 INFO: Opened Bulk Upload page.
+2025-07-08 11:01:34,375 INFO: Clicked Single Upload button.
+2025-07-08 11:01:34,915 INFO: Data table is visible.
+2025-07-08 11:01:35,726 INFO: Entered Plating Stk No: 1805SSA02
+2025-07-08 11:01:48,747 INFO: Entered Polishing Stk No: 1805XSA02
+2025-07-08 11:01:51,248 INFO: Entered Plating Colour: IPS
+2025-07-08 11:01:53,843 INFO: Selected Category fallback: Align
+2025-07-08 11:01:55,042 INFO: Entered Input Qty: 45
+2025-07-08 11:01:57,611 INFO: Selected Source: Testing
+2025-07-08 11:01:58,621 INFO: Clicked Submit.
+2025-07-08 11:01:59,701 INFO: \u274c Submission failed: \u2705 1 row(s) processed successfully.
+2025-07-08 11:23:53,407 INFO: Opened Bulk Upload page.
+2025-07-08 11:23:54,191 INFO: Clicked Single Upload button.
+2025-07-08 11:23:54,263 INFO: Data table is visible.
+2025-07-08 11:23:55,127 INFO: Entered Plating Stk No: 1805SSA02
+2025-07-08 11:24:08,222 INFO: Entered Polishing Stk No: 1805XSA02
+2025-07-08 11:24:10,743 INFO: Entered Plating Colour: IPS
+2025-07-08 11:24:13,383 INFO: Selected Category fallback: Align
+2025-07-08 11:24:14,604 INFO: Entered Input Qty: 45
+2025-07-08 11:24:17,172 INFO: Selected Source: Testing
+2025-07-08 11:24:18,184 INFO: Clicked Submit.
+2025-07-08 11:24:19,233 INFO: \u274c Submission failed: \u2705 1 row(s) processed successfully.
+2025-07-08 11:42:28,564 INFO: Opened Bulk Upload page.
+2025-07-08 11:42:28,759 INFO: Clicked Single Upload button.
+2025-07-08 11:42:28,785 INFO: Data table is visible.
+2025-07-08 11:42:39,333 INFO: \u274c Error while entering data: Message: 
+Stacktrace:
+	GetHandleVerifier [0x0x7ff799d96f95+76917]
+	GetHandleVerifier [0x0x7ff799d96ff0+77008]
+	(No symbol) [0x0x7ff799b49dea]
+	(No symbol) [0x0x7ff799ba0256]
+	(No symbol) [0x0x7ff799ba050c]
+	(No symbol) [0x0x7ff799bf3887]
+	(No symbol) [0x0x7ff799bc84af]
+	(No symbol) [0x0x7ff799bf065c]
+	(No symbol) [0x0x7ff799bc8243]
+	(No symbol) [0x0x7ff799b91431]
+	(No symbol) [0x0x7ff799b921c3]
+	GetHandleVerifier [0x0x7ff79a06d2cd+3051437]
+	GetHandleVerifier [0x0x7ff79a067923+3028483]
+	GetHandleVerifier [0x0x7ff79a0858bd+3151261]
+	GetHandleVerifier [0x0x7ff799db185e+185662]
+	GetHandleVerifier [0x0x7ff799db971f+218111]
+	GetHandleVerifier [0x0x7ff799d9fb14+112628]
+	GetHandleVerifier [0x0x7ff799d9fcc9+113065]
+	GetHandleVerifier [0x0x7ff799d86c98+10616]
+	BaseThreadInitThunk [0x0x7ffb7bf5259d+29]
+	RtlUserThreadStart [0x0x7ffb7c90af58+40]
+
+2025-07-08 11:42:52,971 INFO: Opened Bulk Upload page.
+2025-07-08 11:42:53,161 INFO: Clicked Single Upload button.
+2025-07-08 11:42:53,711 INFO: Data table is visible.
+2025-07-08 11:42:54,487 INFO: Entered Plating Stk No: 1805SSA02
+2025-07-08 11:43:07,473 INFO: Entered Polishing Stk No: 1805XSA02
+2025-07-08 11:43:09,948 INFO: Entered Plating Colour: IPS
+2025-07-08 11:43:12,539 INFO: Selected Category fallback: Align
+2025-07-08 11:43:13,729 INFO: Entered Input Qty: 45
+2025-07-08 11:43:16,263 INFO: Selected Source: Testing
+2025-07-08 11:43:17,255 INFO: Clicked Submit.
+2025-07-08 11:43:18,303 INFO: \u274c Submission failed: \u2705 1 row(s) processed successfully.
+2025-07-08 11:55:43,524 INFO: Opened Bulk Upload page.
+2025-07-08 11:55:43,877 INFO: Clicked Single Upload button.
+2025-07-08 11:55:44,429 INFO: Data table is visible.
+2025-07-08 11:55:45,266 INFO: Entered Plating Stk No: 1805SSA02
+2025-07-08 11:55:58,252 INFO: Entered Polishing Stk No: 1805XSA02
+2025-07-08 11:56:00,716 INFO: Entered Plating Colour: IPS
+2025-07-08 11:56:03,309 INFO: Selected Category fallback: Align
+2025-07-08 11:56:04,506 INFO: Entered Input Qty: 45
+2025-07-08 11:56:07,032 INFO: Selected Source: Testing
+2025-07-08 11:56:18,091 INFO: \u274c Error while entering data: Message: 
+Stacktrace:
+	GetHandleVerifier [0x0x7ff620b66f95+76917]
+	GetHandleVerifier [0x0x7ff620b66ff0+77008]
+	(No symbol) [0x0x7ff620919dea]
+	(No symbol) [0x0x7ff620970256]
+	(No symbol) [0x0x7ff62097050c]
+	(No symbol) [0x0x7ff6209c3887]
+	(No symbol) [0x0x7ff6209984af]
+	(No symbol) [0x0x7ff6209c065c]
+	(No symbol) [0x0x7ff620998243]
+	(No symbol) [0x0x7ff620961431]
+	(No symbol) [0x0x7ff6209621c3]
+	GetHandleVerifier [0x0x7ff620e3d2cd+3051437]
+	GetHandleVerifier [0x0x7ff620e37923+3028483]
+	GetHandleVerifier [0x0x7ff620e558bd+3151261]
+	GetHandleVerifier [0x0x7ff620b8185e+185662]
+	GetHandleVerifier [0x0x7ff620b8971f+218111]
+	GetHandleVerifier [0x0x7ff620b6fb14+112628]
+	GetHandleVerifier [0x0x7ff620b6fcc9+113065]
+	GetHandleVerifier [0x0x7ff620b56c98+10616]
+	BaseThreadInitThunk [0x0x7ffb7bf5259d+29]
+	RtlUserThreadStart [0x0x7ffb7c90af58+40]
+
+2025-07-08 11:57:40,354 INFO: Opened Bulk Upload page.
+2025-07-08 11:57:40,553 INFO: Clicked Single Upload button.
+2025-07-08 11:57:40,651 INFO: Data table is visible.
+2025-07-08 11:57:41,451 INFO: Entered Plating Stk No: 1805SSA02
+2025-07-08 11:57:54,451 INFO: Entered Polishing Stk No: 1805XSA02
+2025-07-08 11:57:56,916 INFO: Entered Plating Colour: IPS
+2025-07-08 11:57:59,515 INFO: Selected Category fallback: Align
+2025-07-08 11:58:00,725 INFO: Entered Input Qty: 45
+2025-07-08 11:58:03,260 INFO: Selected Source: Testing
+2025-07-08 11:58:14,722 INFO: \u274c Error while adding row 2: Message: 
+Stacktrace:
+	GetHandleVerifier [0x0x7ff6d9e66f95+76917]
+	GetHandleVerifier [0x0x7ff6d9e66ff0+77008]
+	(No symbol) [0x0x7ff6d9c19dea]
+	(No symbol) [0x0x7ff6d9c70256]
+	(No symbol) [0x0x7ff6d9c7050c]
+	(No symbol) [0x0x7ff6d9cc3887]
+	(No symbol) [0x0x7ff6d9c984af]
+	(No symbol) [0x0x7ff6d9cc065c]
+	(No symbol) [0x0x7ff6d9c98243]
+	(No symbol) [0x0x7ff6d9c61431]
+	(No symbol) [0x0x7ff6d9c621c3]
+	GetHandleVerifier [0x0x7ff6da13d2cd+3051437]
+	GetHandleVerifier [0x0x7ff6da137923+3028483]
+	GetHandleVerifier [0x0x7ff6da1558bd+3151261]
+	GetHandleVerifier [0x0x7ff6d9e8185e+185662]
+	GetHandleVerifier [0x0x7ff6d9e8971f+218111]
+	GetHandleVerifier [0x0x7ff6d9e6fb14+112628]
+	GetHandleVerifier [0x0x7ff6d9e6fcc9+113065]
+	GetHandleVerifier [0x0x7ff6d9e56c98+10616]
+	BaseThreadInitThunk [0x0x7ffb7bf5259d+29]
+	RtlUserThreadStart [0x0x7ffb7c90af58+40]
+
+2025-07-08 11:58:14,729 INFO: \u274c Error while entering data: Message: 
+Stacktrace:
+	GetHandleVerifier [0x0x7ff6d9e66f95+76917]
+	GetHandleVerifier [0x0x7ff6d9e66ff0+77008]
+	(No symbol) [0x0x7ff6d9c19dea]
+	(No symbol) [0x0x7ff6d9c70256]
+	(No symbol) [0x0x7ff6d9c7050c]
+	(No symbol) [0x0x7ff6d9cc3887]
+	(No symbol) [0x0x7ff6d9c984af]
+	(No symbol) [0x0x7ff6d9cc065c]
+	(No symbol) [0x0x7ff6d9c98243]
+	(No symbol) [0x0x7ff6d9c61431]
+	(No symbol) [0x0x7ff6d9c621c3]
+	GetHandleVerifier [0x0x7ff6da13d2cd+3051437]
+	GetHandleVerifier [0x0x7ff6da137923+3028483]
+	GetHandleVerifier [0x0x7ff6da1558bd+3151261]
+	GetHandleVerifier [0x0x7ff6d9e8185e+185662]
+	GetHandleVerifier [0x0x7ff6d9e8971f+218111]
+	GetHandleVerifier [0x0x7ff6d9e6fb14+112628]
+	GetHandleVerifier [0x0x7ff6d9e6fcc9+113065]
+	GetHandleVerifier [0x0x7ff6d9e56c98+10616]
+	BaseThreadInitThunk [0x0x7ffb7bf5259d+29]
+	RtlUserThreadStart [0x0x7ffb7c90af58+40]
+
