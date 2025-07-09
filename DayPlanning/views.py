@@ -2735,3 +2735,30 @@ class TrayAutoSaveCleanupAPIView(APIView):
         except Exception as e:
             print(f"❌ Error in TrayAutoSaveCleanupAPIView: {str(e)}")
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+from django.views.generic import TemplateView
+
+
+class TestHtmlView(TemplateView):
+    template_name = "Day_Planning/testtable.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['rows'] = [
+            {
+                'id': i,
+                'user': f'User {i}',
+                'dept': f'Dept {chr(64+i)}',
+                'role': f'Role {i}',
+                'status': 'Active' if i % 2 == 0 else 'Inactive',
+                'location': f'Location {i}',
+                'start': f'2025-07-{i:02d}',
+                'end': f'2025-08-{i:02d}',
+                'progress': min((i+10)*7, 100),
+                'manager': f'Manager {i}',
+                'contact': f'+91-90000{i:05d}',
+                'remark': f'Remark {i}',
+            }
+            for i in range(1, 13)
+        ]
+        return context

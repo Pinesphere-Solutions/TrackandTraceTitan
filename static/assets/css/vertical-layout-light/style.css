@@ -26821,6 +26821,7 @@ code {
 }
 .card .card-body {
   padding: 1.25rem 1.25rem;
+  
 }
 .card .card-body a {
   text-decoration: none;
@@ -35467,7 +35468,7 @@ div.tagsinput span.tag a {
   flex-direction: row;
   padding-left: 0;
   padding-right: 0;
-  padding-top: 60px;
+  padding-top: 30px;
 }
 .page-body-wrapper.full-page-wrapper {
   width: 100%;
@@ -35527,7 +35528,7 @@ div.tagsinput span.tag a {
   overflow: hidden;
   flex-wrap: nowrap;
   flex-direction: column;
-  margin-bottom: 110px !important;
+  margin-bottom: 30px !important;
 }
 .sidebar .nav .nav-item {
   -webkit-transition-duration: 0.25s;

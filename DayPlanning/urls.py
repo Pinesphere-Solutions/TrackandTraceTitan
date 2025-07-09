@@ -36,4 +36,8 @@ urlpatterns = [
     path('tray_auto_save/', TrayAutoSaveAPIView.as_view(), name='tray_auto_save'),
     path('tray_auto_save_cleanup/', TrayAutoSaveCleanupAPIView.as_view(), name='tray_auto_save_cleanup'),
 
+    path('test/', TestHtmlView.as_view(), name='test_html'),
+
+
+
 ]

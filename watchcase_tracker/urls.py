@@ -46,6 +46,8 @@ urlpatterns = [
     path('recovery_dp/',include('Recovery_DP.urls')),
     
  
+    
+    path('dayplanning/', include('DayPlanning.urls')),
 
 
 

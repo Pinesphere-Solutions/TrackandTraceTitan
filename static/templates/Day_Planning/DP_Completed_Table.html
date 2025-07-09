@@ -5,7 +5,19 @@
  {% block content %}
 
 <style>
+  #order-listing tr:last-child td {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
   
+}
+/* Gird line color combination */
+#order-listing th, #order-listing td {
+  border-right: 1.5px solid #bababa !important;   /* Vertical lines: blue */
+  border-bottom: 2px solid #121413 !important;  /* Horizontal lines: green */
+}
+#order-listing th:last-child, #order-listing td:last-child {
+  border-right: none !important;
+}
   /* Tablet: Increase tray scan status circle size */
   
   @media (min-width: 900px) and (max-width: 1300px) {
@@ -529,7 +541,6 @@ body:not(.sidebar-icon-only) .pagination-wrapper {
 #order-listing td {
   font-size: 13px !important;
   font-weight: 600 !important;
-  border: 1.5px solid #000 !important; /* Black border for all table grid lines */
 }
     body.sidebar-icon-only .main-panel,
     body.sidebar-icon-only .content-wrapper,

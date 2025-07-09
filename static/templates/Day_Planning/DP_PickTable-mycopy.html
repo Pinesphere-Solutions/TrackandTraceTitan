@@ -5,29 +5,7 @@
 
 
 <style>
-/* Add to your <style> */
-.sticky-col {
-  position: sticky;
-  left: 0;
-  z-index: 30;
-  background: #f9f9fb;
-  box-shadow: 2px 0 6px -2px rgba(2,128,132,0.08);
-}
-.sticky-col-2 {
-  position: sticky;
-  left: 100px; /* Adjust to match your first column width */
-  z-index: 31;
-  background: #f9f9fb;
-  box-shadow: 2px 0 6px -2px rgba(2,128,132,0.08);
-}
-.sticky-col-3 {
-  position: sticky;
-  left: 200px; /* Adjust to match your first+second column width */
-  z-index: 32;
-  background: #f9f9fb;
-  border-right: 2.5px solid #028084;
-  box-shadow: 2px 0 6px -2px rgba(2,128,132,0.12);
-}
+
 /* Tablet: Increase tray scan status circle size */
 @media (min-width: 900px) and (max-width: 1300px) {
   .tray-scan-status-circle {
@@ -216,6 +194,50 @@ tr.dp-row-action-highlight > td:nth-child(2) {
   }
   
 }
+/* Freeze S.No (first column) */
+#order-listing th:nth-child(1),
+#order-listing td:nth-child(1) {
+  box-shadow: 2px 0 2px -1px rgba(0,0,0,0.04);
+}
+
+/* Freeze Date and Time (second column) */
+/* ...existing code... */
+#order-listing th:nth-child(2),
+#order-listing td:nth-child(2) {
+
+  box-shadow: 2px 0 2px -1px rgba(0,0,0,0.03);
+  word-break: break-all;
+  white-space: normal;
+  text-align: center;
+  /* Make border visible above sticky col 1 */
+  border-left: 1.5px solid #d1d1d1 !important; /* Use a stronger color if needed */
+}
+#order-listing th:nth-child(1),
+#order-listing td:nth-child(1) {
+  position: sticky;
+  left: 0;
+  z-index: 30;
+  background: #fff;
+  min-width: 80px;
+}
+
+#order-listing th:nth-child(2),
+#order-listing td:nth-child(2) {
+  position: sticky;
+  left: 90px; /* width of col 1 */
+  z-index: 25;
+  background: #fff;
+  min-width: 100px;
+}
+
+#order-listing th:nth-child(3),
+#order-listing td:nth-child(3) {
+  position: sticky;
+  left: 195px; /* 80px (col 1) + 100px (col 2) */
+  z-index: 20;
+  background: #fff;
+  min-width: 100px;
+}
 
 /* For sticky header cell (top row, Date/Time) */
 #order-listing thead th:nth-child(2) {
@@ -224,7 +246,7 @@ tr.dp-row-action-highlight > td:nth-child(2) {
   color: #e5fcff !important;
   border-left: 2px solid #fff !important; /* White border for header, or match your theme */
 }
-
+/* ...existing code... */
 
 /* When header and column intersect, header should be above */
 #order-listing thead th:nth-child(1) { z-index: 40; background: #028084 !important; color: #e5fcff !important; }
@@ -1194,9 +1216,9 @@ color: #d9534f;
 #order-listing tr:last-child td {
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
-  border-bottom: none !important;
+  
 }
-
+/* Gird line color combination */
 #order-listing th, #order-listing td {
   border-right: 1.5px solid #bababa !important;   /* Vertical lines: blue */
   border-bottom: 2px solid #121413 !important;  /* Horizontal lines: green */
@@ -1312,20 +1334,22 @@ box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* optional shadow for better sep
     <div class="col-12 grid-margin stretch-card">
       <div class="card">
                 <div class="card-body" style="padding-bottom:12px;">
-              <!-- Place this wherever you want the link to appear -->
-              <a href="{% url 'test_html' %}" target="_blank" rel="noopener noreferrer">Day Planning Pick Table</a>            <div class="table-responsive">
+              <h5 class="text-left mt-0 mb-4" style="font-weight:700;">Day Planning Pick Table</h5>
+
+            <!-- Table Section -->
+            <div class="table-responsive">
 <table id="order-listing" class="table">
                <thead>
                   <tr>
-                    <th class="sticky-col">
+                    <th>
                       S.No
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
-                    <th class="sticky-col">
+                    <th>
                       Last Updated
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
-                    <th class="sticky-col">
+                    <th>
                       Plating <br> Stk No
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
