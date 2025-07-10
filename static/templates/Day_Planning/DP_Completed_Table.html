@@ -4,7 +4,8 @@
 
  {% block content %}
 
-<style>
+ <style>
+  
   #order-listing tr:last-child td {
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
@@ -19,7 +20,6 @@
   border-right: none !important;
 }
   /* Tablet: Increase tray scan status circle size */
-  
   @media (min-width: 900px) and (max-width: 1300px) {
       .tray-scan-status-circle {
         width: 30px !important;
@@ -301,7 +301,7 @@
 .pagination-wrapper {
   position: fixed !important;
   left:0;
-  bottom: 32px !important;
+  bottom: 31px !important;
   width: 100% !important;
   z-index: 1001 !important;
   padding: 8px 0 !important;
@@ -541,6 +541,7 @@ body:not(.sidebar-icon-only) .pagination-wrapper {
 #order-listing td {
   font-size: 13px !important;
   font-weight: 600 !important;
+  
 }
     body.sidebar-icon-only .main-panel,
     body.sidebar-icon-only .content-wrapper,
@@ -552,6 +553,7 @@ body:not(.sidebar-icon-only) .pagination-wrapper {
       width: 100% !important;
       max-width: 100% !important;
       box-sizing: border-box !important;
+     
     }
     
     .content-wrapper,
@@ -583,16 +585,28 @@ body:not(.sidebar-icon-only) .pagination-wrapper {
       min-height: 700px !important;
       margin-bottom: 0 !important;
     }
-        /* Increase card-body height for better table visibility */
-    .card-body {
-      min-height: 520px !important;
-      height: auto !important;
-      max-height: 700px !important;
-      overflow: visible !important;
-      box-sizing: border-box !important;
-    }
-    
-
+    /* Increase card-body height for better table visibility */
+.card-body {
+  min-height: 570px !important;
+  height: auto !important;
+  max-height: 700px !important;
+  overflow: visible !important;
+  box-sizing: border-box !important;
+}
+/* --- Make card-body tall enough to fit 10 rows without table scroll (PC only) --- */
+@media (min-width: 1200px) {
+  .card-body {
+    min-height: 650px !important;
+    height: 650px !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .table-responsive {
+    max-height: none !important;
+    height: auto !important;
+    overflow-y: visible !important;
+  }
+}
     #order-listing tr,
     #order-listing td,
     #order-listing th {
@@ -658,7 +672,7 @@ body:not(.sidebar-icon-only) .pagination-wrapper {
     padding-left: 2px !important;
     transition: opacity 0.3s ease;
     flex: 1;
-  
+ 
     transition: opacity 0.3s ease;
 
   }
@@ -1019,8 +1033,8 @@ padding: 4px 8px !important;
 
 /* --- Reduce table background frame height and ensure scrollbar is visible --- */
 .table-responsive {
-  max-height: 380px !important;    /* Reduce this value as needed */
-  min-height: 130px !important;    /* Optional: set a reasonable min-height */
+  max-height: 400px !important;    /* Reduce this value as needed */
+  min-height: 360px !important;    /* Optional: set a reasonable min-height */
   height: auto !important;         /* Let it grow with content, but not exceed max-height */
   background: #fff !important;     /* Ensure background is white */
   padding-bottom: 32px !important; /* Add space for scrollbar and pagination */
@@ -1033,7 +1047,7 @@ padding: 4px 8px !important;
 /* Make sure the scrollbar is always visible */
 .table-responsive::-webkit-scrollbar {
   display: block !important;
-  height: 8px !important;
+  height: 2px !important;
   background: #f3f3f3 !important;
 }
 .table-responsive::-webkit-scrollbar-thumb {
@@ -1145,7 +1159,9 @@ display: block !important;                /* For Chrome, Safari, Opera */
   }
 </style>
 
-
+<div class="content-wrapper">
+  
+  <div class="row">
     <div class="col-12 grid-margin stretch-card">
       <div class="card">
         <div class="card-body">
@@ -1191,7 +1207,7 @@ display: block !important;                /* For Chrome, Safari, Opera */
                       S.No <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Last <br> Updated
+                      Last<br>Updated
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
@@ -1203,7 +1219,7 @@ display: block !important;                /* For Chrome, Safari, Opera */
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Plating Color
+                      Plating <br> Color
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                      <th>
@@ -1211,7 +1227,7 @@ display: block !important;                /* For Chrome, Safari, Opera */
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Polish Finish
+                      Polish <br> Finish
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
@@ -1227,14 +1243,14 @@ display: block !important;                /* For Chrome, Safari, Opera */
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      No of Tray <i class="fa fa-filter" aria-hidden="true"></i>
+                      No of <br> Tray <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
                       Input Qty
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Process <br> Status
+                      Process Status
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
@@ -1256,14 +1272,14 @@ display: block !important;                /* For Chrome, Safari, Opera */
                           <tbody>
               {% for row in master_data %}
                 <tr>
-                  <td>{{ forloop.counter }}</td>
+                  <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
                 <td
                   {% if data.hold_lot %}
                     class="row-inactive-blur"
                   {% endif %}
                 >
-                  {{ row.date_time|date:"d-M-y" }}<br>
-                  <span style="display:inline-block; margin-top:4px;">{{ row.date_time|date:"H:i" }}</span>
+                  {{ row.created_at|date:"d-M-y" }}<br>
+                  <span style="display:inline-block; margin-top:4px;">{{ row.created_at|date:"h:i A" }}</span>
                 </td>           
                     <td>
                       <span class="model-hover-trigger" style="cursor: pointer;">
@@ -1299,11 +1315,11 @@ display: block !important;                /* For Chrome, Safari, Opera */
                     {{ row.total_batch_quantity }}
                   </td>
                   <td>
-                                        <div
-                      class="tray-scan-status-circle"
-                      style="background: {% if row.Moved_to_D_Picker %}#0c8249{% else %}#c3c2c2{% endif %}; color: white; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
-                      T
-                    </div>
+                    <div
+  class="tray-scan-status-circle"
+  style="background: {% if row.Moved_to_D_Picker %}#0c8249{% else %}#c3c2c2{% endif %}; color: white; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+  T
+</div>
                   </td>
 <td>
                     <span style="opacity:0.5; pointer-events:none; display:inline-block;">
@@ -1399,7 +1415,8 @@ display: block !important;                /* For Chrome, Safari, Opera */
   <!-- Text Remark Icon -->
   {% if row.dp_pick_remarks %}
     <span class="remark-tooltip-trigger" style="display: inline-flex; align-items: center; height: 20px; margin-left: 5px; position: relative; cursor: default;">
-      <img src="{% static 'assets/icons/chat1.png' %}" alt="Chat" style="width: 20px; height: 20px;" />
+      <img src="{% static 'assets/icons/chat1.png' %}" alt="Chat"
+        style="width: 20px; height: 20px; filter: grayscale(0) brightness(1.1) sepia(1) hue-rotate(80deg) saturate(3) contrast(1.2); opacity: 1;" />
       <div class="remark-tooltip" style="position: absolute; top: 110%; left: 50%; transform: translateX(-50%); width: 300px; background: #fff; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; padding: 15px; z-index: 1000;">
         <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 10px solid #fff;"></div>
         <div style="font-size: 12px; color: #333;">{{ row.dp_pick_remarks }}</div>
@@ -1502,19 +1519,10 @@ display: block !important;                /* For Chrome, Safari, Opera */
                 <!-- No buttons for read-only modal -->
               </div>
             </div>
-  
-        </div>
-        
-      </div>
-    </div>
-  </div>
-  </div>
-</div>  
-</div>
          <!-- Pagination Section -->
             <div class="pagination-wrapper">
               <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-end mb-0">
+                                <ul class="pagination justify-content-end mb-0">
                   {# Previous button #}
                   {% if page_obj.has_previous %}
                     <li>
@@ -1570,6 +1578,10 @@ display: block !important;                /* For Chrome, Safari, Opera */
                 </ul>
               </nav>
             </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
    <script nonce="{{ csp_nonce }}">
     document.addEventListener("DOMContentLoaded", function () {
@@ -1695,7 +1707,128 @@ display: block !important;                /* For Chrome, Safari, Opera */
   </script>
 
 
-  
+  <!-- Script for Model / Stock No - Image Mouse Hover -->
+
+ 
+<!-- Plating Stk No - Fullscreen image modal with Info & Close (matches Pick Table) -->
+<script nonce="{{ csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function () {
+  let hoverTimeout;
+ 
+  document.querySelectorAll(".model-hover-trigger").forEach(function (trigger) {
+    const tooltip = trigger.querySelector(".model-image-tooltip");
+ 
+    // Remove existing hover event listeners by cloning (prevents double triggers)
+    const newTrigger = trigger.cloneNode(true);
+    trigger.parentNode.replaceChild(newTrigger, trigger);
+ 
+    // Hover: show modal with first image
+    newTrigger.addEventListener("mouseenter", function () {
+      hoverTimeout = setTimeout(() => {
+        const firstImg = newTrigger.querySelector(".model-image-tooltip img");
+        if (firstImg) showDirectImageModal(firstImg.src);
+      }, 200);
+    });
+    newTrigger.addEventListener("mouseleave", function () {
+      clearTimeout(hoverTimeout);
+    });
+ 
+    // Click: show modal with first image
+    newTrigger.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const firstImg = newTrigger.querySelector(".model-image-tooltip img");
+      if (firstImg) showDirectImageModal(firstImg.src);
+    });
+  });
+ 
+  function showDirectImageModal(imageSrc) {
+    // Remove any existing modal
+    const existingModal = document.getElementById('directImageModal');
+    if (existingModal) existingModal.remove();
+ 
+    // Create modal
+    const modal = document.createElement("div");
+    modal.id = 'directImageModal';
+    modal.style.cssText = `
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.8);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100000; backdrop-filter: blur(2px);
+    `;
+ 
+    // Add the image
+    const largeImg = document.createElement("img");
+    largeImg.src = imageSrc;
+    largeImg.style.cssText = `
+      max-width: 90%; max-height: 90%; border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3); object-fit: contain;
+    `;
+    modal.appendChild(largeImg);
+ 
+    // Close button
+    const closeBtn = document.createElement("button");
+    closeBtn.innerHTML = "&times;";
+    closeBtn.style.cssText = `
+      position: absolute; top: 20px; right: 20px; width: 50px; height: 50px;
+      background: #dc3545; color: white; border: none; border-radius: 50%;
+      font-size: 24px; font-weight: bold; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(220,53,69,0.4);
+      transition: all 0.3s ease;
+    `;
+    closeBtn.addEventListener("click", function () { modal.remove(); });
+    closeBtn.addEventListener("mouseenter", function () {
+      closeBtn.style.transform = "scale(1.1)";
+      closeBtn.style.background = "#c82333";
+    });
+    closeBtn.addEventListener("mouseleave", function () {
+      closeBtn.style.transform = "scale(1)";
+      closeBtn.style.background = "#dc3545";
+    });
+    modal.appendChild(closeBtn);
+ 
+    // Info button
+    const infoBtn = document.createElement("button");
+    infoBtn.innerHTML = "ℹ";
+    infoBtn.style.cssText = `
+      position: absolute; top: 20px; left: 20px; width: 50px; height: 50px;
+      background: #007bff; color: white; border: none; border-radius: 50%;
+      font-size: 20px; font-weight: bold; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,123,255,0.4);
+      transition: all 0.3s ease;
+    `;
+    infoBtn.addEventListener("click", function () {
+      alert("Model information will be displayed here.");
+    });
+    infoBtn.addEventListener("mouseenter", function () {
+      infoBtn.style.transform = "scale(1.1)";
+      infoBtn.style.background = "#0056b3";
+    });
+    infoBtn.addEventListener("mouseleave", function () {
+      infoBtn.style.transform = "scale(1)";
+      infoBtn.style.background = "#007bff";
+    });
+    modal.appendChild(infoBtn);
+ 
+    // Close on outside click
+    modal.addEventListener("click", function (e) {
+      if (e.target === modal) modal.remove();
+    });
+ 
+    // Close on Escape key
+    const escapeHandler = function(e) {
+      if (e.key === 'Escape') {
+        modal.remove();
+        document.removeEventListener('keydown', escapeHandler);
+      }
+    };
+    document.addEventListener('keydown', escapeHandler);
+ 
+    document.body.appendChild(modal);
+  }
+});
+</script>
 
 <script nonce="{{ csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function () {
@@ -1958,7 +2091,8 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
-<!-- Script for opening Day Planning - Tray Scan modal with read-only view while hitting view.png -->
+    <!-- Script for opening Day Planning - Tray Scan modal with read-only view while hitting view.png -->
+
 <script nonce="{{ csp_nonce }}">
 // Updated script for opening Day Planning - Tray Scan modal
 document.addEventListener("DOMContentLoaded", function () {
@@ -2241,7 +2375,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const platingStkNoCell = row.children[2]; // 3rd column (index starts at 0)
     if (platingStkNoCell) {
       platingStkNoCell.style.position = "sticky";
-      platingStkNoCell.style.left = "190px"; // Match the `left` value of the header
+      platingStkNoCell.style.left = "170px"; // Match the `left` value of the header
       platingStkNoCell.style.zIndex = "10";
       platingStkNoCell.style.background = "#fff"; // Ensure consistent background
     }
@@ -2251,7 +2385,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const platingStkNoHeader = table.querySelector("thead th:nth-child(3)");
   if (platingStkNoHeader) {
     platingStkNoHeader.style.position = "sticky";
-    platingStkNoHeader.style.left = "190px"; // Match the `left` value of the column
+    platingStkNoHeader.style.left = "170px"; // Match the `left` value of the column
     platingStkNoHeader.style.zIndex = "20";
     platingStkNoHeader.style.background = "#fff"; // Ensure consistent background
   }
@@ -2411,125 +2545,7 @@ document.addEventListener("DOMContentLoaded", function() {
   console.log('✅ HTML5 date filtering initialization complete');
 });
 </script>
-<!-- Plating Stk No - Fullscreen image modal with Info & Close (matches Pick Table) -->
-<script nonce="{{ csp_nonce }}">
-document.addEventListener("DOMContentLoaded", function () {
-  let hoverTimeout;
 
-  document.querySelectorAll(".model-hover-trigger").forEach(function (trigger) {
-    const tooltip = trigger.querySelector(".model-image-tooltip");
-
-    // Remove existing hover event listeners by cloning (prevents double triggers)
-    const newTrigger = trigger.cloneNode(true);
-    trigger.parentNode.replaceChild(newTrigger, trigger);
-
-    // Hover: show modal with first image
-    newTrigger.addEventListener("mouseenter", function () {
-      hoverTimeout = setTimeout(() => {
-        const firstImg = newTrigger.querySelector(".model-image-tooltip img");
-        if (firstImg) showDirectImageModal(firstImg.src);
-      }, 200);
-    });
-    newTrigger.addEventListener("mouseleave", function () {
-      clearTimeout(hoverTimeout);
-    });
-
-    // Click: show modal with first image
-    newTrigger.addEventListener("click", function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      const firstImg = newTrigger.querySelector(".model-image-tooltip img");
-      if (firstImg) showDirectImageModal(firstImg.src);
-    });
-  });
-
-  function showDirectImageModal(imageSrc) {
-    // Remove any existing modal
-    const existingModal = document.getElementById('directImageModal');
-    if (existingModal) existingModal.remove();
-
-    // Create modal
-    const modal = document.createElement("div");
-    modal.id = 'directImageModal';
-    modal.style.cssText = `
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.8);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 100000; backdrop-filter: blur(2px);
-    `;
-
-    // Add the image
-    const largeImg = document.createElement("img");
-    largeImg.src = imageSrc;
-    largeImg.style.cssText = `
-      max-width: 90%; max-height: 90%; border-radius: 8px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3); object-fit: contain;
-    `;
-    modal.appendChild(largeImg);
-
-    // Close button
-    const closeBtn = document.createElement("button");
-    closeBtn.innerHTML = "&times;";
-    closeBtn.style.cssText = `
-      position: absolute; top: 20px; right: 20px; width: 50px; height: 50px;
-      background: #dc3545; color: white; border: none; border-radius: 50%;
-      font-size: 24px; font-weight: bold; cursor: pointer; display: flex;
-      align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(220,53,69,0.4);
-      transition: all 0.3s ease;
-    `;
-    closeBtn.addEventListener("click", function () { modal.remove(); });
-    closeBtn.addEventListener("mouseenter", function () {
-      closeBtn.style.transform = "scale(1.1)";
-      closeBtn.style.background = "#c82333";
-    });
-    closeBtn.addEventListener("mouseleave", function () {
-      closeBtn.style.transform = "scale(1)";
-      closeBtn.style.background = "#dc3545";
-    });
-    modal.appendChild(closeBtn);
-
-    // Info button
-    const infoBtn = document.createElement("button");
-    infoBtn.innerHTML = "ℹ";
-    infoBtn.style.cssText = `
-      position: absolute; top: 20px; left: 20px; width: 50px; height: 50px;
-      background: #007bff; color: white; border: none; border-radius: 50%;
-      font-size: 20px; font-weight: bold; cursor: pointer; display: flex;
-      align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,123,255,0.4);
-      transition: all 0.3s ease;
-    `;
-    infoBtn.addEventListener("click", function () {
-      alert("Model information will be displayed here.");
-    });
-    infoBtn.addEventListener("mouseenter", function () {
-      infoBtn.style.transform = "scale(1.1)";
-      infoBtn.style.background = "#0056b3";
-    });
-    infoBtn.addEventListener("mouseleave", function () {
-      infoBtn.style.transform = "scale(1)";
-      infoBtn.style.background = "#007bff";
-    });
-    modal.appendChild(infoBtn);
-
-    // Close on outside click
-    modal.addEventListener("click", function (e) {
-      if (e.target === modal) modal.remove();
-    });
-
-    // Close on Escape key
-    const escapeHandler = function(e) {
-      if (e.key === 'Escape') {
-        modal.remove();
-        document.removeEventListener('keydown', escapeHandler);
-      }
-    };
-    document.addEventListener('keydown', escapeHandler);
-
-    document.body.appendChild(modal);
-  }
-});
-</script>
 
 
   {% endblock %}

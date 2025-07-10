@@ -26820,8 +26820,7 @@ code {
   background: transparent;
 }
 .card .card-body {
-  padding: 1.25rem 1.25rem;
-  
+  padding: 2rem 2rem;
 }
 .card .card-body a {
   text-decoration: none;
@@ -35468,7 +35467,7 @@ div.tagsinput span.tag a {
   flex-direction: row;
   padding-left: 0;
   padding-right: 0;
-  padding-top: 30px;
+  padding-top: 60px;
 }
 .page-body-wrapper.full-page-wrapper {
   width: 100%;
@@ -35507,13 +35506,13 @@ div.tagsinput span.tag a {
 
 /* Sidebar */
 .sidebar {
-  min-height: calc(100vh - 60px);
+  min-height: calc(30vh - 6px);
   background: #fff;
   font-family: "Nunito", sans-serif;
   font-weight: 500;
   padding: 0;
   width: 270px;
-  z-index: 11;
+  z-index: 99999;
   transition: width 0.25s ease, background 0.25s ease;
   -webkit-transition: width 0.25s ease, background 0.25s ease;
   -moz-transition: width 0.25s ease, background 0.25s ease;
@@ -35523,13 +35522,12 @@ div.tagsinput span.tag a {
   scrollbar-width: none;
   -ms-overflow-style: none;
   background-color: #f5f7ff;
-}
-.sidebar {
   overflow: hidden;
   flex-wrap: nowrap;
   flex-direction: column;
-  margin-bottom: 30px !important;
+  margin-bottom: 85px !important;
 }
+
 .sidebar .nav .nav-item {
   -webkit-transition-duration: 0.25s;
   -moz-transition-duration: 0.25s;
@@ -35690,12 +35688,14 @@ div.tagsinput span.tag a {
   content: "";
   width: 5px;
   height: 5px;
+  top: 18px;
   position: absolute;
-  top: 18px;           /* Move dot further down (adjust as needed) */
-  left: 0;
+  margin-top: 0px;
   border-radius: 50%;
   background: #b2b2b2;
 }
+
+
 .sidebar .nav.sub-menu .nav-item .nav-link {
   color: #b9b8ee;
   padding: 0.7rem 1rem;
@@ -35892,7 +35892,7 @@ div.tagsinput span.tag a {
   border: 0;
   color: inherit;
   font-size: 1.25rem;
-  padding: 0;
+  padding: 55px;
   border-radius: 0;
 }
 .navbar .navbar-menu-wrapper .navbar-toggler:focus {
@@ -47942,6 +47942,6 @@ div.tagsinput span.tag a {
 /*# sourceMappingURL=../maps/vertical-layout-light/style.css.map */
 @media only screen and (max-width: 900px) {
   .sidebar .nav.sub-menu .nav-item::before {
-    top: 28px !important; /* Move dot further down for tablet/mobile */
+    top:35px !important; /* Move dot further down for tablet/mobile */
   }
 }
