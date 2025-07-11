@@ -5,14 +5,17 @@
 
 
 <style>
-    /* ...existing code... */
+
+    /*Global Grid Lines */
   #order-listing th,
   #order-listing td {
     border-right: 1.5px solid #bdbdbd !important;   /* vertical lines: grey */
     border-bottom: 1.5px solid #111 !important;     /* horizontal lines: black */
   }
-  /* ...existing code... */
-
+  @keyframes hourglass-spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
     /* Show sidebar icon tooltips ONLY when minimized and always at the very front */
     body.sidebar-icon-only .sidebar .nav .nav-item .menu-icon[data-tooltip]:hover::after,
     body.sidebar-icon-only .sidebar .nav .nav-item i[data-tooltip]:hover::after,
@@ -1014,6 +1017,14 @@ tr.dp-row-action-highlight > td:nth-child(2) {
 </head>
 
 <body>
+<!--Global Buffering -->
+<div id="global-loading-spinner" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(255,255,255,0.55); z-index:200000; align-items:center; justify-content:center;">
+  <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh;">
+    <img src="{% static 'assets/gif/buffer.gif' %}" alt="Loading..." style="width: 70px; height: 70px;" />
+    <div style="margin-top:12px; color:#028084; font-weight:600; font-size:1.1rem;">Loading...</div>
+  </div>
+</div>
+
   <div class="container-scroller">
 
     <!-- partial:partials/_navbar.html -->
@@ -1153,7 +1164,15 @@ tr.dp-row-action-highlight > td:nth-child(2) {
                
               </div>
             </li>
-            <li class="nav-item nav-profile dropdown">
+           
+            <li class="nav-item d-flex align-items-center ms-2">
+                          <a class="nav-link p-0" href="#" tabindex="-1" aria-disabled="true" style="background: none; border: none;">
+                            <i class="ti-file" style="font-size: 1.5rem; color: #028084;"></i> <!-- Document icon -->
+                          </a>
+                        </li>
+
+                         <li class="nav-item nav-profile dropdown">
+                           <!-- Find this block in your navbar profile dropdown: -->
               <a
                 class="nav-link count-indicator dropdown-toggle ms-2"
                 href="#"
@@ -1162,7 +1181,12 @@ tr.dp-row-action-highlight > td:nth-child(2) {
                 aria-expanded="false"
                 style="border-radius: 50%; width: 38px; height: 38px; padding: 7px; display: flex; align-items: center; justify-content: center;"
               >
-                <i class="ti-user" style="font-size: 1.3rem; color: #028084; display: flex; align-items: center; justify-content: center; line-height: 1;"></i>
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                  <i class="ti-user" style="font-size: 1.3rem; color: #028084; display: flex; align-items: center; justify-content: center; line-height: 1;"></i>
+                  <span style="font-size: 0.85rem; color: #101010; font-weight: 600; margin-top: 2px; line-height: 1;">
+                    {{ request.user.username }}
+                  </span>
+                </div>
               </a>
               <div
                 class="dropdown-menu dropdown-menu-right navbar-dropdown"
@@ -1186,11 +1210,6 @@ tr.dp-row-action-highlight > td:nth-child(2) {
               </div>
             
             </li>
-            <li class="nav-item d-flex align-items-center ms-2">
-                          <a class="nav-link p-0" href="#" tabindex="-1" aria-disabled="true" style="background: none; border: none;">
-                            <i class="ti-file" style="font-size: 1.5rem; color: #028084;"></i> <!-- Document icon -->
-                          </a>
-                        </li>
                     <!-- Place this after the user/profile icon dropdown in your navbar-nav navbar-nav-right list -->
           <li class="nav-item d-flex align-items-center ms-2">
             <a class="navbar-brand brand-logo me-2" href="{% url 'index' %}">
@@ -2349,6 +2368,78 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     }, 500); // 500ms after user stops typing
   });
+</script>
+
+
+<!--  Show the global loading spinner -->
+<script nonce="{{ csp_nonce }}">
+// Show the global loading spinner
+function showGlobalSpinner() {
+  const spinner = document.getElementById('global-loading-spinner');
+  if (spinner) spinner.style.display = 'flex';
+}
+// Hide the global loading spinner
+function hideGlobalSpinner() {
+  const spinner = document.getElementById('global-loading-spinner');
+  if (spinner) spinner.style.display = 'none';
+}
+
+// Optional: Show spinner automatically for all fetch/ajax calls
+(function() {
+  // Patch fetch to show spinner automatically
+  if (window.fetch) {
+    const origFetch = window.fetch;
+    window.fetch = function() {
+      showGlobalSpinner();
+      return origFetch.apply(this, arguments)
+        .finally(hideGlobalSpinner);
+    };
+  }
+  // Patch jQuery ajax if used
+  if (window.jQuery) {
+    $(document).ajaxStart(showGlobalSpinner).ajaxStop(hideGlobalSpinner);
+  }
+})();
+</script>
+
+<!-- // Show spinner on any internal link click or form submit (full page navigation) -->
+<script nonce="{{ csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function() {
+  // For all <a> tags that are not external and not with target="_blank"
+  document.body.addEventListener("click", function(e) {
+    let el = e.target;
+    // Traverse up to <a>
+    while (el && el.tagName !== "A" && el !== document.body) el = el.parentElement;
+    if (
+      el && el.tagName === "A" &&
+      el.href &&
+      el.origin === window.location.origin &&
+      !el.hasAttribute("target") &&
+      !el.hasAttribute("download") &&
+      !el.getAttribute("href").startsWith("#") &&
+      !el.getAttribute("href").startsWith("javascript:")
+    ) {
+      showGlobalSpinner();
+    }
+  }, true);
+
+  // For all <form> submits
+  document.body.addEventListener("submit", function(e) {
+    showGlobalSpinner();
+  }, true);
+
+  // Optional: Hide spinner if navigation is cancelled (e.g., back button)
+  window.addEventListener("pageshow", function() {
+    hideGlobalSpinner();
+  });
+});
+</script>
+
+<!-- // Show spinner on browser refresh or navigation away -->
+<script nonce="{{ csp_nonce }}">
+window.addEventListener("beforeunload", function (e) {
+  showGlobalSpinner();
+});
 </script>
 
 </body>

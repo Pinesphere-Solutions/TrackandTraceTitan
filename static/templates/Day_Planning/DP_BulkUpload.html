@@ -3,7 +3,16 @@
 {% block content %}
 
 <style nonce="{{ csp_nonce }}">
-
+ .main-panel {
+    padding: 20px !important;
+    margin: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    min-height: 0 !important;
+    box-sizing: border-box !important;
+  
+  }
       /* Show record count next to Data Table title */
       .table-header .data-count {
     display: inline-block;
@@ -12,7 +21,7 @@
     color: #126a83;
     background: #e6f7fa;
     border-radius: 12px;
-    padding: 2px 14px;
+    padding: 8px 14px;
     font-weight: 600;
     vertical-align: middle;
     box-shadow: none;
@@ -37,6 +46,7 @@
     .remove-file,
     .data-count {
       font-size: 13px !important;
+      
     }
   }
     .table-header h2 {
@@ -62,7 +72,7 @@
     transform: translateX(-50%);
     background: var(--clr-primary);
     color: white;
-    padding: 6px 12px;
+    padding: 10px;
     border-radius: 20px;
     font-size: 0.85rem;
     font-weight: 600;
@@ -141,7 +151,7 @@
     /* Enhanced button styling for sticky position */
     .table-actions .btn {
       min-width: 120px !important;
-      padding: 0.875rem 2rem !important;
+      padding: 10px !important;
       font-weight: 700 !important;
       text-transform: uppercase !important;
       letter-spacing: 0.5px !important;
@@ -243,6 +253,7 @@
           animation: slideIn 0.8s ease-out;
           margin-left: auto;    /* Center horizontally */
           margin-right: auto;   /* Center horizontally */
+          margin-top: 15px !important;
         }
     @keyframes slideIn {
       from { transform: translateY(20px); opacity: 0; }
@@ -286,11 +297,14 @@
       opacity: 0.35;
     }
     /* Body styling */
-    .card-body {
-      padding: 2rem;
+      .card-body {
+      padding: 1rem;
       display: flex;
       flex-direction: column;
-      gap: 2rem;
+      gap: 1rem;
+      background: #ffffff !important;
+      box-shadow: 0 6px 18px -6px rgba(18, 106, 131, 0.13); /* Add bottom shadow */
+      margin: 18px 18px 18px 18px; /* Add outer space (adjust as needed) */
     }
     .action-area {
       display: flex;
@@ -327,37 +341,39 @@
       gap: 2rem;
       padding-bottom: 20px;
     }
-    .file-upload-area {
-      flex: 1 1 460px;
-      border: 2px dashed var(--clr-muted);
-      border-radius: 8px;
-      padding: 10px;
-      text-align: center;
-      cursor: pointer;
-      transition: background 0.3s, border-color 0.3s;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 70px;
-    }
+        
+       .file-upload-area {
+    flex: -1 -1 200px;
+    border: 1px dashed;
+    border-color: #9e9e9e;
+    border-radius: 3px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.3s, border-color 0.3s;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+}
     .file-upload-area:hover {
       background: rgba(18,106,131,0.05);
     }
     .file-upload-area p {
       margin: 0;
       font-size: 1rem;
-      color: var(--clr-muted);
+      color: #171717;
     }
     .upload-link {
-      color: var(--clr-primary);
+      color: #2547f2 !important; /* Example: orange, change to any color you want */
       font-weight: 600;
       text-decoration: underline;
     }
-    .lottie-upload {
+   /*  .lottie-upload {
       width: 80px;
       height: 80px;
-    }
+    } */
     .file-upload-area.dragover {
       background: rgba(18,106,131,0.1);
       border-color: var(--clr-primary);
@@ -368,16 +384,25 @@
       display: grid;
       gap: 1rem;
     }
-    .file-card {
+       .file-card {
       background: var(--clr-surface);
       border: 1px solid var(--clr-muted);
       border-radius: 8px;
-      padding: 1rem;
+      padding: 7px !important;
       display: flex;
       justify-content: space-between;
       align-items: center;
       transition: box-shadow 0.3s;
       animation: fadeIn 0.5s ease-in;
+      max-width: 350px !important; /* Reduced width to prevent overlap */
+      min-width: 0;
+      word-break: break-all;
+    }
+    .file-name {
+      max-width: 170px; /* Reduce max width for file name text */
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .file-card:hover {
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
@@ -400,14 +425,7 @@
     .file-details {
       overflow: hidden;
     }
-    .file-name {
-      font-weight: 500;
-      font-size: 0.9rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 150px;
-    }
+   
     .file-size {
       font-size: 0.8rem;
       color: var(--clr-muted);
@@ -434,12 +452,13 @@
     .data-table-card {
       margin: 0rem 5px 0.5rem 3px;
       animation: slideIn 0.8s ease-out;
+      margin-top: 15px !important; /* Gap above the Data Table section */
     }
     .table-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1rem;
+      margin-bottom: 0px !important;
     }
     .table-header h2 {
       font-size: 1.4rem;
@@ -452,16 +471,15 @@
     .table-header h2 .icon {
       margin-right: 0.5rem;
     }
-    .table-container {
-      overflow-x: auto; /* Changed to auto for horizontal scrolling */
-      overflow-y: auto;
-      max-height: 320px;
-      margin-bottom: 35px !important; /* Additional margin to ensure scroll visibility */
-      padding-bottom: 20px !important; /* Space for sticky buttons */
-      position: relative !important;
-      z-index: 1 !important; /* Ensure table content is below buttons but scroll is visible */
-     
-    }
+   .table-container {
+  overflow-x: auto;
+  max-height: 320px;
+  margin-bottom: 35px !important;
+  padding-bottom: 20px !important;
+  position: relative !important;
+  z-index: 1 !important;
+  max-width: 100%; /* Add this */
+}
   
   /* Ensure table scroll track is visible above buttons */
   .table-container::-webkit-scrollbar {
@@ -498,8 +516,8 @@
       border-radius: 8px;
       overflow: hidden;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      margin-bottom: 5px !important;
-  
+      margin-bottom: 30px !important;
+      
     }
     .data-table th,
     .data-table td {
@@ -633,98 +651,82 @@
     }
   }
 
- 
+ /* Top Buttons style */
+ .content-wrapper, .card, .card-body {
+    min-height: 0 !important;
+    max-height: none !important;
+    height: auto !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    
+    box-sizing: border-box !important;
+    
+}
   </style>
 
-<div class="bulk-card">
-  <div class="card-header" style="
-  background: url('{% static 'assets/images/banner.jpg' %}') no-repeat center center;
+<div>
+  <h4>Day Planning - Data Upload</h4>
+ <!--  <div class="card-header" style="
   background-size: cover;
   color: #fff;
   position: relative;
   overflow: hidden;
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
-  padding: 1.5rem 1rem;
+  
 ">
-  <!-- Optional overlay for darkening the banner -->
-  <div style="
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgb(2 62 77 / 80%);
-      z-index: 1;
-  "></div>
+
+
   
-  <div class="header-content" style="position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; padding-right: 15px;">
-    <h3 class="heading-title">
-      Day Planning / Data Upload
-    </h3>
-  </div>
-  
-  <!-- Add Model Button over the banner image -->
-  <button id="add-model-btn" class="btn btn-outline" style="
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    z-index: 2;
-    padding: 0.75rem 1.5rem;
-    font-size: 12px;
-    font-weight: 600;
-    border: 2px solid var(--clr-primary);
-    background: #fff;
-    color: var(--clr-primary);
-    border-radius: 6px;
-    cursor: pointer;
-    transition: transform 0.3s, box-shadow 0.3s;
-  ">
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="var(--clr-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-          <line x1="3" y1="9" x2="21" y2="9"/>
-          <line x1="3" y1="15" x2="21" y2="15"/>
-          <line x1="9" y1="3" x2="9" y2="21"/>
-          <line x1="15" y1="3" x2="15" y2="21"/>
-        </svg>
-    Single Upload
-  </button>
-  
-  <!-- Optional bottom bar -->
-  <div class="header-bottom" style="
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 8px;
-    background: linear-gradient(to right, #023E4D, #126a83);
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
-    z-index: 2;
-  "></div>
-</div>
+</div> -->
   <!-- Card Body content follows -->
   <div class="card-body">
+        <!-- ...existing code... -->
     <div class="upload-file-area">
-      <!-- Drag & Drop File Upload -->
-      <div class="file-upload-area" id="file-upload-area">
-        <p>Drag and drop Excel files here or <span class="upload-link">Click to Select</span></p>
+      <div class="upload-controls-wrapper" style="width:100%;display:flex;flex-wrap:wrap;gap:1.5rem;align-items:flex-start;justify-content:space-between;position:relative;">
+        <div class="file-upload-area" id="file-upload-area">
+          <p>Drag and drop Excel files here or <span class="upload-link">Click to Select</span></p>
           <div class="lottie-upload" style="flex-shrink:0;">
-            <!-- Replace the Lottie animation with a static logo image -->
-            <img src="{% static 'assets/gif/upload.gif' %}" alt="Upload Logo" style="width:60px; height:auto; object-fit:contain; margin-top: 10px;">
+            <!-- ...existing code for lottie or image... -->
+            <!-- <img src="{% static 'assets/gif/upload.gif' %}" alt="Upload Logo" style="width:60px; height:auto; object-fit:contain; margin-top: 10px;"> -->
           </div>
-        <input type="file" id="file-upload" accept=".xlsx,.xls" hidden>
+          <input type="file" id="file-upload" accept=".xlsx,.xls" hidden>
+        </div>
+        <div id="file-list" class="file-list"></div>
+        <button id="add-model-btn" class="btn btn-outline" style="
+          position: absolute;
+          bottom: 5px;
+          right: 20px;
+          z-index: 2;
+          padding: 5px;
+          font-size: 12px;
+          font-weight: 600;
+          border: 1.5px solid var(--clr-primary);
+          background: #fff;
+          color: var(--clr-primary);
+          border-radius: 30px;
+          cursor: pointer;
+          transition: transform 0.3s, box-shadow 0.3s;
+        ">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="var(--clr-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <line x1="3" y1="9" x2="21" y2="9"/>
+            <line x1="3" y1="15" x2="21" y2="15"/>
+            <line x1="9" y1="3" x2="9" y2="21"/>
+            <line x1="15" y1="3" x2="15" y2="21"/>
+          </svg>
+          Single Upload
+        </button>
       </div>
-      <!-- File List -->
-      <div id="file-list" class="file-list"></div>
     </div>
+    <!-- ...existing code... -->
   </div>
 </div>
 
-<div id="data-table-section" class="card data-table-card" style="display:none;">
+<div id="data-table-section" class="data-table-card" style="display:none;">
   <div class="card-body">
     <div class="table-header">
-      <h2>
+      <h4>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="var(--clr-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
           <rect x="3" y="3" width="16" height="16" rx="2" ry="2"/>
           <line x1="3" y1="9" x2="21" y2="9"/>
@@ -733,7 +735,7 @@
           <line x1="15" y1="3" x2="15" y2="21"/>
         </svg>
         Data Table
-      </h2>
+      </h4>
     </div>
     <div class="table-container" id="data-table-container"></div>
   </div>
