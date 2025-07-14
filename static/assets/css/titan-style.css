@@ -220,8 +220,7 @@ body.pick-table-only .table-responsive {
   white-space: normal !important;
   line-height: 1.2 !important;
   word-break: break-word !important;
-  min-width: 90px;
-  max-width: 120px;
+
   text-align: center;
   vertical-align: middle;
   padding-top: 5px !important;
@@ -1048,143 +1047,106 @@ td:first-child * {
 }
 
 /* Default: Desktop/Laptop (wider columns for larger font) - server */
-#order-listing th:nth-child(1) {
-  min-width: 100px;
+/* #order-listing th:nth-child(1) {
+  min-width: 90px;
+  max-width: 90px;
+} */ /* S.No */
+/* #order-listing th:nth-child(2) {
+  min-width: 90px;
   max-width: 100px;
-} /* S.No */
-#order-listing th:nth-child(2) {
-  min-width: 100px;
-  max-width: 110px;
-} /* Last Updated */
-#order-listing th:nth-child(3) {
+} */ /* Last Updated */
+/* #order-listing th:nth-child(3) {
   min-width: 90px;
   max-width: 120px;
-} /* Plating */
+} */ /* Plating */
 #order-listing th:nth-child(4) {
-  min-width: 130px;
-  max-width: 160px;
-} /* Stk No */
-#order-listing th:nth-child(5) {
   min-width: 110px;
-  max-width: 130px;
-} /* Polishing */
+  max-width: 120px;
+} /* Polishing Stk No */
+#order-listing th:nth-child(5) {
+  min-width: 100px;
+  max-width: 110px;
+} /* Plating Color */
 #order-listing th:nth-child(6) {
   min-width: 120px;
   max-width: 120px;
-} /* Stk No */
+} /* Category */
 #order-listing th:nth-child(7) {
-  min-width: 110px;
-  max-width: 130px;
-} /* Plating Color */
+  min-width: 100px;
+  max-width: 110px;
+} /* Polish Finish */
 #order-listing th:nth-child(8) {
   min-width: 100px;
   max-width: 100px;
-} /* Category */
-#order-listing th:nth-child(9) {
-  min-width: 130px;
-  max-width: 160px;
-} /* Polish Finish */
-#order-listing th:nth-child(10) {
-  min-width: 70px;
-  max-width: 80px;
 } /* Version */
-#order-listing th:nth-child(11) {
-  min-width: 120px;
-  max-width: 130px;
-} /* Tray Cate-Capacity */
-#order-listing th:nth-child(12) {
-  min-width: 100px;
+#order-listing th:nth-child(9) {
+  min-width: 110px;
   max-width: 120px;
+} /* Tray Cate-Capacity */
+#order-listing th:nth-child(10) {
+  min-width: 90px;
+  max-width: 100px;
 } /* Source */
-#order-listing th:nth-child(13) {
-  min-width: 120px;
-  max-width: 150px;
+#order-listing th:nth-child(11) {
+  min-width: 80px;
+  max-width: 90px;
 } /* No of Trays */
+#order-listing th:nth-child(12) {
+  min-width: 80px;
+  max-width: 90px;
+} /* Input Qty */
+#order-listing th:nth-child(13) {
+  min-width: 100px;
+  max-width: 110px;
+} /* Process Status */
 #order-listing th:nth-child(14) {
   min-width: 80px;
   max-width: 100px;
-} /* Input Qty */
+} /*  Action */
 #order-listing th:nth-child(15) {
-  min-width: 110px;
-  max-width: 130px;
-} /* Process Status */
-#order-listing th:nth-child(16) {
-  min-width: 120px;
-  max-width: 140px;
-} /* Action */
-#order-listing th:nth-child(17) {
-  min-width: 110px;
-  max-width: 130px;
-} /* Lot Status / Current Stage / Remarks */
-
-/* Tablet: Override with narrower columns for 900px–1300px width *(working both screens) / 
-@media (min-width: 900px) and (max-width: 1300px) {
-    #order-listing th:nth-child(1) { min-width: 100px !important; max-width: 100px !important; }    /* S.No */
-#order-listing th:nth-child(2) {
-  min-width: 120px !important;
-  max-width: 150px !important;
-} /* Last Updated */
-#order-listing th:nth-child(3) {
-  min-width: 110px !important;
-  max-width: 130px !important;
-} /* Plating Stk No */
-#order-listing th:nth-child(4) {
-  min-width: 110px !important;
-  max-width: 120px !important;
-} /* Polishing Stk No */
-#order-listing th:nth-child(5) {
-  min-width: 110px !important;
-  max-width: 130px !important;
-} /* Plating Color */
-#order-listing th:nth-child(6) {
-  min-width: 120px !important;
-  max-width: 130px !important;
-} /* Category */
-#order-listing th:nth-child(7) {
-  min-width: 105px !important;
-  max-width: 120px !important;
-} /* Polish Finish */
-#order-listing th:nth-child(8) {
-  min-width: 90px !important;
-  max-width: 100px !important;
-} /* Version */
-#order-listing th:nth-child(9) {
-  min-width: 115px !important;
-  max-width: 140px !important;
-} /* Tray Cate-Capacity */
-#order-listing th:nth-child(10) {
-  min-width: 90px !important;
-  max-width: 100px !important;
-} /* Source */
-#order-listing th:nth-child(11) {
-  min-width: 75px !important;
-  max-width: 100px !important;
-} /* No of Trays */
-#order-listing th:nth-child(12) {
-  min-width: 75px !important;
-  max-width: 100px !important;
-} /* Input Qty */
-#order-listing th:nth-child(13) {
-  min-width: 100px !important;
-  max-width: 120px !important;
-} /* Process Status */
-#order-listing th:nth-child(14) {
-  min-width: 120px !important;
-  max-width: 160px !important;
-} /* Action */
-#order-listing th:nth-child(15) {
-  min-width: 90px !important;
-  max-width: 110px !important;
+  min-width: 90px;
+  max-width: 100px;
 } /* Lot Status */
 #order-listing th:nth-child(16) {
-  min-width: 150px !important;
-  max-width: 150px !important;
+  min-width: 130px;
+  max-width: 140px;
 } /* Current Stage */
 #order-listing th:nth-child(17) {
-  min-width: 120px !important;
-  max-width: 140px !important;
+  min-width: 100px;
+  max-width: 90px;
 } /* Remarks */
 
+@media (min-width: 600px) and (max-width: 900px) {
+  #order-listing {
+    table-layout: auto !important; /* Let columns auto-fit content */
+    width: 100% !important;
+    min-width: unset !important;
+    max-width: 100vw !important;
+  }
+  /* Adjust width for all headings (th) and cells (td) */
+  #order-listing th,
+  #order-listing td {
+    min-width: 160px !important;
+    max-width: 260px !important;
+    width: 180px !important;
+  }
+  #order-listing th {
+    position: relative;
+    padding-right: 48px !important; /* More space for filter icon */
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: ellipsis;
+  }
+  #order-listing th .fa-filter {
+    position: absolute;
+    right: 18px !important;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    background: transparent;
+    pointer-events: auto;
+  }
+}
 /* Right-align filter icons */
 #order-listing th .fa-filter {
   position: absolute;
@@ -1481,74 +1443,37 @@ thead th {
 #order-listing th:nth-child(1),
 #order-listing td:nth-child(1) {
   position: sticky;
-  left: 0;
+  left: 0 !important;
   z-index: 12; /* Above header */
   background: #f7fafd;
+  min-width: 75px;
+  max-width: 75px;
 }
 
 /* Freeze 2nd column - Last Updated*/
 #order-listing th:nth-child(2),
 #order-listing td:nth-child(2) {
   position: sticky;
-  left: 100px; /* Match min-width of 1st col */
+  left: 75px !important; /* Match min-width of 1st col */
   z-index: 12;
   background: #f7fafd;
-  min-width: 100px; /* Increased width */
-  max-width: 110px; /* Increased width */
+  min-width: 100px !important; /* Increased width */
+  max-width: 110px !important; /* Increased width */
 }
 
 /* Freeze 3rd column */
 #order-listing th:nth-child(3),
 #order-listing td:nth-child(3) {
   position: sticky;
-  left: 220px; /* 100px (1st) + 90px (2nd) */
+  left: 175px; /* 100px (1st) + 90px (2nd) */
   z-index: 12;
   background: #f7fafd;
+  min-width: 100px !important; /* Increased width */
+  max-width: 110px !important; /* Increased width */
 }
 
-/* Responsive: adjust sticky left for tablets/mobiles */
-@media (max-width: 1300px) {
-  #order-listing th:nth-child(1),
-  #order-listing td:nth-child(1) {
-    left: 0;
-  }
-  #order-listing th:nth-child(2),
-  #order-listing td:nth-child(2) {
-    left: 100px;
-  }
-  #order-listing th:nth-child(3),
-  #order-listing td:nth-child(3) {
-    left: 220px;
-  }
-}
-@media (max-width: 900px) {
-  #order-listing th:nth-child(1),
-  #order-listing td:nth-child(1) {
-    left: 0;
-  }
-  #order-listing th:nth-child(2),
-  #order-listing td:nth-child(2) {
-    left: 80px;
-  }
-  #order-listing th:nth-child(3),
-  #order-listing td:nth-child(3) {
-    left: 170px;
-  }
-}
-@media (max-width: 600px) {
-  #order-listing th:nth-child(1),
-  #order-listing td:nth-child(1) {
-    left: 0;
-  }
-  #order-listing th:nth-child(2),
-  #order-listing td:nth-child(2) {
-    left: 60px;
-  }
-  #order-listing th:nth-child(3),
-  #order-listing td:nth-child(3) {
-    left: 130px;
-  }
-}
+/* ...existing code... */
+
 
 /* Prevent sticky columns from overlapping sticky header */
 #order-listing th:nth-child(-n + 3) {
@@ -1561,8 +1486,7 @@ thead th {
 /* Ensure sticky columns and header work together */
 #order-listing th,
 #order-listing td {
-  min-width: 80px;
-  max-width: 180px;
+ 
   box-sizing: border-box;
   /* Prevent content shake */
   /* overflow: hidden; */
