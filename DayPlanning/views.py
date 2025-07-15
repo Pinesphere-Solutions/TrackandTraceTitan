@@ -44,6 +44,7 @@ from rest_framework.response import Response
 from rest_framework.renderers import TemplateHTMLRenderer
 import math
 import json
+from rest_framework.permissions import IsAuthenticated
 
 
 class DPBulkUploadView(APIView):
@@ -62,6 +63,7 @@ class DPBulkUploadView(APIView):
     renderer_classes = [TemplateHTMLRenderer]
     template_name = 'Day_Planning/DP_BulkUpload.html'
     parser_classes = [MultiPartParser, JSONParser]
+    permission_classes = [IsAuthenticated] 
 
     def validate_excel_columns(self, sheet):
         """
@@ -1234,11 +1236,12 @@ class GetLocationsAPIView(APIView):
                 'success': False,
                 'error': f'An error occurred: {str(e)}'
             }, status=500) 
-    
-    
+
+
 class DayPlanningPickTableAPIView(APIView):
     renderer_classes = [TemplateHTMLRenderer]
     template_name = 'Day_Planning/DP_PickTable.html'
+    permission_classes = [IsAuthenticated] 
 
     def get(self, request, *args, **kwargs):
         user = request.user
@@ -1253,33 +1256,34 @@ class DayPlanningPickTableAPIView(APIView):
         next_process_module_subquery = TotalStockModel.objects.filter(
             batch_id=OuterRef('pk')
         ).values('next_process_module')[:1]
-        
-        last_process_date_time_subquery = TotalStockModel.objects.filter(
-            batch_id=OuterRef('pk')
-        ).values('last_process_date_time')[:1]
+
         
         accepted_Ip_stock_subquery = TotalStockModel.objects.filter(
             batch_id=OuterRef('pk'),
-         ).values('accepted_Ip_stock')[:1]   
+        ).values('accepted_Ip_stock')[:1]   
+
+        # ✅ NEW: Add subquery to check if tray scanning was started but not completed
+        tray_scan_status_subquery = TotalStockModel.objects.filter(
+            batch_id=OuterRef('pk')
+        ).values('tray_scan_status')[:1]
 
         # Build queryset
         queryset = ModelMasterCreation.objects.filter(
             total_batch_quantity__gt=0,
             Moved_to_D_Picker=False  
-
         ).annotate(
             last_process_module=Subquery(last_process_module_subquery),
             next_process_module=Subquery(next_process_module_subquery),
-            last_process_date_time=Subquery(last_process_date_time_subquery),
             accepted_Ip_stock=Subquery(accepted_Ip_stock_subquery),
-        ).order_by('-date_time')  # <-- Add this line
+            tray_scan_status=Subquery(tray_scan_status_subquery),  # ✅ NEW
+        ).order_by('-date_time')
 
         # Pagination
         page_number = request.GET.get('page', 1)
         paginator = Paginator(queryset, 10)  # 10 items per page
         page_obj = paginator.get_page(page_number)
 
-        # Convert page_obj to list of dicts (using .values())
+        # Convert page_obj to list of dicts
         master_data = list(page_obj.object_list.values(
             'batch_id',
             'date_time',
@@ -1300,7 +1304,6 @@ class DayPlanningPickTableAPIView(APIView):
             'Draft_Saved',
             'dp_pick_remarks',
             'top_tray_qty_verified',
-            'last_process_date_time',
             'plating_stk_no',
             'polishing_stk_no',
             'category',
@@ -1309,14 +1312,23 @@ class DayPlanningPickTableAPIView(APIView):
             'holding_reason',
             'release_reason',
             'accepted_Ip_stock',
+            'tray_scan_status',  # ✅ NEW
         ))
 
-        # Calculate no_of_trays dynamically
+        # Calculate no_of_trays dynamically and determine needs_top_tray_scan
         for data in master_data:
             total_batch_quantity = data.get('total_batch_quantity', 0)
             tray_capacity = data.get('tray_capacity', 0)
             data['vendor_location'] = f"{data.get('vendor_internal', '')}_{data.get('location__location_name', '')}"
 
+            # ✅ NEW: Determine if this lot needs top tray scan
+            # Condition: tray_scan_status=True but Moved_to_D_Picker=False
+            tray_scan_status = data.get('tray_scan_status', False)
+            moved_to_d_picker = data.get('Moved_to_D_Picker', False)
+            
+            # This indicates partial completion - user needs to set top tray
+            data['needs_top_tray_scan'] = bool(tray_scan_status and not moved_to_d_picker)
+            
             if tray_capacity > 0:
                 no_of_trays = math.ceil(total_batch_quantity / tray_capacity)
                 data['no_of_trays'] = no_of_trays
@@ -1336,6 +1348,7 @@ class DayPlanningPickTableAPIView(APIView):
             else:
                 data['no_of_trays'] = 0
                 data['tray_qty_list'] = []
+                
             # Add model images
             mmc = ModelMasterCreation.objects.filter(batch_id=data['batch_id']).first()
             images = []
@@ -1354,9 +1367,11 @@ class DayPlanningPickTableAPIView(APIView):
             'page_obj': page_obj,
             'paginator': paginator,
             'user': user,
-            'is_admin': is_admin,  # Add this line to pass admin status to template
+            'is_admin': is_admin,
         }
         return Response(context, template_name=self.template_name)
+
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class SaveHoldUnholdReasonAPIView(APIView):
@@ -1565,6 +1580,8 @@ class TrayIdScanAPIView(APIView):
             polish_finish_obj = PolishFinishType.objects.filter(polish_finish=batch_instance.polish_finish).first() 
             plating_color = batch_instance.plating_color
 
+            # In the TrayIdScanAPIView post method, find this section and update it:
+
             with transaction.atomic():
                 # Calculate total quantity excluding delinked trays (qty = 0)
                 active_total_quantity = sum(int(tray.get('tray_quantity', 0)) for tray in trays if int(tray.get('tray_quantity', 0)) > 0)
@@ -1578,8 +1595,7 @@ class TrayIdScanAPIView(APIView):
                     polish_finish=polish_finish_obj,
                     plating_color=Plating_Color.objects.filter(plating_color=plating_color).first() if plating_color else None,
                     lot_id=lot_id,
-                    tray_scan_status=True,
-                    last_process_date_time=now(),
+                    tray_scan_status=True,  # ✅ Mark as True to indicate tray scanning started
                     last_process_module="DayPlanning",
                     next_process_module="IP Screening",
                 )
@@ -1589,7 +1605,7 @@ class TrayIdScanAPIView(APIView):
                     tray_id = tray.get('tray_id')
                     tray_quantity = tray.get('tray_quantity')
                     
-                    if not tray_id or not tray_quantity:
+                    if not tray_id or tray_quantity is None:
                         continue
                     
                     tray_quantity = int(tray_quantity)
@@ -1629,8 +1645,23 @@ class TrayIdScanAPIView(APIView):
                         existing_tray.top_tray = is_top_tray
                         existing_tray.date = now()
                         existing_tray.scanned = True  # Set scanned status to True
+                        existing_tray.new_tray = False  # <-- Set new_tray to False as requested
+
                         # Don't update tray_type and tray_capacity - preserve admin settings
-                        existing_tray.save()
+                        if is_delinked:
+                            existing_tray.delink_tray = True
+                            existing_tray.lot_id = None
+                            existing_tray.batch_id = None
+                            existing_tray.scanned = False
+                            existing_tray.IP_tray_verified = False
+                            existing_tray.top_tray = False
+                            existing_tray.save(update_fields=[
+                                'delink_tray', 'lot_id', 'batch_id', 'scanned', 'IP_tray_verified', 'top_tray'
+                            ])
+                        else:
+                            # Don't update tray_type and tray_capacity - preserve admin settings
+                            existing_tray.delink_tray = False
+                            existing_tray.save()
                         print(f"✅ Updated existing tray: {tray_id} (Top Tray: {is_top_tray}, Type: {existing_tray.tray_type}, Scanned: True)")
                     else:
                         # ✅ CHANGED: This should never happen now since we validate existence above
@@ -1639,9 +1670,18 @@ class TrayIdScanAPIView(APIView):
                             'success': False, 
                             'error': f'Tray ID {tray_id} not found in system'
                         }, status=400)
+                
 
-                # Update Moved_to_D_Picker
-                ModelMasterCreation.objects.filter(batch_id=batch_id).update(Moved_to_D_Picker=True)
+                # ✅ ENHANCED: Handle Moved_to_D_Picker based on top tray quantity
+                if top_tray_qty_zero:
+                    # ✅ NEW: If top tray quantity is zero, keep as draft mode (Moved_to_D_Picker=False)
+                    # This allows user to complete the "Set Top Tray" step later
+                    print(f"🔍 Top tray quantity is zero - keeping Moved_to_D_Picker=False (draft mode)")
+                    # Do not update Moved_to_D_Picker, it remains False
+                else:
+                    # ✅ NORMAL: Complete tray scanning process
+                    ModelMasterCreation.objects.filter(batch_id=batch_id).update(Moved_to_D_Picker=True)
+                    print(f"✅ Normal tray scanning completed - set Moved_to_D_Picker=True")
 
             # Return response based on top tray quantity
             if top_tray_qty_zero:
@@ -1654,7 +1694,6 @@ class TrayIdScanAPIView(APIView):
                 }, status=201)
             else:
                 return JsonResponse({'success': True, 'message': 'Tray scan and stock saved!'}, status=201)
-
         except IntegrityError as e:
             error_message = str(e)
             if 'duplicate key value violates unique constraint' in error_message and 'tray_id' in error_message:
@@ -1783,10 +1822,13 @@ class ValidateTopTrayAPIView(APIView):
                 'error': f'Validation error: {str(e)}'
             }, status=500)
 
+# Update your TopTrayScanAPIView in views.py
+
 @method_decorator(csrf_exempt, name='dispatch')
 class TopTrayScanAPIView(APIView):
     """
     API endpoint to handle top tray scanning when original top tray quantity is 0
+    Enhanced to complete the tray scanning process by setting Moved_to_D_Picker=True
     """
     def post(self, request):
         try:
@@ -1846,9 +1888,16 @@ class TopTrayScanAPIView(APIView):
                 
                 print(f"✅ Set {scanned_tray_id} as new top tray for batch {batch_id}")
 
+                # ✅ NEW: Complete the tray scanning process by setting Moved_to_D_Picker=True
+                # This indicates that the tray scanning is now fully completed
+                batch_instance.Moved_to_D_Picker = True
+                batch_instance.save(update_fields=['Moved_to_D_Picker'])
+                
+                print(f"✅ Set Moved_to_D_Picker=True for batch {batch_id} - tray scanning completed")
+
                 return JsonResponse({
                     'success': True,
-                    'message': f'Top tray set successfully: {scanned_tray_id}'
+                    'message': f'Top tray set successfully: {scanned_tray_id}. Tray scanning completed!'
                 })
 
         except Exception as e:
@@ -1857,6 +1906,7 @@ class TopTrayScanAPIView(APIView):
                 'success': False, 
                 'error': f'An error occurred: {str(e)}'
             }, status=500)
+            
 
 @method_decorator(csrf_exempt, name='dispatch')
 class VerifyTopTrayQtyAPIView(APIView):
@@ -2075,13 +2125,23 @@ class TrayIdUniqueCheckAPIView(APIView):
                 'exists': False,
                 'available': False,
                 'tray_not_in_system': True,
+                'delink_tray': None,  # <-- Add this line
                 'error': f'Tray ID "{tray_id}" not found in system. Only pre-configured trays are allowed.',
                 'message': 'This tray must be added by admin before scanning.'
             })
         
-        # Tray exists in system - check its status
-        print(f"🔍 Tray {tray_id} found - Scanned: {existing_tray.scanned}, Delinked: {existing_tray.delink_tray}")
+        # ✅ NEW: Disallow if tray is rejected
+        if getattr(existing_tray, 'rejected_tray', False):
+            return JsonResponse({
+                'exists': True,
+                'available': False,
+                'rejected_tray': True,
+                'delink_tray': getattr(existing_tray, 'delink_tray', False),  # <-- Add this line
+                'error': f'Tray ID \"{tray_id}\" is marked as rejected and cannot be used.',
+                'message': 'This tray is rejected and cannot be used for scanning.'
+            })
         
+
         # Check if tray is delinked (can be reused regardless of scanned status)
         if existing_tray.delink_tray:
             # Delinked trays can be reused - validate tray type if batch_id provided
@@ -2092,6 +2152,7 @@ class TrayIdUniqueCheckAPIView(APIView):
                         'exists': True,
                         'available': False,
                         'tray_type_error': True,
+                        'delink_tray': True,  # <-- Add this line
                         'error': validation_result['error'],
                         'batch_tray_type': validation_result['batch_tray_type'],
                         'scanned_tray_type': validation_result['scanned_tray_type']
@@ -2100,6 +2161,7 @@ class TrayIdUniqueCheckAPIView(APIView):
             return JsonResponse({
                 'exists': True,
                 'available': True,
+                'delink_tray': True,  # <-- Add this line
                 'status': 'delinked_reusable',
                 'message': 'Delinked tray - available for reuse'
             })
@@ -2110,6 +2172,7 @@ class TrayIdUniqueCheckAPIView(APIView):
                 'exists': True,
                 'available': False,
                 'already_scanned': True,
+                'delink_tray': getattr(existing_tray, 'delink_tray', False),  # <-- Add this line
                 'error': f'Tray ID "{tray_id}" has already been scanned and is in use',
                 'batch_info': existing_tray.batch_id.batch_id if existing_tray.batch_id else 'Unknown batch',
                 'scan_date': existing_tray.date.strftime('%d-%m-%Y %H:%M') if existing_tray.date else 'Unknown date'
@@ -2123,6 +2186,7 @@ class TrayIdUniqueCheckAPIView(APIView):
                     'exists': True,
                     'available': False,
                     'tray_type_error': True,
+                    'delink_tray': getattr(existing_tray, 'delink_tray', False),  # <-- Add this line
                     'error': validation_result['error'],
                     'batch_tray_type': validation_result['batch_tray_type'],
                     'scanned_tray_type': validation_result['scanned_tray_type']
@@ -2134,6 +2198,7 @@ class TrayIdUniqueCheckAPIView(APIView):
             'available': True,
             'status': 'pre_configured',
             'message': 'Pre-configured tray - available for scanning',
+            'delink_tray': getattr(existing_tray, 'delink_tray', False),  # <-- Add this line
             'tray_type': existing_tray.tray_type,
             'tray_capacity': existing_tray.tray_capacity
         })
@@ -2220,6 +2285,8 @@ class TrayIdUniqueCheckAPIView(APIView):
                 'batch_tray_type': None,
                 'scanned_tray_type': tray.tray_type if tray else None
             }
+
+
 
 # Add this new API view to your views.py file
 
@@ -2359,42 +2426,57 @@ class TrayValidateAPIView(APIView):
             print(f"[TrayValidateAPIView] Error: {str(e)}")
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
      
-        
+     
+import pytz
+
 class DPCompletedTableView(APIView):
     renderer_classes = [TemplateHTMLRenderer]
     template_name = 'Day_Planning/DP_Completed_Table.html'
+    permission_classes = [IsAuthenticated] 
 
     def get(self, request, *args, **kwargs):
         from django.utils import timezone
         from datetime import datetime, timedelta
-        
+
         user = request.user
+        tz = pytz.timezone("Asia/Kolkata")
+        now_local = timezone.now().astimezone(tz)
+        today = now_local.date()
+        yesterday = today - timedelta(days=1)
+
+        # --- Use created_at for date filtering ---
+        # Get all related created_at values for completed batches
+        completed_batches = ModelMasterCreation.objects.filter(
+            total_batch_quantity__gt=0,
+            Moved_to_D_Picker=True
+        ).values_list('batch_id', flat=True)
+
+        # Get min/max created_at from TotalStockModel for these batches
+        created_at_qs = TotalStockModel.objects.filter(
+            batch_id__batch_id__in=completed_batches
+        )
+        min_created_at = created_at_qs.order_by('created_at').values_list('created_at', flat=True).first()
+        max_created_at = created_at_qs.order_by('-created_at').values_list('created_at', flat=True).first()
+
+        # Always use current date in IST
+        today = now_local.date()
+        yesterday = today - timedelta(days=1) 
 
         # Get date filter parameters from request
         from_date_str = request.GET.get('from_date')
         to_date_str = request.GET.get('to_date')
-        
+
         # Calculate date range
         if from_date_str and to_date_str:
-            # User provided date range - use it
             try:
                 from_date = datetime.strptime(from_date_str, '%Y-%m-%d').date()
                 to_date = datetime.strptime(to_date_str, '%Y-%m-%d').date()
-                print(f"📅 Using user-provided date range: {from_date} to {to_date}")
             except ValueError:
-                # Invalid date format - fall back to default
-                today = timezone.now().date()
-                yesterday = today - timedelta(days=1)
                 from_date = yesterday
                 to_date = today
-                print(f"⚠️ Invalid date format, using default: {from_date} to {to_date}")
         else:
-            # No date range provided - default to last 2 days (today and yesterday)
-            today = timezone.now().date()
-            yesterday = today - timedelta(days=1)
             from_date = yesterday
             to_date = today
-            print(f"📅 Using default date range (last 2 days): {from_date} to {to_date}")
 
         # Convert dates to datetime objects for filtering (include full day)
         from_datetime = timezone.make_aware(datetime.combine(from_date, datetime.min.time()))
@@ -2407,47 +2489,45 @@ class DPCompletedTableView(APIView):
         next_process_module_subquery = TotalStockModel.objects.filter(
             batch_id=OuterRef('pk')
         ).values('next_process_module')[:1]
-        
-        last_process_date_time_subquery = TotalStockModel.objects.filter(
+        created_at_subquery = TotalStockModel.objects.filter(
             batch_id=OuterRef('pk')
-        ).values('last_process_date_time')[:1]
-        
+        ).values('created_at')[:1]
         accepted_Ip_stock_subquery = TotalStockModel.objects.filter(
             batch_id=OuterRef('pk'),
-         ).values('accepted_Ip_stock')[:1]
-        
+        ).values('accepted_Ip_stock')[:1]
         few_cases_accepted_Ip_stock_subquery = TotalStockModel.objects.filter(
             batch_id=OuterRef('pk'),
-         ).values('few_cases_accepted_Ip_stock')[:1]
-        
+        ).values('few_cases_accepted_Ip_stock')[:1]
         rejected_ip_stock_subquery = TotalStockModel.objects.filter(
             batch_id=OuterRef('pk'),
-         ).values('rejected_ip_stock')[:1]
-        
-        
+        ).values('rejected_ip_stock')[:1]
 
-        # Build queryset with date filtering
+        # --- Filter by created_at in TotalStockModel ---
+        # Get batch_ids where created_at is in range
+        batch_ids_in_range = list(
+            TotalStockModel.objects.filter(
+                created_at__range=(from_datetime, to_datetime)
+            ).values_list('batch_id__batch_id', flat=True)
+        )
+
         queryset = ModelMasterCreation.objects.filter(
             total_batch_quantity__gt=0,
-            Moved_to_D_Picker=True,  # Only include records where Moved_to_D_Picker is True
-            date_time__range=(from_datetime, to_datetime)  # 🔥 NEW: Add date filtering
+            Moved_to_D_Picker=True,
+            batch_id__in=batch_ids_in_range
         ).annotate(
             last_process_module=Subquery(last_process_module_subquery),
             next_process_module=Subquery(next_process_module_subquery),
-            last_process_date_time=Subquery(last_process_date_time_subquery),
+            created_at=Subquery(created_at_subquery),
             accepted_Ip_stock=Subquery(accepted_Ip_stock_subquery),
             few_cases_accepted_Ip_stock=Subquery(few_cases_accepted_Ip_stock_subquery),
             rejected_ip_stock=Subquery(rejected_ip_stock_subquery),
-        ).order_by('-date_time')
-
-        print(f"📊 Found {queryset.count()} records in date range {from_date} to {to_date}")
+        ).order_by('-created_at')
 
         # Pagination
         page_number = request.GET.get('page', 1)
-        paginator = Paginator(queryset, 10)  # 10 items per page
+        paginator = Paginator(queryset, 10)
         page_obj = paginator.get_page(page_number)
 
-        # Convert page_obj to list of dicts (using .values())
         master_data = list(page_obj.object_list.values(
             'batch_id',
             'date_time',
@@ -2466,7 +2546,7 @@ class DPCompletedTableView(APIView):
             'next_process_module',
             'Draft_Saved',
             'top_tray_qty_verified',
-            'last_process_date_time',
+            'created_at',
             'plating_stk_no',
             'polishing_stk_no',
             'category',
@@ -2475,7 +2555,6 @@ class DPCompletedTableView(APIView):
             'accepted_Ip_stock',
             'rejected_ip_stock',
             'few_cases_accepted_Ip_stock',
-            
         ))
 
         # Calculate no_of_trays dynamically and add tray_qty_list
@@ -2530,6 +2609,8 @@ class DPCompletedTableView(APIView):
         }
         return Response(context, template_name=self.template_name)
     
+    
+    
 @method_decorator(csrf_exempt, name='dispatch')
 class CompletedTrayIdListAPIView(APIView):
     def get(self, request):
@@ -2573,6 +2654,8 @@ class CompletedTrayIdListAPIView(APIView):
             })
         
         return JsonResponse({'success': True, 'trays': data})
+   
+   
    
 @method_decorator(csrf_exempt, name='dispatch')
 class TrayAutoSaveAPIView(APIView):
@@ -2704,6 +2787,8 @@ class TrayAutoSaveAPIView(APIView):
             print(f"❌ Error in TrayAutoSaveAPIView DELETE: {str(e)}")
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
+
+
 @method_decorator(csrf_exempt, name='dispatch')
 class TrayAutoSaveCleanupAPIView(APIView):
     """
@@ -2735,30 +2820,3 @@ class TrayAutoSaveCleanupAPIView(APIView):
         except Exception as e:
             print(f"❌ Error in TrayAutoSaveCleanupAPIView: {str(e)}")
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
-
-from django.views.generic import TemplateView
-
-
-class TestHtmlView(TemplateView):
-    template_name = "Day_Planning/testtable.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['rows'] = [
-            {
-                'id': i,
-                'user': f'User {i}',
-                'dept': f'Dept {chr(64+i)}',
-                'role': f'Role {i}',
-                'status': 'Active' if i % 2 == 0 else 'Inactive',
-                'location': f'Location {i}',
-                'start': f'2025-07-{i:02d}',
-                'end': f'2025-08-{i:02d}',
-                'progress': min((i+10)*7, 100),
-                'manager': f'Manager {i}',
-                'contact': f'+91-90000{i:05d}',
-                'remark': f'Remark {i}',
-            }
-            for i in range(1, 13)
-        ]
-        return context

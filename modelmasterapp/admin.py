@@ -3,15 +3,6 @@ from .models import *
 #test
 
 
-#user creation - masters for department and role
-@admin.register(Department)
-class DepartmentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name')
-
-@admin.register(Role)
-class RoleAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name')
-
 
 admin.site.register(PolishFinishType)
 admin.site.register(TrayType)

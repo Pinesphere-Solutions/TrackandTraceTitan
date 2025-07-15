@@ -22,8 +22,8 @@ from django.views.generic import TemplateView
 
 
 urlpatterns = [
-    
-    path('',include('modelmasterapp.urls')),
+    path('', TemplateView.as_view(template_name="index.html"), name="index"),
+    path('modelmaster/',include('modelmasterapp.urls')),
     path('dashboard/', TemplateView.as_view(template_name="index.html"), name="root"),
     path('home/', TemplateView.as_view(template_name="index.html"), name="home"),
     path('admin/', admin.site.urls),
@@ -40,7 +40,7 @@ urlpatterns = [
     
     path('nickel_inspection/', include('Nickel_Inspection.urls')),
     path('iqf/', include('IQF.urls')),
-    path('modelmaster/', TemplateView.as_view(template_name="modelmaster.html"), name='modelmaster'),
+    # path('modelmaster/', TemplateView.as_view(template_name="modelmaster.html"), name='modelmaster'),
     path('viewmasters/', TemplateView.as_view(template_name="viewmasters.html"), name='viewmasters'),
     path('visualaid/', TemplateView.as_view(template_name="VisualAid.html"), name='VisualAid'),
     path('recovery_dp/',include('Recovery_DP.urls')),

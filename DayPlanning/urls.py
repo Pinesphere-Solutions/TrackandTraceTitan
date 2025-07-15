@@ -23,6 +23,7 @@ urlpatterns = [
     
     path('dp_completed_table/', DPCompletedTableView.as_view(), name='dp_completed_table'),  # <-- Add this
     path('completed_tray_id_list/', CompletedTrayIdListAPIView.as_view(), name='completed_tray_id_list'),
+    path('tray_validate/', TrayValidateAPIView.as_view(), name='tray_validate'),
 
     
     path('delete_batch/', DeleteBatchAPIView.as_view(), name='delete_batch'),
@@ -30,14 +31,9 @@ urlpatterns = [
     path('get_plating_colors/', GetPlatingColorsAPIView.as_view(), name='get_plating_colors'),
     path('save_dp_pick_remark/', SaveDPPickRemarkAPIView.as_view(), name='save_dp_pick_remark'),
     path('verify_top_tray_qty/', VerifyTopTrayQtyAPIView.as_view(), name='verify_top_tray_qty'),
-    path('tray_validate/', TrayValidateAPIView.as_view(), name='tray_validate'),
     path('save_hold_unhold_reason/', SaveHoldUnholdReasonAPIView.as_view(), name='save_hold_unhold_reason'),
 
     path('tray_auto_save/', TrayAutoSaveAPIView.as_view(), name='tray_auto_save'),
     path('tray_auto_save_cleanup/', TrayAutoSaveCleanupAPIView.as_view(), name='tray_auto_save_cleanup'),
-
-    path('test/', TestHtmlView.as_view(), name='test_html'),
-
-
 
 ]

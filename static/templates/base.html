@@ -84,7 +84,7 @@
       .navbar .navbar-menu-wrapper .ti-file,
       .navbar .navbar-menu-wrapper .fa,
       .navbar .navbar-menu-wrapper .icon-menu {
-        font-size: 20px !important;
+        font-size: 16px !important;
         min-width: 10px;
         min-height: 20px;
         line-height: 1;
@@ -95,7 +95,7 @@
 .sidebar .nav .nav-item .nav-link .menu-title {
   color: inherit;
   display: inline-block;
-  font-size: 20px !important;
+  font-size: 16px !important;
   line-height: 1;
   vertical-align: middle;
   font-weight: 700;
@@ -188,16 +188,16 @@ body.sidebar-icon-only .sidebar .nav .nav-item .ti {
 /* Start of global font handling for tablet device */
         @media (min-width: 800px) and (max-width: 1300px) and (min-height: 600px) and (max-height: 900px) and (orientation: landscape) {
         html, body {
-          font-size: 20px !important;
+          font-size: 16px !important;
         }
         *, *::before, *::after {
-          font-size: 20px !important;
+          font-size: 16px !important;
         }
         input, select, textarea, button {
-          font-size: 20px !important;
+          font-size: 16px !important;
         }
         th, td {
-          font-size: 20px !important;
+          font-size: 16px !important;
           
         }
        
@@ -206,7 +206,7 @@ body.sidebar-icon-only .sidebar .nav .nav-item .ti {
            @media (min-width: 800px) and (max-width: 1300px) and (min-height: 600px) and (max-height: 900px) and (orientation: landscape) {
         html, body, *, *::before, *::after,
         #order-listing th, #order-listing td {
-          font-size: 20px !important;
+          font-size: 16px !important;
           
 
         }
@@ -214,7 +214,7 @@ body.sidebar-icon-only .sidebar .nav .nav-item .ti {
             @media (min-width: 800px) and (max-width: 1300px) and (min-height: 600px) and (max-height: 900px) and (orientation: landscape) {
         #order-listing th,
         #order-listing td {
-          font-size: 20px !important;
+          font-size: 16px !important;
           
         }
       }
@@ -382,8 +382,8 @@ footer.footer {
   align-items: center;
 }
 .barcode-icon {
-  height: 38px;
-  width: 38px;
+  height: 36px;
+  width: 36px;
   max-width: 100%;
   object-fit: contain;
   display: inline-block;
@@ -745,15 +745,7 @@ body {
   border: none !important;
   box-shadow: none !important;
 }
-.barcode-icon {
-  height: 45px;
-  width: 45px;
-  max-width: 100%;
-  object-fit: contain;
-  display: inline-block;
-  vertical-align: middle;
-  cursor: pointer;
-}
+
 
 @media (max-width: 576px) {
   .barcode-icon {
@@ -1095,11 +1087,11 @@ tr.dp-row-action-highlight > td:nth-child(2) {
                 aria-labelledby="settingsDropdown"
                 style="min-width: 200px;"
               >
-                <a class="dropdown-item" href="{% url 'adminPanel' %}">
+                <a class="dropdown-item" href="#">
                   <i class="ti-user text-primary" style="margin-right: 8px;"></i>
                   User Creation
                 </a>
-                <a class="dropdown-item" href="{% url 'modelmaster' %}">
+                <a class="dropdown-item" href="#">
                   <i class="ti-package text-primary" style="margin-right: 8px;"></i>
                   Model Master
                 </a>
@@ -1113,7 +1105,7 @@ tr.dp-row-action-highlight > td:nth-child(2) {
                <a
           class="nav-link count-indicator ms-2"
           id="reportStatus"
-          href="{% url 'VisualAid' %}"
+          href="#"
           style="border-radius: 50%; padding: 7px; display: flex; align-items: center; justify-content: center;"
         >
           <i class="ti-eye" style="font-size: 1.3rem; color: #028084;"></i>
@@ -1275,30 +1267,9 @@ tr.dp-row-action-highlight > td:nth-child(2) {
 </ul>
 </div>
 </li>
- 
-          <!-- Recovery Onboard Menu -->
-<li class="nav-item">
-<a class="nav-link" data-bs-toggle="collapse" href="#recovery-onboard" aria-expanded="false" aria-controls="recovery-onboard">
-<i class="ti-loop menu-icon"></i>
-<span class="menu-title">Recovery Onboard</span>
-<i class="menu-arrow"></i>
-</a>
-<div class="collapse" id="recovery-onboard">
-<ul class="nav flex-column sub-menu">
-<li class="nav-item">
-<a class="nav-link" href="{% url 'rec_bulk_upload' %}">R- Bulk Upload</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="{% url 'rec_dp_pick_table' %}">R - DP Pick Table</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="{% url 'rec_completed_table' %}">R - DP Completed Table</a>
-</li>
-</ul>
-</div>
-</li>
- 
-          <li class="nav-item">
+
+<!-- Module - Input Screening -->
+ <li class="nav-item">
 <a class="nav-link" data-bs-toggle="collapse" href="#ui-advanced" aria-expanded="false" aria-controls="ui-advanced">
 <i class="icon-watch menu-icon"></i>
 <span class="menu-title">Input Screening</span>
@@ -1306,159 +1277,25 @@ tr.dp-row-action-highlight > td:nth-child(2) {
 </a>
 <div class="collapse" id="ui-advanced">
 <ul class="nav flex-column sub-menu">
-<li class="nav-item"> 
+<li class="nav-item">
 <a class="nav-link" href="{% url 'IS_PickTable' %}">Pick Table</a>
 </li>
-<li class="nav-item"> 
+<li class="nav-item">
 <a class="nav-link" href="{% url 'IS_Completed_Table' %}">Completed Table</a>
 </li>
-<li class="nav-item"> 
-<a class="nav-link" href="{% url 'IS_AcceptTable' %}">Accept</a>
+<li class="nav-item">
+<a class="nav-link" href="{% url 'IS_AcceptTable' %}">Accept Table</a>
 </li>
 <li class="nav-item">
-<a class="nav-link" href="{% url 'IS_RejectTable' %}">Reject</a>
-</li>
-</ul>
-</div>
-</li>
-<!-- Brass Qc Menu -->
-<li class="nav-item">
-<a class="nav-link" data-bs-toggle="collapse" href="#editors" aria-expanded="false" aria-controls="ui-advanced">
-<i class="fa fa-industry menu-icon"></i>
-<span class="menu-title">Brass QC</span>
-<i class="menu-arrow"></i>
-</a>
-<div class="collapse" id="editors">
-<ul class="nav flex-column sub-menu">
-<li class="nav-item"> 
-<a class="nav-link" href="{% url 'BrassPickTableView' %}">Brass Qc Pick Table</a>
-</li>
-<li class="nav-item"> 
-<a class="nav-link" href="{% url 'BrassCompletedView' %}">Brass Qc Completed Table</a>
-</li>
-<li class="nav-item"> 
-<a class="nav-link" href="{% url 'iqf_picktable' %}">IQF Pick Table</a>
-</li>
-<li class="nav-item"> 
-<a class="nav-link" href="{% url 'iqf_completed_table' %}">IQF Completed Table</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="{% url 'iqf_rejection_table' %}">IQF Reject Table</a>
-</li>
-</ul>
-</div>
-</li>
-<!-- Jig Loading Menu -->
-<li class="nav-item">
-<a class="nav-link" data-bs-toggle="collapse" href="#jig-loading" aria-expanded="false" aria-controls="jig-loading">
-<i class="ti-package menu-icon"></i>
-<span class="menu-title">Jig Loading</span>
-<i class="menu-arrow"></i>
-</a>
-<div class="collapse" id="jig-loading">
-<ul class="nav flex-column sub-menu">
-<li class="nav-item">
-<a class="nav-link" href="{% url 'JigView' %}">Pick Table</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="{% url 'JigCompletedTable' %}">Completed Table</a>
-</li>
-</ul>
-</div>
-</li>
-<!-- Jig Unloading Menu -->
-<li class="nav-item">
-<a class="nav-link" data-bs-toggle="collapse" href="#tables" aria-expanded="false" aria-controls="jig-loading">
-<i class="ti-truck menu-icon"></i>
-<span class="menu-title">Jig Unloading</span>
-<i class="menu-arrow"></i>
-</a>
-<div class="collapse" id="tables">
-<ul class="nav flex-column sub-menu">
-<li class="nav-item">
-<a class="nav-link" href="{% url 'Jig_Unloading_MainTable' %}">JUL Main Table</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="{% url 'JigUnloading_Completedtable' %}">JUL Completed</a>
-</li>
-</ul>
-</div>
-</li>
-<!-- In-process Inspection Menu -->
-<li class="nav-item">
-<a class="nav-link" data-bs-toggle="collapse" href="#inprocessInspectionMenu" aria-expanded="false" aria-controls="inprocessInspectionMenu">
-<i class="ti-eye menu-icon"></i>
-<span class="menu-title">Ip Inspection</span>
-<i class="menu-arrow"></i>
-</a>
-<div class="collapse" id="inprocessInspectionMenu">
-<ul class="nav flex-column sub-menu">
-<li class="nav-item">
-<a class="nav-link" href="{% url 'inprocess_inspection_main' %}">IP Main</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="{% url 'inprocess_inspection_complete' %}">IP Completed</a>
-</li>
-</ul>
-</div>
-</li>
-<!-- In-Nickel Inspection Menu -->
-<li class="nav-item">
-<a class="nav-link" data-bs-toggle="collapse" href="#NI" aria-expanded="false" aria-controls="jig-loading">
-<i class="ti-eye menu-icon"></i>
-<span class="menu-title">Nickel Inspection</span>
-<i class="menu-arrow"></i>
-</a>
-<div class="collapse" id="NI">
-<ul class="nav flex-column sub-menu">
-<li class="nav-item">
-<a class="nav-link" href="{% url 'Nickel_Inspection' %}">Main Table</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="{% url 'NI_Completed' %}">Completed Table</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="{% url 'NI_Rejected' %}">Reject Table</a>
-</li>
-</ul>
-</div>
-</li>
- 
-          <!-- Nickel Audit Menu -->
-<li class="nav-item">
-<a class="nav-link" data-bs-toggle="collapse" href="#nickelAuditMenu" aria-expanded="false" aria-controls="nickelAuditMenu">
-<i class="ti-medall menu-icon"></i>
-<span class="menu-title">Nickel Audit</span>
-<i class="menu-arrow"></i>
-</a>
-<div class="collapse" id="nickelAuditMenu">
-<ul class="nav flex-column sub-menu">
-<li class="nav-item">
-<a class="nav-link" href="{% url 'NA_Main_Table' %}">NA Pick Table</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="{% url 'NA_Complete_Table' %}">NA Completed</a>
-</li>
-</ul>
-</div>
+<a class="nav-link" href="{% url 'IS_RejectTable' %}">Reject Table</a>
 </li>
  
  
-<!-- Spider Spindle Menu -->
-<li class="nav-item">
-<a class="nav-link" data-bs-toggle="collapse" href="#spiderSpindleMenu" aria-expanded="false" aria-controls="spiderSpindleMenu">
-<i class="ti-control-shuffle menu-icon"></i>
-<span class="menu-title">Spider Spindle</span>
-<i class="menu-arrow"></i>
-</a>
-<div class="collapse" id="spiderSpindleMenu">
-<ul class="nav flex-column sub-menu">
-<li class="nav-item">
-<a class="nav-link" href="{% url 'spider_pick_table' %}">Spider Pick Table</a>
-</li> 
-</ul>
+ 
+        </ul>
 </div>
 </li>
+
  
  
         </ul>
@@ -1480,7 +1317,7 @@ tr.dp-row-action-highlight > td:nth-child(2) {
   <!-- plugins:js -->
   <!-- Tray IDentification Form Section via gif barcode -->
 
-     <div id="barcodeModal" class="barcode-modal">
+<div id="barcodeModal" class="barcode-modal">
       <div class="barcode-modal-content">
         <div
           class="row align-items-center mb-3"
@@ -1693,104 +1530,230 @@ tr.dp-row-action-highlight > td:nth-child(2) {
     </script>
 
       <script nonce="{{ csp_nonce }}">
-          // Open modal on barcode click
-          document.getElementById("barcodeStatus").onclick = function (e) {
-            e.preventDefault();
-            document.getElementById("barcodeModal").style.display = "flex";
-            setTimeout(function() {
-              document.getElementById("trayHiddenInput").focus();
-            }, 100);
-          };
-          document.getElementById("barcodeModalClose").onclick = function () {
-            document.getElementById("barcodeModal").style.display = "none";
-          };
-          window.onclick = function (event) {
-            var modal = document.getElementById("barcodeModal");
-            if (event.target === modal) {
-              modal.style.display = "none";
-            }
-          };
-        
-          // Always keep focus on the hidden input
-          const trayInput = document.getElementById("trayHiddenInput");
-          document.getElementById("barcodeModal").addEventListener("click", function() {
-            trayInput.focus();
-          });
-          trayInput.addEventListener("blur", function() {
-            setTimeout(() => trayInput.focus(), 10);
-          });
-        
-          // Debounce logic for barcode input and fetch details from API
-          let debounceTimer = null;
-          trayInput.addEventListener("input", function() {
-            if (debounceTimer) clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(function() {
-              const trayId = trayInput.value.trim();
-              if (trayId !== "") {
-                // Call BaseAPIView with trayId as barcodeInput
-                fetch(`/modelmaster/base/?barcodeInput=${encodeURIComponent(trayId)}`, {
-                  method: "GET",
-                  headers: {
-                    "Accept": "application/json"
-                  },
-                  credentials: "same-origin"
-                })
-                .then(response => response.json())
-                .then(data => {
-                  // Update the modal fields with the fetched data
-                  if (data.tray_details) {
-                    document.getElementById("modelNo").value = data.model_master_details?.model_stock_no || "";
-                    document.getElementById("version").value = data.model_master_details?.version || "";
-                    document.getElementById("polishFinish").value = data.model_master_details?.polish_finish || "";
-                    document.getElementById("platingColor").value = data.model_master_details?.plating_color || "";
-                    document.getElementById("source").value = data.model_master_details?.vendor_internal || "";
-                    document.getElementById("inputType").value = data.total_stock_details?.total_stock || "";
-                    document.getElementById("lastProcessDate").value = data.total_stock_details?.last_process_date_time || "";   
-                    document.getElementById("lastProcessModule").innerText = data.total_stock_details?.last_process_module || "";
-                    document.getElementById("nextProcessModule").innerText = data.total_stock_details?.next_process_module || "";
-                     // ✅ Update image section with model images
-                    const imageSection = document.querySelector('.barcode-image-section');
-                    imageSection.innerHTML = ''; // Clear previous images
+  // ✅ NEW: Create error banner function
+  function showErrorBanner(message) {
+    // Remove any existing error banner
+    const existingError = document.getElementById('barcodeErrorBanner');
+    if (existingError) {
+      existingError.remove();
+    }
+    
+    // Create error banner
+    const errorBanner = document.createElement('div');
+    errorBanner.id = 'barcodeErrorBanner';
+    errorBanner.style.cssText = `
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      text-align: center;
+      font-weight: 500;
+      animation: slideDown 0.3s ease-out;
+    `;
+    
+    errorBanner.innerHTML = message;
+    
+    // Add animation CSS if not exists
+    if (!document.getElementById('bannerErrorStyle')) {
+      const style = document.createElement('style');
+      style.id = 'bannerErrorStyle';
+      style.textContent = `
+        @keyframes slideDown {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    // Insert banner at the top of modal content (after title row)
+    const modalContent = document.querySelector('.barcode-modal-content');
+    const titleRow = modalContent.querySelector('.row.align-items-center');
+    if (titleRow && titleRow.nextElementSibling) {
+      modalContent.insertBefore(errorBanner, titleRow.nextElementSibling);
+    } else {
+      modalContent.insertBefore(errorBanner, modalContent.firstChild);
+    }
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+      if (errorBanner && errorBanner.parentNode) {
+        errorBanner.style.animation = 'slideUp 0.3s ease-out';
+        setTimeout(() => {
+          if (errorBanner.parentNode) {
+            errorBanner.remove();
+          }
+        }, 300);
+      }
+    }, 5000);
+    
+    // ✅ IMPORTANT: Keep focus on hidden input
+    setTimeout(() => {
+      const trayInput = document.getElementById("trayHiddenInput");
+      if (trayInput) {
+        trayInput.focus();
+      }
+    }, 100);
+  }
 
-                    const images = data.model_master_details?.model_images || [];
-                    images.forEach(url => {
-                      const img = document.createElement('img');
-                      img.src = url;
-                      img.alt = "Model Image";
-                      img.className = "barcode-img-preview mx-2";
-                      img.style.maxWidth = "80px";
-                      img.style.maxHeight = "80px";
-                      img.style.borderRadius = "8px";
-                      imageSection.appendChild(img);
-                    });
-                    
-                  } else {
-                    // Clear fields or show error if not found
-                    document.getElementById("modelNo").value = "";
-                    document.getElementById("version").value = "";
-                    document.getElementById("polishFinish").value = "";
-                    document.getElementById("platingColor").value = "";
-                    document.getElementById("source").value = "";
-                    document.getElementById("inputType").value = "";
-                    document.getElementById("lastProcessDate").value = "";
-                    document.getElementById("lastProcessModule").innerText = "";
-                    document.getElementById("nextProcessModule").innerText = "";
-                // ✅ Clear images
-                    const imageSection = document.querySelector('.barcode-image-section');
-                    imageSection.innerHTML = '';
+  // ✅ NEW: Clear error banner function
+  function clearErrorBanner() {
+    const existingError = document.getElementById('barcodeErrorBanner');
+    if (existingError) {
+      existingError.remove();
+    }
+  }
 
-                    alert(data.error || "Tray not found"); 
-                   }
-                  trayInput.value = ""; // Clear input after processing
-                })
-                .catch(err => {
-                  alert("Error fetching tray details");
-                  trayInput.value = "";
-                });
-              }
-            }, 500); // 500ms after user stops typing
-          });
-        </script>
+  // Tablet image zoom toggle
+  document.querySelectorAll(".barcode-img-preview").forEach(function (img) {
+    img.addEventListener("click", function (e) {
+      // Only apply on tablet screens
+      if (window.innerWidth <= 991.98) {
+        e.preventDefault();
+        // Toggle zoomed class
+        this.classList.toggle("zoomed");
+      }
+    });
+  });
+
+  // Open modal on barcode click
+  document.getElementById("barcodeStatus").onclick = function (e) {
+    e.preventDefault();
+    document.getElementById("barcodeModal").style.display = "flex";
+    setTimeout(function() {
+      document.getElementById("trayHiddenInput").focus();
+    }, 100);
+  };
+  
+  document.getElementById("barcodeModalClose").onclick = function () {
+    document.getElementById("barcodeModal").style.display = "none";
+    // Clear error banner when closing modal
+    clearErrorBanner();
+  };
+  
+  window.onclick = function (event) {
+    var modal = document.getElementById("barcodeModal");
+    if (event.target === modal) {
+      modal.style.display = "none";
+      // Clear error banner when closing modal
+      clearErrorBanner();
+    }
+  };
+
+  // ✅ ENHANCED: Always keep focus on the hidden input
+  const trayInput = document.getElementById("trayHiddenInput");
+  
+  // Focus on modal click
+  document.getElementById("barcodeModal").addEventListener("click", function() {
+    setTimeout(() => trayInput.focus(), 10);
+  });
+  
+  // Re-focus when input loses focus
+  trayInput.addEventListener("blur", function() {
+    setTimeout(() => {
+      // Only re-focus if modal is still open
+      const modal = document.getElementById("barcodeModal");
+      if (modal && modal.style.display === "flex") {
+        trayInput.focus();
+      }
+    }, 10);
+  });
+
+  // Clear error banner when user starts typing again
+  trayInput.addEventListener("input", function() {
+    if (this.value.length === 1) { // On first character typed
+      clearErrorBanner();
+    }
+  });
+
+  // ✅ UPDATED: Debounce logic with banner error
+  let debounceTimer = null;
+  trayInput.addEventListener("input", function() {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(function() {
+      const trayId = trayInput.value.trim();
+      if (trayId !== "") {
+        // Call BaseAPIView with trayId as barcodeInput
+        fetch(`/modelmaster/base/?barcodeInput=${encodeURIComponent(trayId)}`, {
+          method: "GET",
+          headers: {
+            "Accept": "application/json"
+          },
+          credentials: "same-origin"
+        })
+        .then(response => response.json())
+        .then(data => {
+          // Update the modal fields with the fetched data
+          if (data.tray_details) {
+            // Clear any existing error banner on success
+            clearErrorBanner();
+            
+            document.getElementById("modelNo").value = data.model_master_details?.model_stock_no || "";
+            document.getElementById("version").value = data.model_master_details?.version || "";
+            document.getElementById("polishFinish").value = data.model_master_details?.polish_finish || "";
+            document.getElementById("platingColor").value = data.model_master_details?.plating_color || "";
+            document.getElementById("source").value = data.model_master_details?.vendor_internal || "";
+            document.getElementById("inputType").value = data.total_stock_details?.total_stock || "";
+            document.getElementById("lastProcessDate").value = data.total_stock_details?.last_process_date_time || "";   
+            document.getElementById("lastProcessModule").innerText = data.total_stock_details?.last_process_module || "";
+            document.getElementById("nextProcessModule").innerText = data.total_stock_details?.next_process_module || "";
+            
+            // Update image section with model images
+            const imageSection = document.querySelector('.barcode-image-section');
+            imageSection.innerHTML = ''; // Clear previous images
+
+            const images = data.model_master_details?.model_images || [];
+            images.forEach(url => {
+              const img = document.createElement('img');
+              img.src = url;
+              img.alt = "Model Image";
+              img.className = "barcode-img-preview mx-2";
+              img.style.maxWidth = "80px";
+              img.style.maxHeight = "80px";
+              img.style.borderRadius = "8px";
+              imageSection.appendChild(img);
+            });
+            
+          } else {
+            // ✅ UPDATED: Clear fields and show banner error
+            document.getElementById("modelNo").value = "";
+            document.getElementById("version").value = "";
+            document.getElementById("polishFinish").value = "";
+            document.getElementById("platingColor").value = "";
+            document.getElementById("source").value = "";
+            document.getElementById("inputType").value = "";
+            document.getElementById("lastProcessDate").value = "";
+            document.getElementById("lastProcessModule").innerText = "";
+            document.getElementById("nextProcessModule").innerText = "";
+            
+            // Clear images
+            const imageSection = document.querySelector('.barcode-image-section');
+            imageSection.innerHTML = '';
+
+            // ✅ REPLACED: alert() with banner error (like your image)
+            const errorMessage = `Tray ID '${trayId}' not found in table.`;
+            showErrorBanner(errorMessage);
+          }
+          
+          // ✅ IMPORTANT: Clear input and keep focus
+          trayInput.value = ""; // Clear input after processing
+          setTimeout(() => trayInput.focus(), 100); // Keep focus on hidden input
+          
+        })
+        .catch(err => {
+          // ✅ REPLACED: alert() with banner error for network errors
+          showErrorBanner("Error fetching tray details");
+          trayInput.value = "";
+          setTimeout(() => trayInput.focus(), 100);
+        });
+      }
+    }, 500); // 500ms after user stops typing
+  });
+</script>
+
 
 
   <script nonce="{{ csp_nonce }}" src="{% static 'assets/vendors/js/vendor.bundle.base.js' %}"></script>
@@ -2445,7 +2408,22 @@ window.addEventListener("beforeunload", function (e) {
   showGlobalSpinner();
 });
 </script>
+<script nonce="{{ csp_nonce }}">
+// Show spinner on page load (before DOM ready)
+document.getElementById('global-loading-spinner').style.display = 'flex';
 
+// Hide spinner when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    document.getElementById('global-loading-spinner').style.display = 'none';
+  }, 200); // slight delay for smoothness
+});
+
+// Show spinner on any fetch/ajax call (already handled in your code)
+// Show spinner on internal link click or form submit (already handled in your code)
+// Show spinner on beforeunload (already handled in your code)
+// Hide spinner on pageshow (already handled in your code)
+</script>
 </body>
 
 </html>

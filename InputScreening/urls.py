@@ -29,14 +29,20 @@ urlpatterns = [
     path('ip_save_hold_unhold_reason/', IPSaveHoldUnholdReasonAPIView.as_view(), name='ip_save_hold_unhold_reason'),
     path('verify_top_tray_qty/', VerifyTopTrayQtyAPIView.as_view(), name='verify_top_tray_qty'),
 
-
     path('ip_tray_validate/', IPTrayValidateAPIView.as_view(), name='ip_tray_validate'),
-    path('ip_completed_tray_id_list/',IPCompletedTrayIdListAPIView.as_view(), name='completed_tray_id_list'),
+    path('ip_completed_tray_id_list/',IPCompletedTrayIdListAPIView.as_view(), name='ip_completed_tray_id_list'),
 
     path('save_rejection_draft/', SaveRejectionDraftAPIView.as_view(), name='save_rejection_draft'),
     path('get_rejection_draft/', get_rejection_draft, name='get_rejection_draft'),
     path('get_delink_tray_data/', get_delink_tray_data, name='get_delink_tray_data'),
     path('delink_check_tray_id/', delink_check_tray_id, name='delink_check_tray_id'),
     path('reject_check_tray_id/', reject_check_tray_id, name='reject_check_tray_id'),
+    path('reject_check_tray_id_dynamic/', reject_check_tray_id_dynamic, name='reject_check_tray_id_dynamic'),
+    path('reject_check_tray_id_session_aware/', reject_check_tray_id_session_aware, name='reject_check_tray_id_session_aware'),
+    
+    path('complete_tray_validate/', TrayValidate_Complete_APIView.as_view(), name='complete_tray_validate'),
+    path('CompleteTable_tray_id_list/', TrayIdList_Complete_APIView.as_view(), name='CompleteTable_tray_id_list'),
+    path('get_shortage_rejections/', GetShortageRejectionsView.as_view(), name='get_shortage_rejections'),
 
+    
 ]

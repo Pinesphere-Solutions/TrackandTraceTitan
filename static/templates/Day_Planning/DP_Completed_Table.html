@@ -128,22 +128,23 @@
                   {{ row.created_at|date:"d-M-y" }}<br>
                   <span style="display:inline-block; margin-top:4px;">{{ row.created_at|date:"h:i A" }}</span>
                 </td>           
-                    <td>
-                      <span class="model-hover-trigger" style="cursor: pointer;">
-                        {{ row.plating_stk_no|highlight_plating_color|safe_html }}
-                        
-                        <div class="model-image-tooltip"
-                             style="position: absolute; left: 238%; top: 0%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 10010; display: flex; align-items: center; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s;">          
-                          <button class="img-scroll-left" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8592;</button>
-                          <div class="img-gallery" style="display: flex; gap: 6px; overflow: hidden; width: 170px;">
-                            {% for img_url in row.model_images %}
-                              <img src="{{ img_url }}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px;" />
-                            {% endfor %}
-                          </div>
-                          <button class="img-scroll-right" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8594;</button>
-                        </div>
-                      </span>
-                    </td>
+                    <!-- Plating Stk No Column -->
+<td {% if row.hold_lot %}class="row-inactive-blur"{% endif %} style="white-space:normal;word-break:break-all;">
+  <span class="model-hover-trigger" style="cursor: pointer; word-break: break-all;">
+    {{ row.plating_stk_no|highlight_plating_color|safe_html }}
+
+    <div class="model-image-tooltip"
+         style="position: absolute; left: 238%; top: 0%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 10010; display: flex; align-items: center; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s;">          
+      <button class="img-scroll-left" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8592;</button>
+      <div class="img-gallery" style="display: flex; gap: 6px; overflow: hidden; width: 180px;">
+        {% for img_url in row.model_images %}
+          <img src="{{ img_url }}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px;" />
+        {% endfor %}
+      </div>
+      <button class="img-scroll-right" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8594;</button>
+    </div>
+  </span>
+</td>
                       <td>
                       {{ row.polishing_stk_no|default:"N/A"|highlight_polish_finish|safe_html }}
                     </td>
@@ -155,7 +156,7 @@
                     {% if row.tray_type %}{{ row.tray_type }}{% else %}Nil{% endif %}-
                     {% if row.tray_capacity %}{{ row.tray_capacity }}{% endif %}
                   </td>
-                  <td>{{ row.vendor_internal }}</td>
+                  <td>{{ row.location__location_name|default:"N/A" }}</td>
 
                   <td>{{ row.no_of_trays }}</td>
                   <td>
