@@ -7,14 +7,12 @@
 
 
 <div class="content-wrapper">
-  <!--<h5 class="text-left mt-0 mb-3">Input Screening / Pick Table</h5>-->
-  <div class="row">
     <div class="col-12 grid-margin stretch-card">
       <div class="card">
-        <div class="card-body" style="padding-bottom:12px;">
+                <div class="card-body" style="padding-bottom:12px;">
           <h5 class="text-left mt-0 mb-4" style="font-weight:700;">Input Screening Pick Table</h5>
-          <div class="table-responsive">
-            <div class="table-responsive">
+          
+            <div class="table-responsive" style="overflow: scroll !important">
               <table id="order-listing" class="table">
                 <thead>
                     <tr>
@@ -46,7 +44,7 @@
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Tray Category-Capacity
+                      Tray Cate- <br> Capacity
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
@@ -65,7 +63,7 @@
                       LOT Qty
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
-                    <th style="display: none;">
+                    <th>
                       Physical Qty
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
@@ -110,7 +108,7 @@
                     data-few-cases-acceptance="{{data.few_cases_accepted_Ip_stock}}"
                       data-model-no="{{ data.plating_stk_no }}">
                     
-                  <td style="position: relative;" {% if data.ip_hold_lot %} class="row-inactive-blur"{% endif %}>
+                  <td {% if data.ip_hold_lot %} class="row-inactive-blur"{% endif %}>
                     <span style="display:flex; align-items:center; gap:3px;">
                       {% if is_admin %}
                         <!-- Admin users: Show toggle switch -->
@@ -147,19 +145,20 @@
                     <td {% if data.ip_hold_lot %} class="row-inactive-blur" {% endif %}>
                               {{ data.created_at|date:"d-M-y"  }}<br>
                         <span style="display:inline-block; margin-top:4px;">{{ data.created_at|date:"h:i A" }}</span>
-                        <td {% if data.ip_hold_lot %} class="row-inactive-blur" {% endif %} style="position: relative;">
-                      <span class="model-hover-trigger" style="cursor: pointer;">
-                        {{ data.plating_stk_no|highlight_plating_color|safe_html }}
-                        <div class="model-image-tooltip" style="position: absolute; left: 50%; top: 110%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 9999; display: flex; align-items: center; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s;">
-                          <button class="img-scroll-left" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8592;</button>
-                          <div class="img-gallery" style="display: flex; gap: 6px; overflow: hidden; width: 180px;">
-                            {% for img_url in data.model_images %}
-                              <img src="{{ img_url }}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px;" />
-                            {% endfor %}
+                        </td>
+                    <td {% if data.ip_hold_lot %} class="row-inactive-blur" {% endif %}>
+                        <span class="model-hover-trigger" style="cursor: pointer;">
+                          {{ data.plating_stk_no|highlight_plating_color|safe_html }}
+                          <div class="model-image-tooltip" style="position: absolute; left: 50%; top: 110%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 9999; display: flex; align-items: center; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s;">
+                            <button class="img-scroll-left" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8592;</button>
+                            <div class="img-gallery" style="display: flex; gap: 6px; overflow: hidden; width: 180px;">
+                              {% for img_url in data.model_images %}
+                                <img src="{{ img_url }}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px;" />
+                              {% endfor %}
+                            </div>
+                            <button class="img-scroll-right" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8594;</button>
                           </div>
-                          <button class="img-scroll-right" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8594;</button>
-                        </div>
-                      </span>
+                        </span>
                     </td>
                     <td {% if data.ip_hold_lot %} class="row-inactive-blur" {% endif %}>{{ data.polishing_stk_no|default:"N/A"|highlight_polish_finish|safe_html }}</td>
                     <td {% if data.ip_hold_lot %} class="row-inactive-blur" {% endif %}>{{ data.plating_color }}</td>
@@ -183,11 +182,11 @@
                                 class="ip-checkbox"
                                 data-lot-id="{{ data.stock_lot_id }}"
                                 style="width: 15px; height: 15px"
-                                {% if data.ip_person_qty_verified %}checked disabled{% endif %} />
+                                {% if data.ip_person_qty_verified %}checked disabled{% endif %} /
                         
                       </span>
                     </td>
-                    <td {% if data.ip_hold_lot %} class="row-inactive-blur" {% endif %} style="display: none;">
+                    <td {% if data.ip_hold_lot %} class="row-inactive-blur" {% endif %}>
                       <input
                         type="text"
                         class="physical-qty-input"
@@ -490,11 +489,11 @@
                     {% endif %}
                     </td>
                    
-                  </tr>
+                </tr>
                   {% endfor%}
-              
                 </tbody>
               </table>
+                
 
               <!-- Tray Scan Modal for Input Screening -->
               <div
@@ -666,15 +665,12 @@
                   </div>
                 </div>
               </div>
-              
-            </div>
-            
-           
+
           </div>
 
         <!-- Pagination Section -->
 
- <div class="pagination-wrapper">
+            <div class="pagination-wrapper">
               <nav aria-label="Page navigation">
                                 <ul class="pagination justify-content-end mb-0">
                   {# Previous button #}

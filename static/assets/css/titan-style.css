@@ -190,7 +190,6 @@ body.pick-table-only .table-responsive {
   overflow-y: auto !important;
   overflow-x: auto !important;
   -webkit-overflow-scrolling: touch;
-
 }
 
 /* Hide the small tooltip completely for Plating Stk No hover */
@@ -542,7 +541,6 @@ td:first-child * {
   pointer-events: none; /* allow hover for cursor effect */
 }
 
-
 /* end of toggle style switch */
 #trayScanModal_DayPlanning table thead th {
   background: #d2d2d2 !important;
@@ -661,7 +659,6 @@ td:first-child * {
   top: 0;
   z-index: 20; /* higher than sticky columns */
 }
-
 
 /* start of pagination styles */
 .pagination-wrapper {
@@ -1015,8 +1012,8 @@ td:first-child * {
   background: #028084 !important;
   color: #e5fcff !important;
   border-bottom: 2.5px solid #bdbdbd !important;
-  min-width: 80px;
-  max-width: 140px;
+  /* min-width: 80px;
+  max-width: 140px; */
 }
 
 /* Default: Desktop/Laptop (wider columns for larger font) - server */
@@ -1085,9 +1082,13 @@ td:first-child * {
   max-width: 140px;
 } /* Current Stage */
 #order-listing th:nth-child(17) {
-  min-width: 100px;
-  max-width: 90px;
+  min-width: 110px;
+  max-width: 100px;
 } /* Remarks */
+#order-listing th:nth-child(20) {
+  min-width: 100px;
+  max-width: 110px;
+} /* Remarks for IS Pick Table */
 
 @media (min-width: 600px) and (max-width: 900px) {
   #order-listing {
@@ -1225,7 +1226,7 @@ h6 {
 }
 
 #trayScanDetails {
-  display: grid;
+  /* display: grid; */
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   padding-top: 10px;
@@ -1240,10 +1241,6 @@ h6 {
   font-size: 14px;
 }
 
-.highlighted-tray-scan {
-  background: #e6f7ff !important;
-  transition: background 0.3s;
-}
 .tray-scan-modal {
   position: fixed;
   top: 0;
@@ -1447,7 +1444,6 @@ thead th {
 
 /* ...existing code... */
 
-
 /* Prevent sticky columns from overlapping sticky header */
 #order-listing th:nth-child(-n + 3) {
   z-index: 12;
@@ -1459,7 +1455,6 @@ thead th {
 /* Ensure sticky columns and header work together */
 #order-listing th,
 #order-listing td {
- 
   box-sizing: border-box;
   /* Prevent content shake */
   /* overflow: hidden; */
@@ -1972,635 +1967,636 @@ thead th {
 }
 /* Day Planning Complete table end */
 
-
 /* Input Screening Pick Table Start (2029-3270)  */
 
 /* Enhanced Modal CSS for Day Planning Tray Scan - UPDATED FOR IS PICK TABLE */
 .tray-scan-modal-DayPlanning {
-    display: none !important;
-    position: fixed !important;
-    top: 40px !important;
-    right: 20px !important;
-    width: 580px !important;
-    background: #fff !important;
-    border-radius: 12px !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-    padding: 20px !important;
-    z-index: 999999 !important;
-    max-height: 85vh !important;
-    overflow-y: auto !important;
-    border: 2px solid #028084 !important;
+  display: none !important;
+  position: fixed !important;
+  top: 40px !important;
+  right: 20px !important;
+  width: 580px !important;
+  background: #fff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+  padding: 20px !important;
+  z-index: 999999 !important;
+  max-height: 85vh !important;
+  overflow-y: auto !important;
 }
 
 .tray-scan-modal-DayPlanning.open {
-    display: block !important;
-    animation: slideInFromRight 0.3s ease-out;
+  display: block !important;
+  animation: slideInFromRight 0.3s ease-out;
 }
 
 @keyframes slideInFromRight {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 /* Enhanced Close button styling */
 .tray-scan-close-readonly {
-    position: absolute !important;
-    top: 10px !important;
-    right: 15px !important;
-    font-size: 28px !important;
-    font-weight: bold !important;
-    cursor: pointer !important;
-    color: #d9534f !important;
-    z-index: 1000000 !important;
-    width: 35px !important;
-    height: 35px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 50% !important;
-    transition: all 0.2s ease !important;
+  position: absolute !important;
+  top: 10px !important;
+  right: 15px !important;
+  font-size: 28px !important;
+  font-weight: bold !important;
+  cursor: pointer !important;
+  color: #d9534f !important;
+  z-index: 1000000 !important;
+  width: 35px !important;
+  height: 35px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  transition: all 0.2s ease !important;
 }
 
 .tray-scan-close-readonly:hover {
-    color: #fff !important;
-    background-color: #d9534f !important;
-    transform: scale(1.1) !important;
+  color: #fff !important;
+  background-color: #d9534f !important;
+  transform: scale(1.1) !important;
 }
 
 /* Enhanced Modal header styling */
 .modal-top-header {
-    padding-bottom: 12px !important;
-    margin-bottom: 15px !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 16px !important;
-    border-bottom: 2px solid #028084 !important;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
-    margin: -20px -20px 15px -20px !important;
-    padding: 15px 20px 12px 20px !important;
-    border-radius: 12px 12px 0 0 !important;
+  padding-bottom: 12px !important;
+  margin-bottom: 15px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  border-bottom: 1px solid #b3b3b3 !important;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+  margin: -20px -20px 15px -20px !important;
+  padding: 15px 20px 12px 20px !important;
+  border-radius: 12px 12px 0 0 !important;
 }
 
 .modal-top-header .user-profile {
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
 }
 
 .modal-top-header .user-profile img {
-    border-radius: 50% !important;
-    width: 50px !important;
-    height: 50px !important;
-    object-fit: cover !important;
-    border: 3px solid #028084 !important;
-    box-shadow: 0 2px 8px rgba(2, 128, 132, 0.3) !important;
-    transition: transform 0.3s cubic-bezier(.4,2,.3,1), box-shadow 0.3s;
-    will-change: transform;
-    cursor: pointer;
+  border-radius: 50% !important;
+  width: 50px !important;
+  height: 50px !important;
+  object-fit: cover !important;
+
+  box-shadow: 0 2px 8px rgba(2, 128, 132, 0.3) !important;
+  transition: transform 0.3s cubic-bezier(0.4, 2, 0.3, 1), box-shadow 0.3s;
+  will-change: transform;
+  cursor: pointer;
 }
 
 .modal-top-header img:hover {
-    transform: scale(1.18) rotate(-2deg);
-    box-shadow: 0 4px 24px rgba(2,128,132,0.18);
-    z-index: 10;
+  transform: scale(1.18) rotate(-2deg);
+  box-shadow: 0 4px 24px rgba(2, 128, 132, 0.18);
+  z-index: 10;
 }
 
 .modal-top-header h6 {
-    margin-top: 10px;
+  margin-top: 10px;
 }
 
 #modalModelNo_DayPlanning {
-    margin: 0 !important;
-    font-size: 16px !important;
-    font-weight: 600 !important;
-    color: #028084 !important;
-    margin-top: 10px !important;
-    display: inline-block;
+  margin: 0 !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: #028084 !important;
+  margin-top: 10px !important;
+  display: inline-block;
 }
-
-
 
 /* Enhanced Button styling */
 #trayValidateBtn {
-    padding: 8px 16px !important;
-    font-size: 12px !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    background: linear-gradient(135deg, #f5faff 0%, #e3f2fd 100%) !important;
-    border: 2px solid #028084 !important;
-    color: #028084 !important;
-    border-radius: 25px !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    white-space: nowrap !important;
+  padding: 8px 16px !important;
+  font-size: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background: linear-gradient(135deg, #f5faff 0%, #e3f2fd 100%) !important;
+  border: 2px solid #028084 !important;
+  color: #028084 !important;
+  border-radius: 25px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  white-space: nowrap !important;
 }
 
 #trayValidateBtn:hover {
-    background: linear-gradient(135deg, #028084 0%, #026d70 100%) !important;
-    color: white !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 4px 12px rgba(2, 128, 132, 0.3) !important;
+  background: linear-gradient(135deg, #028084 0%, #026d70 100%) !important;
+  color: white !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(2, 128, 132, 0.3) !important;
 }
 
 #trayValidateBtn img {
-    width: 18px !important;
-    height: 18px !important;
-    margin-right: 2px !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin-right: 2px !important;
 }
 
 #trayQtyRedoBtn {
-    width: 28px !important;
-    height: 28px !important;
-    cursor: pointer !important;
-    margin-left: 8px !important;
-    border-radius: 50% !important;
-    padding: 4px !important;
-    transition: all 0.2s ease !important;
+  width: 28px !important;
+  height: 28px !important;
+  cursor: pointer !important;
+  margin-left: 8px !important;
+  border-radius: 50% !important;
+  padding: 4px !important;
+  transition: all 0.2s ease !important;
 }
 
 #trayQtyRedoBtn:hover {
-    background-color: #f8f9fa !important;
-    transform: scale(1.1) !important;
+  background-color: #f8f9fa !important;
+  transform: scale(1.1) !important;
 }
 
 /* Enhanced Table styling inside modal */
 #trayScanModal_DayPlanning table {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    margin-top: 15px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-    border-radius: 8px !important;
-    overflow: hidden !important;
+  width: 100% !important;
+  border-collapse: collapse !important;
+  margin-top: 15px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
 }
 
 #trayScanModal_DayPlanning table th,
 #trayScanModal_DayPlanning table td {
-    border: 1px solid #dee2e6 !important;
-    padding: 8px 12px !important;
-    font-size: 12px !important;
-    text-align: left !important;
-    line-height: 1.4 !important;
-    vertical-align: middle !important;
+  border: 1px solid #dee2e6 !important;
+  padding: 8px 12px !important;
+  font-size: 12px !important;
+  text-align: left !important;
+  line-height: 1.4 !important;
+  vertical-align: middle !important;
 }
 
 #trayScanModal_DayPlanning table {
-    background: linear-gradient(135deg, #028084 0%, #026d70 100%) !important;
-    font-weight: bold !important;
-    color: #ffffff !important;
-    height: 40px !important;
-    text-align: center !important;
-    font-size: 13px !important;
+  font-weight: bold !important;
+  color: #030303 !important;
+  height: 40px !important;
+  text-align: center !important;
+  font-size: 13px !important;
 }
 
 #trayScanModal_DayPlanning table tbody tr {
-    height: 45px !important;
-    transition: background-color 0.2s ease !important;
+  height: 45px !important;
+  transition: background-color 0.2s ease !important;
 }
 
 #trayScanModal_DayPlanning table tbody tr:nth-child(even) {
-    background-color: #f8f9fa !important;
+  background-color: #f8f9fa !important;
 }
 
 #trayScanModal_DayPlanning table tbody tr:hover {
-    background-color: #e3f2fd !important;
+  background-color: #e3f2fd !important;
 }
 
 /* Enhanced Form controls inside modal */
 #trayScanModal_DayPlanning input.form-control {
-    width: 100% !important;
-    padding: 6px 10px !important;
-    font-size: 12px !important;
-    border: 2px solid #ced4da !important;
-    border-radius: 6px !important;
-    height: 32px !important;
-    line-height: 1.4 !important;
-    margin: 0 !important;
-    transition: border-color 0.2s ease !important;
+  width: 100% !important;
+  padding: 6px 10px !important;
+  font-size: 12px !important;
+  border: 2px solid #ced4da !important;
+  border-radius: 6px !important;
+  height: 32px !important;
+  line-height: 1.4 !important;
+  margin: 0 !important;
+  transition: border-color 0.2s ease !important;
 }
 
 #trayScanModal_DayPlanning input.form-control:focus {
-    border-color: #028084 !important;
-    outline: none !important;
-    box-shadow: 0 0 0 3px rgba(2, 128, 132, 0.1) !important;
-    animation: inputFocusGlow 0.3s ease-out;
+  border-color: #028084 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(2, 128, 132, 0.1) !important;
+  animation: inputFocusGlow 0.3s ease-out;
 }
 
 /* Enhanced Status badges inside modal */
 #trayScanModal_DayPlanning span[style*="background"] {
-    padding: 4px 8px !important;
-    font-size: 10px !important;
-    margin-left: 8px !important;
-    border-radius: 12px !important;
-    line-height: 1.2 !important;
-    font-weight: 600 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.5px !important;
+  padding: 4px 8px !important;
+  font-size: 10px !important;
+  margin-left: 8px !important;
+  border-radius: 12px !important;
+  line-height: 1.2 !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
 }
 
 /* Enhanced Top tray row styling */
 .top-tray-row {
-    border-left: 4px solid #2196f3 !important;
-    font-weight: 700 !important;
-    background-color: #e3f2fd !important;
+  border-left: 4px solid #2196f3 !important;
+  font-weight: 700 !important;
+  background-color: #e3f2fd !important;
 }
 
 /* Enhanced Validation status styling */
 .validation-status {
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    justify-content: center !important;
-    padding: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  justify-content: center !important;
+  padding: 4px !important;
 }
 
 .status-icon {
-    width: 24px !important;
-    height: 24px !important;
-    border-radius: 50% !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transition: all 0.4s ease !important;
-    opacity: 0.4 !important;
-    filter: grayscale(0.8) !important;
-    cursor: pointer !important;
-    position: relative;
-    overflow: hidden;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.4s ease !important;
+  opacity: 0.4 !important;
+  filter: grayscale(0.8) !important;
+  cursor: pointer !important;
+  position: relative;
+  overflow: hidden;
 }
 
 .status-icon img {
-    width: 16px !important;
-    height: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
 }
 
 /* Default state - both icons visible but dimmed */
 .status-icon.fail,
 .status-icon.pass {
-    opacity: 0.25;
-    filter: grayscale(0.8) brightness(0.7);
-    transform: scale(0.9);
-    border: 1px solid transparent;
+  opacity: 0.25;
+  filter: grayscale(0.8) brightness(0.7);
+  transform: scale(0.9);
+  border: 1px solid transparent;
 }
 
 /* Pass icon styling */
 .status-icon.pass {
-    background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
 }
 
 .status-icon.pass img {
-    filter: hue-rotate(0deg) saturate(0.6);
+  filter: hue-rotate(0deg) saturate(0.6);
 }
 
 /* Fail icon styling */
 .status-icon.fail {
-    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
 }
 
 .status-icon.fail img {
-    filter: hue-rotate(0deg) saturate(0.6);
+  filter: hue-rotate(0deg) saturate(0.6);
 }
 
 /* Active states */
 .status-icon.active {
-    opacity: 1 !important;
-    filter: grayscale(0) brightness(1) !important;
-    transform: scale(1.15) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-    border: 2px solid !important;
-    animation: statusActivate 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  opacity: 1 !important;
+  filter: grayscale(0) brightness(1) !important;
+  transform: scale(1.15) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  border: 2px solid !important;
+  animation: statusActivate 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 .status-icon.active.pass {
-    background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%) !important;
-    border-color: #2e7d32 !important;
-    box-shadow: 0 4px 16px rgba(76, 175, 80, 0.4) !important;
+  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%) !important;
+  border-color: #2e7d32 !important;
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.4) !important;
 }
 
 .status-icon.active.pass img {
-    filter: brightness(0) invert(1) !important; /* Makes icon white */
+  filter: brightness(0) invert(1) !important; /* Makes icon white */
 }
 
 .status-icon.active.fail {
-    background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%) !important;
-    border-color: #d32f2f !important;
-    box-shadow: 0 4px 16px rgba(244, 67, 54, 0.4) !important;
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%) !important;
+  border-color: #d32f2f !important;
+  box-shadow: 0 4px 16px rgba(244, 67, 54, 0.4) !important;
 }
 
 .status-icon.active.fail img {
-    filter: brightness(0) invert(1) !important; /* Makes icon white */
+  filter: brightness(0) invert(1) !important; /* Makes icon white */
 }
 
 /* Inactive state - more subtle */
 .status-icon.inactive {
-    opacity: 0.15 !important;
-    filter: grayscale(1) brightness(0.5) !important;
-    transform: scale(0.8) !important;
+  opacity: 0.15 !important;
+  filter: grayscale(1) brightness(0.5) !important;
+  transform: scale(0.8) !important;
 }
 
 /* Animation for activation */
 @keyframes statusActivate {
-    0% {
-        transform: scale(0.9);
-        opacity: 0.3;
-    }
-    50% {
-        transform: scale(1.25);
-        opacity: 0.8;
-    }
-    100% {
-        transform: scale(1.15);
-        opacity: 1;
-    }
+  0% {
+    transform: scale(0.9);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.25);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
 }
 
 /* Hover effects for better UX */
 .status-icon:not(.active):hover {
-    opacity: 0.4 !important;
-    filter: grayscale(0.5) brightness(0.8) !important;
-    transform: scale(0.95) !important;
-    transition: all 0.2s ease !important;
+  opacity: 0.4 !important;
+  filter: grayscale(0.5) brightness(0.8) !important;
+  transform: scale(0.95) !important;
+  transition: all 0.2s ease !important;
 }
 
 /* Hidden input for validation */
 #trayValidateInput {
-    position: absolute !important;
-    left: -9999px !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
+  position: absolute !important;
+  left: -9999px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 /* Enhanced Error message styling */
 #trayErrorMessage {
-    display: none !important;
-    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%) !important;
-    border: 2px solid #f44336 !important;
-    color: #c62828 !important;
-    padding: 12px 16px !important;
-    border-radius: 8px !important;
-    margin-bottom: 15px !important;
-    font-size: 12px !important;
-    text-align: center !important;
-    font-weight: 600 !important;
-    box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2) !important;
+  display: none !important;
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%) !important;
+  border: 2px solid #f44336 !important;
+  color: #c62828 !important;
+  padding: 12px 16px !important;
+  border-radius: 8px !important;
+  margin-bottom: 15px !important;
+  font-size: 12px !important;
+  text-align: center !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2) !important;
 }
 
 /* Enhanced Draft/Cancel Buttons Styling */
 #draftInfoMessage {
-    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%) !important;
-    border: 2px solid #ffeaa7 !important;
-    color: #856404 !important;
-    padding: 12px 16px !important;
-    border-radius: 8px !important;
-    margin: 15px 0 !important;
-    font-size: 14px !important;
-    text-align: center !important;
-    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2) !important;
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%) !important;
+  border: 2px solid #ffeaa7 !important;
+  color: #856404 !important;
+  padding: 12px 16px !important;
+  border-radius: 8px !important;
+  margin: 15px 0 !important;
+  font-size: 14px !important;
+  text-align: center !important;
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2) !important;
 }
 
 #draftCancelButtons {
-    display: flex !important;
-    justify-content: center !important;
-    gap: 15px !important;
-    margin-top: 20px !important;
-    padding: 15px !important;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
-    border-radius: 8px !important;
-    border: 2px solid #dee2e6 !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  display: flex !important;
+  justify-content: center !important;
+  gap: 15px !important;
+  margin-top: 20px !important;
+  padding: 15px !important;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+  border-radius: 8px !important;
+  border: 2px solid #dee2e6 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
 }
 
-#trayDraftBtn, #trayCancelBtn {
-    padding: 10px 20px !important;
-    border: none !important;
-    border-radius: 25px !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+#trayDraftBtn,
+#trayCancelBtn {
+  padding: 10px 20px !important;
+  border: none !important;
+  border-radius: 25px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
 #trayDraftBtn {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
-    color: white !important;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+  color: white !important;
 }
 
 #trayDraftBtn:hover {
-    background: linear-gradient(135deg, #0056b3 0%, #004085 100%) !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3) !important;
+  background: linear-gradient(135deg, #0056b3 0%, #004085 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3) !important;
 }
 
 #trayCancelBtn {
-    background: linear-gradient(135deg, #6c757d 0%, #545b62 100%) !important;
-    color: white !important;
+  background: linear-gradient(135deg, #6c757d 0%, #545b62 100%) !important;
+  color: white !important;
 }
 
 #trayCancelBtn:hover {
-    background: linear-gradient(135deg, #545b62 0%, #3d4349 100%) !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3) !important;
+  background: linear-gradient(135deg, #545b62 0%, #3d4349 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3) !important;
 }
 
 /* Override grid display for table layout */
 #trayScanDetails_DayPlanning.table-grid {
-    display: block !important;    /* Override grid display */
-    grid-template-columns: none !important;
-    gap: 0 !important;
-    max-height: none !important;
-    overflow-y: visible !important;
-    padding-right: 0;
-    margin-top: 0;
-    background: #fff;
-    position: relative;
+  display: block !important; /* Override grid display */
+  grid-template-columns: none !important;
+  gap: 0 !important;
+  max-height: none !important;
+  overflow-y: visible !important;
+  padding-right: 0;
+  margin-top: 0;
+  background: #fff;
+  position: relative;
 }
 
 /* Remove grid cell styling when using table */
 #trayScanDetails_DayPlanning.table-grid > div {
-    display: none !important;     /* Hide grid divs when table is used */
+  display: none !important; /* Hide grid divs when table is used */
 }
 
 /* Enhanced Responsive adjustments for mobile */
 @media (max-width: 768px) {
-    .tray-scan-modal-DayPlanning {
-        width: 95% !important;
-        right: 2.5% !important;
-        top: 20px !important;
-        max-height: 90vh !important;
-    }
-    
-    #trayScanModal_DayPlanning table th,
-    #trayScanModal_DayPlanning table td {
-        padding: 6px 8px !important;
-        font-size: 11px !important;
-    }
-    
-    #trayScanModal_DayPlanning input.form-control {
-        height: 28px !important;
-        font-size: 11px !important;
-    }
-    
-    #trayValidateSection,
-    #verificationStatusIndicator {
-        flex-direction: column !important;
-        gap: 8px !important;
-    }
-    
-    #trayValidateBtn {
-        width: 100% !important;
-        justify-content: center !important;
-    }
-    
-    #draftCancelButtons {
-        flex-direction: column !important;
-        gap: 10px !important;
-    }
-    
-    #trayDraftBtn, #trayCancelBtn {
-        width: 100% !important;
-    }
-    
-    .modal-top-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-    }
+  .tray-scan-modal-DayPlanning {
+    width: 95% !important;
+    right: 2.5% !important;
+    top: 20px !important;
+    max-height: 90vh !important;
+  }
+
+  #trayScanModal_DayPlanning table th,
+  #trayScanModal_DayPlanning table td {
+    padding: 6px 8px !important;
+    font-size: 11px !important;
+  }
+
+  #trayScanModal_DayPlanning input.form-control {
+    height: 28px !important;
+    font-size: 11px !important;
+  }
+
+  #trayValidateSection,
+  #verificationStatusIndicator {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  #trayValidateBtn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  #draftCancelButtons {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  #trayDraftBtn,
+  #trayCancelBtn {
+    width: 100% !important;
+  }
+
+  .modal-top-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
 }
 
 /* Enhanced Backdrop overlay */
 .modal-backdrop-custom {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    background-color: rgba(0, 0, 0, 0.5) !important;
-    z-index: 999998 !important;
-    display: none !important;
-    backdrop-filter: blur(2px) !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  z-index: 999998 !important;
+  display: none !important;
+  backdrop-filter: blur(2px) !important;
 }
 
 .modal-backdrop-custom.show {
-    display: block !important;
-    animation: fadeIn 0.3s ease-out;
+  display: block !important;
+  animation: fadeIn 0.3s ease-out;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Enhanced Content dimming when modal is active */
 .content-dimmed {
-    opacity: 0.3 !important;
-    pointer-events: none !important;
-    filter: blur(2px) !important;
-    transition: all 0.3s ease !important;
+  opacity: 0.3 !important;
+  pointer-events: none !important;
+  filter: blur(2px) !important;
+  transition: all 0.3s ease !important;
 }
-
 
 /* Enhanced Animation for input focus */
 @keyframes inputFocusGlow {
-    0% {
-        box-shadow: 0 0 0 0 rgba(2, 128, 132, 0.4);
-    }
-    100% {
-        box-shadow: 0 0 0 6px rgba(2, 128, 132, 0.1);
-    }
+  0% {
+    box-shadow: 0 0 0 0 rgba(2, 128, 132, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 0 6px rgba(2, 128, 132, 0.1);
+  }
 }
 
 /* Enhanced Status indicators */
 .verification-indicator {
-    transition: all 0.3s ease !important;
-    border-radius: 4px !important;
-    padding: 2px 6px !important;
+  transition: all 0.3s ease !important;
+  border-radius: 4px !important;
+  padding: 2px 6px !important;
 }
 
 .verification-indicator.verified {
-    animation: verifiedPulse 2s ease-in-out;
+  animation: verifiedPulse 2s ease-in-out;
 }
 
 @keyframes verifiedPulse {
-    0%, 100% {
-        background-color: #d4edda;
-    }
-    50% {
-        background-color: #c3e6cb;
-    }
+  0%,
+  100% {
+    background-color: #d4edda;
+  }
+  50% {
+    background-color: #c3e6cb;
+  }
 }
 
 /* Enhanced Loading states */
 .loading-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.9);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    border-radius: 8px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  border-radius: 8px;
 }
 
 .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #028084;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #028084;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Enhanced Visual feedback for successful operations */
 .success-flash {
-    animation: successFlash 1s ease-out;
+  animation: successFlash 1s ease-out;
 }
 
 @keyframes successFlash {
-    0% {
-        background-color: transparent;
-    }
-    50% {
-        background-color: rgba(40, 167, 69, 0.2);
-    }
-    100% {
-        background-color: transparent;
-    }
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(40, 167, 69, 0.2);
+  }
+  100% {
+    background-color: transparent;
+  }
 }
 
 /* Enhanced Error flash for failed operations */
 .error-flash {
-    animation: errorFlash 1s ease-out;
+  animation: errorFlash 1s ease-out;
 }
 
 @keyframes errorFlash {
-    0% {
-        background-color: transparent;
-    }
-    50% {
-        background-color: rgba(220, 53, 69, 0.2);
-    }
-    100% {
-        background-color: transparent;
-    }
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(220, 53, 69, 0.2);
+  }
+  100% {
+    background-color: transparent;
+  }
 }
 
 /* ===== YOUR EXISTING STYLES - PRESERVED ===== */
@@ -2643,7 +2639,7 @@ thead th {
 }
 
 /* Style for toggle switch and whole row inactive */
-@media (max-width: 426px){
+@media (max-width: 426px) {
   .file-upload-area p {
     font-size: 12px !important;
   }
@@ -2695,21 +2691,26 @@ td:first-child * {
 .hold-slider {
   position: absolute;
   cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: #e5e5e5; /* Always grey track */
   border-radius: 20px;
-  transition: .3s;
+  transition: 0.3s;
 }
 
 .hold-slider:before {
   position: absolute;
   content: "";
-  height: 16px; width: 16px;
-  left: 2px; bottom: 2px;
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
   background-color: #bbb; /* Default grey circle */
   border: 2px solid #bbb;
   border-radius: 50%;
-  transition: .3s;
+  transition: 0.3s;
 }
 
 .hold-toggle-switch input:checked + .hold-slider:before {
@@ -2790,8 +2791,6 @@ td:first-child * {
   color: #028084 !important;
 }
 
-
-
 @media (min-width: 1800px) and (max-width: 2000px) and (min-height: 1100px) and (max-height: 1300px) {
   .content-wrapper,
   .row,
@@ -2799,7 +2798,7 @@ td:first-child * {
   .grid-margin,
   .stretch-card,
   .card,
-  .card-body{
+  .card-body {
     max-width: 1400px !important;
     margin-left: auto !important;
     margin-right: auto !important;
@@ -2816,7 +2815,6 @@ td:first-child * {
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
-
 }
 
 /* Remove right space after the table and make table stretch fully */
@@ -2826,13 +2824,14 @@ td:first-child * {
 .grid-margin,
 .stretch-card,
 .card,
-.card-body{
+.card-body {
   margin-right: 0 !important;
   padding-right: 0 !important;
   box-sizing: border-box !important;
 }
 
-body, html {
+body,
+html {
   overflow-x: hidden !important;
 }
 
@@ -2844,8 +2843,6 @@ body, html {
   margin-left: 0 !important;
   margin-right: 0 !important;
 }
-
-
 
 /* Main panel and content wrapper base */
 .main-panel,
@@ -2881,7 +2878,7 @@ body, html {
 
 /* Title spacing */
 .card-body > h5.text-left.mt-0.mb-4 {
-  margin-bottom: 10px !important;    
+  margin-bottom: 10px !important;
   margin-top: 10px !important;
   padding-bottom: 0 !important;
   margin-left: 5px !important;
@@ -2892,9 +2889,6 @@ body, html {
   margin-bottom: -5px !important;
   margin-left: -15px !important;
 }
-
-
-
 
 .content-wrapper {
   transition: opacity 0.3s ease;
@@ -2918,10 +2912,6 @@ body, html {
 .tray-scan-modal {
   right: -400px; /* hidden by default */
   z-index: 9999;
-}
-
-.tray-scan-modal.open {
-  right: 400px; /* When open, sits next to New Popup */
 }
 
 .new-popup-modal {
@@ -2984,7 +2974,7 @@ body, html {
   gap: 12px;
 }
 
-.ms-2{
+.ms-2 {
   margin-top: 8px;
 }
 
@@ -3004,18 +2994,13 @@ body, html {
     width: 100%;
     padding: 10px;
   }
-  
-  .tray-scan-modal.open {
-    width: 100% !important; /* your desired expanded width */
-    margin-right: 0px !important;
-  }
-  
+
   /* On very small screens, stacking is more appropriate */
   .tray-scan-modal.open {
     right: 0;
     top: 0;
   }
-  
+
   .new-popup-modal.open {
     right: 0;
     top: 0;
@@ -3031,19 +3016,19 @@ body, html {
     width: 300px;
     padding: 15px;
   }
-  
+
   .tray-scan-modal {
     right: -300px;
   }
-  
+
   .tray-scan-modal.open {
     right: 300px;
   }
-  
+
   .new-popup-modal {
     right: -300px;
   }
-  
+
   .new-popup-modal.open {
     right: 0;
   }
@@ -3054,8 +3039,6 @@ body, html {
     max-height: 75vh;
   }
 }
-
-
 
 @media (max-width: 1200px) {
   .tray-scan-modal-DayPlanning {
@@ -3075,7 +3058,6 @@ body, html {
 .table-responsive::-webkit-scrollbar {
   display: none;
 }
-
 
 html,
 body {
@@ -3130,7 +3112,7 @@ footer {
   width: 600px;
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   padding: 20px;
   z-index: 10000;
   transition: right 0.3s ease;
@@ -3187,7 +3169,7 @@ footer {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   border: none;
   color: #fff;
   padding: 8px;
@@ -3196,8 +3178,12 @@ footer {
   user-select: none;
 }
 
-.prev { left: 10px; }
-.next { right: 10px; }
+.prev {
+  left: 10px;
+}
+.next {
+  right: 10px;
+}
 
 @media (max-width: 767px) {
   .image-slider-modal {
@@ -3207,8 +3193,12 @@ footer {
     border-radius: 0;
     padding: 10px;
   }
-  .slider { height: 250px; }
-  .slide img { height: 250px; }
+  .slider {
+    height: 250px;
+  }
+  .slide img {
+    height: 250px;
+  }
 }
 body.pick-table-only #order-listing,
 body.pick-table-only .content-wrapper,
