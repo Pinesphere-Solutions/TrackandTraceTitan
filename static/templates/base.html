@@ -1091,7 +1091,7 @@ tr.dp-row-action-highlight > td:nth-child(2) {
                   <i class="ti-user text-primary" style="margin-right: 8px;"></i>
                   User Creation
                 </a>
-                <a class="dropdown-item" href="#">
+                <a class="dropdown-item" href="{% url 'dp_modelmaster' %}">
                   <i class="ti-package text-primary" style="margin-right: 8px;"></i>
                   Model Master
                 </a>
@@ -1677,7 +1677,7 @@ tr.dp-row-action-highlight > td:nth-child(2) {
       const trayId = trayInput.value.trim();
       if (trayId !== "") {
         // Call BaseAPIView with trayId as barcodeInput
-        fetch(`/modelmaster/base/?barcodeInput=${encodeURIComponent(trayId)}`, {
+        fetch(`/dp_modelmaster/base/?barcodeInput=${encodeURIComponent(trayId)}`, {
           method: "GET",
           headers: {
             "Accept": "application/json"
@@ -2260,7 +2260,7 @@ document.addEventListener("DOMContentLoaded", function() {
       const trayId = trayInput.value.trim();
       if (trayId !== "") {
         // Call BaseAPIView with trayId as barcodeInput
-        fetch(`/modelmaster/base/?barcodeInput=${encodeURIComponent(trayId)}`, {
+        fetch(`/dp_modelmaster/base/?barcodeInput=${encodeURIComponent(trayId)}`, {
           method: "GET",
           headers: {
             "Accept": "application/json"

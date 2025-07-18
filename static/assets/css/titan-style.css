@@ -154,6 +154,8 @@ h5.text-left.mt-0.mb-3 {
 /* Module - Day Planning Pick Table Start */
 /* Remove screen scroll and keep only table scroll for Pick Table screen */
 /* --- Fix: Ensure modal popup is scrollable and content not cropped --- */
+
+
 .tray-scan-modal.open,
 .tray-scan-modal {
   max-height: 90vh !important;
@@ -1229,7 +1231,7 @@ h6 {
   /* display: grid; */
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  padding-top: 10px;
+  padding-top: 0;
 }
 
 /* Make each <p> act like a table cell */
@@ -1968,7 +1970,12 @@ thead th {
 /* Day Planning Complete table end */
 
 /* Input Screening Pick Table Start (2029-3270)  */
-
+.new-popup-modal.open {
+    left: 100px;
+    max-height: 500px !important;
+    margin-top: 40px;
+    border-radius: 20px;
+}
 /* Enhanced Modal CSS for Day Planning Tray Scan - UPDATED FOR IS PICK TABLE */
 .tray-scan-modal-DayPlanning {
   display: none !important;
@@ -2026,19 +2033,7 @@ thead th {
   transform: scale(1.1) !important;
 }
 
-/* Enhanced Modal header styling */
-.modal-top-header {
-  padding-bottom: 12px !important;
-  margin-bottom: 15px !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 16px !important;
-  border-bottom: 1px solid #b3b3b3 !important;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
-  margin: -20px -20px 15px -20px !important;
-  padding: 15px 20px 12px 20px !important;
-  border-radius: 12px 12px 0 0 !important;
-}
+
 
 .modal-top-header .user-profile {
   display: flex !important;
@@ -2969,10 +2964,6 @@ html {
   height: calc(100% - 40px); /* Keeps height correct */
 }
 
-#trayScanDetails {
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
 
 .ms-2 {
   margin-top: 8px;

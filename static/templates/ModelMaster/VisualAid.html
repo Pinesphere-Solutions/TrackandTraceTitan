@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    .image-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.image-controls .control-icon {
+  font-size: 20px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.image-controls .control-icon:hover {
+  background-color: #e0e0e0;
+}
+
+/* Optional: Adjust icons if using Font Awesome */
+.image-controls .fa {
+  font-size: 18px;
+}
+
+    .big-image-container h5 {
+  font-weight: 600;
+  font-size: 18px;
+  color: #333;
+   margin-bottom: 10px;
+    margin-top: -30px;
+}
+  .big-image-container img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: 400px;
+    object-fit: contain;
+    border-radius: 8px;
+    display: block;
+  }
+
+  .big-image-container {
+    margin-left: -15px;
+  }
+
+  @media (max-width: 768px) {
+    .big-image-container {
+      margin-left: 0;
+    }
+
+    .big-image-container img {
+      max-height: 250px;
+    }
+  }
+
+  .table-container {
+    overflow-x: auto;
+    max-width: 80%;  /* ✅ Shrink the table width */
+    margin: 0 auto;  /* ✅ Center the table */
+  }
+
+  .scrollable-images {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 0;
+  }
+
+  .scrollable-image {
+    width: 22%;
+    max-width: 150px;
+    height: auto;
+    aspect-ratio: 1/1;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+
+  @media (max-width: 768px) {
+    .scrollable-image {
+      width: 45%;
+    }
+
+    .big-image-container img {
+      max-height: 250px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .scrollable-image {
+      width: 100%;
+    }
+  }
+</style>
+
+<div class="container-fluid mt-4">
+  <div class="row mb-4">
+    <!-- Big Image View -->
+   <div class="col-lg-6 col-md-12 mb-3">
+  <div class="big-image-container">
+    <h5 class="text-center mb-3">Model No: 1805</h5> <!-- ✅ Title added -->
+    <img
+      src="{% static 'assets/images/imagePlaceholder.png' %}"
+      alt="Big View"
+    />
+  </div>
+  <!-- Add this below your image inside .big-image-container -->
+<div class="image-controls">
+  <span class="control-icon"><i class="fa fa-arrow-left"></i></span>
+  <span class="control-icon"><i class="fa fa-search-plus"></i></span>
+  <span class="control-icon"><i class="fa fa-search"></i></span>
+  <span class="control-icon"><i class="fa fa-arrow-right"></i></span>
+</div>
+
+</div>
+
+
+    <!-- Table -->
+    <div class="col-lg-6 col-md-12">
+      <div class="table-container">
+        <table class="table table-bordered">
+          <tbody>
+            <tr>
+              <th>Model No</th>
+              <td>2648</td>
+            </tr>
+            <tr>
+              <th>Polish Finish</th>
+              <td>Shot Blasting</td>
+            </tr>
+            <tr>
+              <th>Plating Color</th>
+              <td>Gold</td>
+            </tr>
+            <tr>
+              <th>Vendor</th>
+              <td>Titan</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ✅ 360° View MOVED here: BELOW the table inside same column -->
+      <div class="mt-4">
+        <h5 class="text-center">360° View</h5>
+        <div class="scrollable-images">
+          <img
+            src="{% static 'assets/images/imagePlaceholder.png' %}"
+            alt="360 View 1"
+            class="scrollable-image"
+          />
+          <img
+            src="{% static 'assets/images/imagePlaceholder.png' %}"
+            alt="360 View 2"
+            class="scrollable-image"
+          />
+          <img
+            src="{% static 'assets/images/imagePlaceholder.png' %}"
+            alt="360 View 3"
+            class="scrollable-image"
+          />
+          <img
+            src="{% static 'assets/images/imagePlaceholder.png' %}"
+            alt="360 View 4"
+            class="scrollable-image"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

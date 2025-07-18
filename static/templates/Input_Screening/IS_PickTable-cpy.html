@@ -313,7 +313,7 @@
                             border: 2px solid #dc3545;
                             background-color: #f8d7da;
                             color: #721c24;
-                            font-size: clamp(0.75rem, 2vw, 0.875rem);
+                            font-size: 13px;
                             white-space: nowrap;
                             padding-top: 0.5rem;
                             padding-bottom: 0.5rem;
@@ -325,13 +325,12 @@
                         <div
                           class="d-inline-block px-3 fw-semibold text-center rounded-pill"
                           style="
-                            border: 2px solid #4997ac;
+                            border: 1px solid #4997ac;
                             background-color: #d1f2f3;
                             color: #03425d;
-                            font-size: clamp(0.75rem, 2vw, 0.875rem);
+                            font-size: 13px;
                             white-space: nowrap;
-                            padding-top: 0.5rem;
-                            padding-bottom: 0.5rem;
+                            padding: 5px;
                           "
                         >
                           Draft
@@ -340,14 +339,13 @@
                         <div
                           class="d-inline-block px-3 fw-semibold text-center rounded-pill"
                           style="
-                            border: 2px solid #4997ac;
+                            border: 1px solid #4997ac;
                             background-color: #d1f2f3;
                             color: #03425d;
-                            font-size: clamp(0.75rem, 2vw, 0.875rem);
+                            font-size: 13px;
                             white-space: nowrap;
-                            padding-top: 0.5rem;
-                            padding-bottom: 0.5rem;
-                          "
+                            padding: 5px;
+ "
                         >
                           Draft
                         </div>
@@ -512,7 +510,6 @@
                       align-items: center;
                       gap: 20px;
                       padding-bottom: 10px;
-                      margin: 0px !important;
                     "
                   >
                     <div
@@ -586,7 +583,7 @@
                   <span id="closeTrayScanModal" class="tray-scan-close"
                     >&times;</span
                   >
-                  <h4 id="trayScanModalHeader">Input Screening / <span class="modal-model-no"></span> / Rejection Window</h4>
+                  <h3 id="trayScanModalHeader">Input Screening / <span class="modal-model-no"></span> / Rejection Window</h3>
                    <div id="trayScanDetails">
                     <!-- Dynamic content will be loaded here -->
                   </div>
@@ -632,7 +629,19 @@
                   
                   <!-- Existing centered h3 title -->
                   <!-- Redo icon for clearing "tray ID" -->
-                 
+                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                    <h5 style="text-align: center; margin: 0; flex: 1; font-weight: 600; color:#595959">
+                      Accepted - Top Tray Scan
+                    </h5>
+                    <img
+                      src="{% static 'assets/icons/redo2.png' %}"
+                      alt="Redo"
+                      
+                      id="trayScanRedoBtn"
+                      style="width: 24px; height: 24px; cursor: pointer; margin-right: 14px;"
+                      title="Clear Tray IDs"
+                    />
+                  </div>
                   <!-- Accepted Case Tray Scan Table - Grid View with Visible Borders -->
                   <div id="trayScanDetails" class="table-grid">
                     
@@ -1888,7 +1897,7 @@ document.addEventListener("DOMContentLoaded", function () {
         lotStatusCell.innerHTML = `
           <div class="d-inline-block px-3 fw-semibold text-center rounded-pill"
               style="border: 2px solid #4997ac; background-color: #d1f2f3; color: #03425d; 
-                     font-size: clamp(0.75rem, 2vw, 0.875rem); white-space: nowrap; 
+                     font-size: 13px; white-space: nowrap; 
                      padding-top: 0.5rem; padding-bottom: 0.5rem;">
             Draft (Qty Calculated)
           </div>
@@ -2528,7 +2537,7 @@ function showRejectionModalFlow(batchId, stockLotId, isOnProceed, row) {
         detailsDiv.innerHTML = `
           ${draftAlert}
           <div class="d-flex justify-content-between align-items-center mb-2" style="padding: 10px 0;">
-            <h6 class="mb-0">Rejection Reason List${draftIndicator}</h6>
+            <h4 class="mb-0">Rejection Reason List${draftIndicator}</h4>
             
             <div class="form-check d-flex align-items-center">
                 <input class="form-check-input" type="checkbox" id="batchRejection" 
@@ -2538,45 +2547,44 @@ function showRejectionModalFlow(batchId, stockLotId, isOnProceed, row) {
           </div>
          
           <!-- ✅ UPDATED: Rejection form with dynamic tray ID generation -->
-<div class="table-responsive" style="border: 1px solid black; max-width: 650px; margin: 0 auto;">
-  <table class="table table-bordered text-center" style="width:100%; margin-bottom:0; border-collapse: collapse; font-size: 13px;">
-        <thead style="background-color: ${headerColor}; color: #000;">
-      <tr>
-        <th style="padding: 8px; border: 1px solid #000;">S.No</th>
-        <th style="padding: 8px; border: 1px solid #000;">Reason ID</th>
-        <th style="padding: 8px; border: 1px solid #000;">Rejection Reason</th>
-        <th style="padding: 8px; border: 1px solid #000;">Quantity</th>
-        <th style="padding: 8px; min-width: 120px; border: 1px solid #000;">Tray ID(s)</th>
+<div class="table-responsive" style="border: solid 1px black;">
+  <table class="table table-bordered text-center" style="border: solid 2px black; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    <thead style="border: solid 2px black; background-color: ${headerColor}; color: #fff;">
+      <tr style="border: solid 1px black; color: #000;">
+        <th style="padding: 12px;">S.No</th>
+        <th style="padding: 12px;">Reason ID</th>
+        <th style="padding: 12px;">Rejection Reason</th>
+        <th style="padding: 12px;">Quantity</th>
+        <th style="padding: 12px; min-width: 180px;">Tray ID(s)</th> <!-- ✅ UPDATED: Wider column for multiple inputs -->
       </tr>
     </thead>
-        <tbody id="rejection-table-body">
+    <tbody id="rejection-table-body">
       {% for reason in ip_rejection_reasons %}
-      <tr data-batch-id="${batchId}" data-stock-lot-id="${stockLotId}" style="border-bottom: 1.5px solid #000;">
-        <td style="border: 1px solid #000;">{{ forloop.counter }}</td>
-        <td style="color: {{ reason.row_color }};border: 1px solid #000;">{{ reason.rejection_reason_id }}</td>
-        <td style="color: {{ reason.row_color }};border: 1px solid #000;">{{ reason.rejection_reason }}</td>
-        <td style="border: 1px solid #000;">
+      <tr data-batch-id="${batchId}" data-stock-lot-id="${stockLotId}">
+        <td>{{ forloop.counter }}</td>
+        <td style="color: {{ reason.row_color }};">{{ reason.rejection_reason_id }}</td>
+        <td style="color: {{ reason.row_color }};">{{ reason.rejection_reason }}</td>
+        <td>
           <input type="number" 
                  min="0" 
                  class="form-control rejection-qty-input" 
                  name="quantity_{{ forloop.counter }}" 
-                 style="width: 60px; ${inputStyle}" 
+                 style="width: 80px; ${inputStyle}" 
                  data-reason-id="{{ reason.rejection_reason_id }}"
                  value="" />
         </td>
-        <td style="border: 1px solid #000; vertical-align: top; padding: 6px 4px; min-width: 120px; max-width: 140px;">
+        <td style="vertical-align: top; padding: 8px 6px; min-width: 180px; max-width: 200px;">
           <!-- ✅ NEW: Dynamic tray ID container will be populated by JavaScript -->
           <span style="color: #999; font-style: italic;">Enter quantity first</span>
         </td>
       </tr>
       {% endfor %}
-      <tr style="border: 1px solid #000;">
+      <tr>
         <td colspan="4" style="text-align: right; font-weight: bold;">Total Qty</td>
         <td id="rejection-total-qty" style="font-weight: bold;">0</td>
       </tr>
     </tbody>
   </table>
-</div>
 </div>
 
           
@@ -2981,6 +2989,285 @@ function getTotalRejectionQuantityForReason(reasonId) {
 }
 
 
+// ✅ UPDATED: Enhanced validation with session tracking
+function addMultipleTrayIdValidationWithDynamic(trayIdCell) {
+  const trayInputs = trayIdCell.querySelectorAll('.rejection-tray-id-input');
+  
+  trayInputs.forEach(function(input, idx) {
+    // Remove existing event listeners
+    input.removeEventListener('blur', input._blurHandler);
+    input.removeEventListener('input', input._inputHandler);
+    input.removeEventListener('keydown', input._keydownHandler);
+    
+    // Track validation state
+    input._hasError = false;
+    input._isValidating = false;
+    
+    // Input event for counter update
+    input._inputHandler = function() {
+      this._hasError = false;
+      const errorSpan = this.parentElement.querySelector('.rejection-tray-error');
+      if (errorSpan) {
+        errorSpan.style.display = 'none';
+        errorSpan.textContent = '';
+      }
+      updateRejectionScanCounter();
+    };
+    input.addEventListener('input', input._inputHandler);
+    
+    // Keydown handler
+    input._keydownHandler = function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        
+        if (this._hasError || this._isValidating || !this.value.trim()) {
+          return;
+        }
+        
+        // Move to next tray input in same cell or next row
+        const nextInput = trayInputs[idx + 1];
+        if (nextInput) {
+          nextInput.focus();
+        }
+      }
+    };
+    input.addEventListener('keydown', input._keydownHandler);
+    
+    // ✅ ENHANCED: Session-aware blur validation
+    input._blurHandler = function() {
+      const trayId = this.value.trim();
+      const errorSpan = this.parentElement.querySelector('.rejection-tray-error');
+      this._hasError = false;
+    
+      // Always clear error before validation
+      if (errorSpan) {
+        errorSpan.textContent = '';
+        errorSpan.style.display = 'none';
+      }
+    
+      if (!trayId) {
+        updateRejectionScanCounter();
+        return;
+      }
+    
+      this._isValidating = true;
+    
+      // Check for duplicates within current form
+      let isDuplicate = false;
+      document.querySelectorAll('.rejection-tray-id-input').forEach(function(otherInput) {
+        if (otherInput !== input && otherInput.value.trim() === trayId) {
+          isDuplicate = true;
+        }
+      });
+    
+      if (isDuplicate) {
+        this._hasError = true;
+        this._isValidating = false;
+        if (errorSpan) {
+          errorSpan.innerHTML = `❌ Duplicate`;
+          errorSpan.style.display = 'block';
+          errorSpan.style.color = '#dc3545';
+        }
+        setTimeout(() => {
+          this.value = '';
+          this._hasError = false;
+          if (errorSpan) errorSpan.style.display = 'none';
+          this.focus();
+          updateRejectionScanCounter();
+        }, 800);
+        return;
+      }
+
+      // ✅ NEW: Collect current session allocations before validation
+      const currentSessionAllocations = collectCurrentSessionAllocations(this);
+      const currentLotId = getCurrentLotId();
+      const rejectionQty = parseInt(this.getAttribute('data-rejection-qty')) || 0;
+      
+      const rejectionContext = {
+        tray_id: trayId,
+        lot_id: currentLotId,
+        rejection_qty: rejectionQty,
+        current_session_allocations: JSON.stringify(currentSessionAllocations)  // ✅ NEW: Pass session data
+      };
+      
+      console.log('🔍 Session-aware validation context:', rejectionContext);
+      
+      // ✅ UPDATED: Use session-aware validation endpoint
+      const queryParams = new URLSearchParams(rejectionContext).toString();
+      fetch(`/inputscreening/reject_check_tray_id_session_aware/?${queryParams}`)
+        .then(res => res.json())
+        .then(data => {
+          this._isValidating = false;
+          
+          console.log('🔍 Session-aware validation response:', data);
+    
+          if (errorSpan) {
+            if (data.exists && data.valid_for_rejection) {
+              this._hasError = false;
+              
+              // ✅ ENHANCED: Show session-aware validation results
+              let successMessage = `✅ ${data.status_message}`;
+              
+              // Add session information
+              if (data.session_remaining_distribution) {
+                console.log(`📊 Session remaining: [${data.session_remaining_distribution.join(', ')}]`);
+              }
+              
+              errorSpan.innerHTML = successMessage;
+              errorSpan.style.display = 'block';
+              errorSpan.style.color = '#155724';
+              errorSpan.style.backgroundColor = '#d4edda';
+              errorSpan.style.padding = '4px 8px';
+              errorSpan.style.borderRadius = '4px';
+              errorSpan.style.fontSize = '11px';
+              
+              setTimeout(() => {
+                errorSpan.style.display = 'none';
+                updateRejectionScanCounter();
+              }, 3000);
+              
+            } else {
+              this._hasError = true;
+              
+              // ✅ ENHANCED: Show session-aware error messages
+              let errorMessage = `❌ ${data.status_message || 'Invalid'}`;
+              
+              // Show session information for debugging
+              if (data.session_remaining_distribution) {
+                const validQties = data.session_remaining_distribution.join(', ');
+                console.log(`📊 Available in session: [${validQties}]`);
+                if (data.already_allocated_in_session) {
+                  errorMessage += ` (Already used in session)`;
+                }
+              }
+              
+              errorSpan.innerHTML = errorMessage;
+              errorSpan.style.display = 'block';
+              errorSpan.style.color = '#721c24';
+              errorSpan.style.backgroundColor = '#f8d7da';
+              errorSpan.style.padding = '4px 8px';
+              errorSpan.style.borderRadius = '4px';
+              errorSpan.style.fontSize = '11px';
+              
+              setTimeout(() => {
+                this.value = '';
+                this._hasError = false;
+                errorSpan.style.display = 'none';
+                this.focus();
+                updateRejectionScanCounter();
+              }, 4000);
+            }
+          } else {
+            updateRejectionScanCounter();
+          }
+        })
+        .catch(() => {
+          this._isValidating = false;
+          this._hasError = true;
+          if (errorSpan) {
+            errorSpan.innerHTML = '❌ Connection Error';
+            errorSpan.style.display = 'block';
+            errorSpan.style.color = '#721c24';
+            setTimeout(() => {
+              this.value = '';
+              this._hasError = false;
+              errorSpan.style.display = 'none';
+              this.focus();
+              updateRejectionScanCounter();
+            }, 1000);
+          } else {
+            updateRejectionScanCounter();
+          }
+        });
+    };
+    input.addEventListener('blur', input._blurHandler);
+  });
+}
+
+
+
+function collectCurrentSessionAllocations(excludeInput) {
+  const allocations = [];
+  
+  console.log('📊 [Session Collection] Starting allocation collection...');
+  
+  // Get all rejection quantity inputs and their associated tray scans
+  document.querySelectorAll('.rejection-qty-input').forEach(qtyInput => {
+    const qty = parseInt(qtyInput.value) || 0;
+    const reasonId = qtyInput.getAttribute('data-reason-id');
+    
+    if (qty > 0) {
+      const row = qtyInput.closest('tr');
+      const reasonCell = row.cells[2];
+      const reasonText = reasonCell ? reasonCell.textContent.trim() : '';
+      const trayIdCell = row.querySelector('td:last-child');
+      const trayInputs = trayIdCell.querySelectorAll('.rejection-tray-id-input');
+      
+      console.log(`📋 [Session Collection] Processing reason ${reasonId} (${reasonText}): qty=${qty}, inputs=${trayInputs.length}`);
+      
+      // ✅ ENHANCED: Count valid tray scans more accurately
+      const validTrayIds = [];
+      let validTrayCount = 0;
+      
+      trayInputs.forEach((trayInput, index) => {
+        const trayId = trayInput.value.trim();
+        
+        // Skip the input we're currently validating
+        if (trayInput === excludeInput) {
+          console.log(`   ⏭️ Skipping current input ${index + 1}: "${trayId}" (being validated)`);
+          return;
+        }
+        
+        if (trayId) {
+          // Check if this tray input has a validation error
+          const errorSpan = trayInput.parentElement.querySelector('.rejection-tray-error');
+          const hasError = errorSpan && 
+                           errorSpan.style.display === 'block' && 
+                           (errorSpan.textContent.includes('❌') || errorSpan.style.color === '#721c24');
+          
+          if (!hasError) {
+            validTrayIds.push(trayId);
+            validTrayCount++;
+            console.log(`   ✅ Valid tray ${index + 1}: "${trayId}"`);
+          } else {
+            console.log(`   ❌ Invalid tray ${index + 1}: "${trayId}" (has error)`);
+          }
+        } else {
+          console.log(`   ⭕ Empty tray ${index + 1}`);
+        }
+      });
+      
+      // ✅ CRITICAL: Only add allocation if there are valid tray scans
+      if (validTrayCount > 0) {
+        const allocation = {
+          reason_id: reasonId,
+          reason_text: reasonText,
+          qty: qty,
+          tray_count: validTrayCount,
+          tray_ids: validTrayIds,
+          expected_trays: Math.ceil(qty / 12) // For debugging
+        };
+        
+        allocations.push(allocation);
+        console.log(`   ✅ Added allocation:`, allocation);
+      } else {
+        console.log(`   ⚠️ No valid trays for reason ${reasonId}, skipping allocation`);
+      }
+    }
+  });
+  
+  console.log('📊 [Session Collection] FINAL allocations:', allocations);
+  console.log(`📊 [Session Collection] Summary: ${allocations.length} active allocations`);
+  
+  // Log summary for debugging
+  allocations.forEach(alloc => {
+    console.log(`   📋 ${alloc.reason_id}: Qty ${alloc.qty} using ${alloc.tray_count} tray(s)`);
+  });
+  
+  return allocations;
+}
+
+
 // ✅ NEW: Function to calculate tray distribution with remainder FIRST
 function calculateTrayDistribution(totalQuantity, trayCapacities) {
   const distribution = [];
@@ -3051,7 +3338,8 @@ function getTrayCapacitiesForCurrentLot() {
   return [6, 12, 12, 10, 10, 10, 10, 10, 10, 10]; // Sample capacities
 }
 
-function addMultipleTrayIdValidationWithDynamic(trayIdCell) {
+// ✅ NEW: Enhanced validation for multiple tray ID inputs
+function addMultipleTrayIdValidation(trayIdCell) {
   const trayInputs = trayIdCell.querySelectorAll('.rejection-tray-id-input');
   
   trayInputs.forEach(function(input, idx) {
@@ -3085,6 +3373,7 @@ function addMultipleTrayIdValidationWithDynamic(trayIdCell) {
           return;
         }
         
+        // Move to next tray input in same cell or next row
         const nextInput = trayInputs[idx + 1];
         if (nextInput) {
           nextInput.focus();
@@ -3093,239 +3382,111 @@ function addMultipleTrayIdValidationWithDynamic(trayIdCell) {
     };
     input.addEventListener('keydown', input._keydownHandler);
     
-    // ✅ ENHANCED: NEW tray aware validation
-    input._blurHandler = function() {
-      const trayId = this.value.trim();
-      const errorSpan = this.parentElement.querySelector('.rejection-tray-error');
-      this._hasError = false;
-    
-      if (errorSpan) {
-        errorSpan.textContent = '';
-        errorSpan.style.display = 'none';
-      }
-    
-      if (!trayId) {
-        updateRejectionScanCounter();
-        return;
-      }
-    
-      this._isValidating = true;
-    
-      // Check for duplicates within current form
-      let isDuplicate = false;
-      document.querySelectorAll('.rejection-tray-id-input').forEach(function(otherInput) {
-        if (otherInput !== input && otherInput.value.trim() === trayId) {
-          isDuplicate = true;
-        }
-      });
-    
-      if (isDuplicate) {
-        this._hasError = true;
-        this._isValidating = false;
-        if (errorSpan) {
-          errorSpan.innerHTML = `❌ Duplicate`;
-          errorSpan.style.display = 'block';
-          errorSpan.style.color = '#dc3545';
-        }
-        setTimeout(() => {
-          this.value = '';
+    // Blur validation
+        input._blurHandler = function() {
+          const trayId = this.value.trim();
+          const errorSpan = this.parentElement.querySelector('.rejection-tray-error');
           this._hasError = false;
-          if (errorSpan) errorSpan.style.display = 'none';
-          this.focus();
-          updateRejectionScanCounter();
-        }, 800);
-        return;
-      }
-
-      // ✅ ENHANCED: Collect session allocations with NEW tray tracking
-      const currentSessionAllocations = collectCurrentSessionAllocationsWithNewTrayTracking(this);
-      const currentLotId = getCurrentLotId();
-      const individualTrayQty = parseInt(this.getAttribute('data-tray-qty')) || 0;
-      
-      const rejectionContext = {
-        tray_id: trayId,
-        lot_id: currentLotId,
-        rejection_qty: individualTrayQty,
-        current_session_allocations: JSON.stringify(currentSessionAllocations)
-      };
-      
-      console.log('🔍 NEW tray aware validation context:', rejectionContext);
-      
-      const queryParams = new URLSearchParams(rejectionContext).toString();
-      fetch(`/inputscreening/reject_check_tray_id_simple/?${queryParams}`)
-        .then(res => res.json())
-        .then(data => {
-          this._isValidating = false;
-          
-          console.log('🔍 Session-aware validation response (with NEW tray logic):', data);
-    
+        
+          // Always clear error before validation
           if (errorSpan) {
-            if (data.exists && data.valid_for_rejection) {
-              this._hasError = false;
-              
-              let successMessage = `✅ ${data.status_message}`;
-              
-              errorSpan.innerHTML = successMessage;
-              errorSpan.style.display = 'block';
-              errorSpan.style.color = '#155724';
-              errorSpan.style.backgroundColor = '#d4edda';
-              errorSpan.style.padding = '4px 8px';
-              errorSpan.style.borderRadius = '4px';
-              errorSpan.style.fontSize = '11px';
-              
-              setTimeout(() => {
-                errorSpan.style.display = 'none';
-                updateRejectionScanCounter();
-              }, 3000);
-              
-            } else {
-              this._hasError = true;
-              
-              let errorMessage = `❌ ${data.status_message || 'Invalid'}`;
-              
-              errorSpan.innerHTML = errorMessage;
-              errorSpan.style.display = 'block';
-              errorSpan.style.color = '#721c24';
-              errorSpan.style.backgroundColor = '#f8d7da';
-              errorSpan.style.padding = '4px 8px';
-              errorSpan.style.borderRadius = '4px';
-              errorSpan.style.fontSize = '11px';
-              
-              setTimeout(() => {
-                this.value = '';
-                this._hasError = false;
-                errorSpan.style.display = 'none';
-                this.focus();
-                updateRejectionScanCounter();
-              }, 4000);
-            }
-          } else {
-            updateRejectionScanCounter();
+            errorSpan.textContent = '';
+            errorSpan.style.display = 'none';
           }
-        })
-        .catch(() => {
-          this._isValidating = false;
-          this._hasError = true;
-          if (errorSpan) {
-            errorSpan.innerHTML = '❌ Connection Error';
-            errorSpan.style.display = 'block';
-            errorSpan.style.color = '#721c24';
+        
+          if (!trayId) {
+            updateRejectionScanCounter();
+            return;
+          }
+        
+          this._isValidating = true;
+        
+          // Check for duplicates
+          let isDuplicate = false;
+          document.querySelectorAll('.rejection-tray-id-input').forEach(function(otherInput) {
+            if (otherInput !== input && otherInput.value.trim() === trayId) {
+              isDuplicate = true;
+            }
+          });
+        
+          if (isDuplicate) {
+            this._hasError = true;
+            this._isValidating = false;
+            if (errorSpan) {
+              errorSpan.innerHTML = `❌ Duplicate`;
+              errorSpan.style.display = 'block';
+              errorSpan.style.color = '#dc3545';
+            }
             setTimeout(() => {
               this.value = '';
               this._hasError = false;
-              errorSpan.style.display = 'none';
+              if (errorSpan) errorSpan.style.display = 'none';
               this.focus();
-              updateRejectionScanCounter();
-            }, 1000);
-          } else {
-            updateRejectionScanCounter();
+              updateRejectionScanCounter(); // ✅ Always update after error
+            }, 800);
+            return;
           }
-        });
-    };
+        
+          // Server validation
+          const currentLotId = getCurrentLotId();
+          fetch(`/inputscreening/reject_check_tray_id/?tray_id=${encodeURIComponent(trayId)}&lot_id=${encodeURIComponent(currentLotId)}`)
+            .then(res => res.json())
+            .then(data => {
+              this._isValidating = false;
+        
+              if (errorSpan) {
+                if (data.exists) {
+                  this._hasError = false;
+                  errorSpan.innerHTML = `✅ ${data.status_message}`;
+                  errorSpan.style.display = 'block';
+                  errorSpan.style.color = '#155724';
+                  setTimeout(() => {
+                    errorSpan.style.display = 'none';
+                    updateRejectionScanCounter(); // ✅ Update after success
+                  }, 1000);
+                } else {
+                  this._hasError = true;
+                  errorSpan.innerHTML = `❌ ${data.status_message || 'Invalid'}`;
+                  errorSpan.style.display = 'block';
+                  errorSpan.style.color = '#721c24';
+                  setTimeout(() => {
+                    this.value = '';
+                    this._hasError = false;
+                    errorSpan.style.display = 'none';
+                    this.focus();
+                    updateRejectionScanCounter(); // ✅ Update after error
+                  }, 1000);
+                }
+              } else {
+                updateRejectionScanCounter();
+              }
+            })
+            .catch(() => {
+              this._isValidating = false;
+              this._hasError = true;
+              if (errorSpan) {
+                errorSpan.innerHTML = '❌ Error';
+                errorSpan.style.display = 'block';
+                errorSpan.style.color = '#721c24';
+                setTimeout(() => {
+                  this.value = '';
+                  this._hasError = false;
+                  errorSpan.style.display = 'none';
+                  this.focus();
+                  updateRejectionScanCounter(); // ✅ Update after network error
+                }, 1000);
+              } else {
+                updateRejectionScanCounter();
+              }
+            });
+        };
     input.addEventListener('blur', input._blurHandler);
   });
 }
 
-// ✅ NEW: Enhanced session allocation collection with NEW tray tracking
-function collectCurrentSessionAllocationsWithNewTrayTracking(excludeInput) {
-  const allocations = [];
-  
-  console.log('📊 [NEW Tray Aware Collection] Starting allocation collection...');
-  
-  document.querySelectorAll('.rejection-qty-input').forEach(qtyInput => {
-    const qty = parseInt(qtyInput.value) || 0;
-    const reasonId = qtyInput.getAttribute('data-reason-id');
-    
-    if (qty > 0) {
-      const row = qtyInput.closest('tr');
-      const reasonCell = row.cells[2];
-      const reasonText = reasonCell ? reasonCell.textContent.trim() : '';
-      const trayIdCell = row.querySelector('td:last-child');
-      const trayInputs = trayIdCell.querySelectorAll('.rejection-tray-id-input');
-      
-      console.log(`📋 [NEW Tray Aware Collection] Processing reason ${reasonId} (${reasonText}): qty=${qty}, inputs=${trayInputs.length}`);
-      
-      const validTrayAllocations = [];
-      let validTrayCount = 0;
-      
-      trayInputs.forEach((trayInput, index) => {
-        const trayId = trayInput.value.trim();
-        
-        if (trayInput === excludeInput) {
-          console.log(`   ⏭️ Skipping current input ${index + 1}: "${trayId}" (being validated)`);
-          return;
-        }
-        
-        if (trayId) {
-          const errorSpan = trayInput.parentElement.querySelector('.rejection-tray-error');
-          const hasError = errorSpan && 
-                           errorSpan.style.display === 'block' && 
-                           (errorSpan.textContent.includes('❌') || errorSpan.style.color === '#721c24');
-          
-          if (!hasError) {
-            const individualTrayQty = parseInt(trayInput.getAttribute('data-tray-qty')) || 0;
-            
-            validTrayAllocations.push({
-              tray_id: trayId,
-              tray_qty: individualTrayQty,
-              is_new_tray: isNewTrayId(trayId)  // ✅ Track if it's a NEW tray
-            });
-            validTrayCount++;
-            console.log(`   ✅ Valid tray ${index + 1}: "${trayId}" (qty: ${individualTrayQty}, new: ${isNewTrayId(trayId)})`);
-          } else {
-            console.log(`   ❌ Invalid tray ${index + 1}: "${trayId}" (has error)`);
-          }
-        } else {
-          console.log(`   ⭕ Empty tray ${index + 1}`);
-        }
-      });
-      
-      if (validTrayCount > 0) {
-        validTrayAllocations.forEach(trayAllocation => {
-          const allocation = {
-            reason_id: reasonId,
-            reason_text: reasonText,
-            qty: trayAllocation.tray_qty,
-            tray_count: 1,
-            tray_ids: [trayAllocation.tray_id],
-            is_new_tray: trayAllocation.is_new_tray  // ✅ Include NEW tray flag
-          };
-          
-          allocations.push(allocation);
-          console.log(`   ✅ Added individual tray allocation:`, allocation);
-        });
-      } else {
-        console.log(`   ⚠️ No valid trays for reason ${reasonId}, skipping allocation`);
-      }
-    }
-  });
-  
-  console.log('📊 [NEW Tray Aware Collection] FINAL allocations:', allocations);
-  return allocations;
-}
-                
-// ✅ NEW: Helper function to identify NEW tray IDs (frontend version)
-function isNewTrayId(trayId) {
-  if (!trayId) return false;
-  
-  // Simple heuristic: Check tray number pattern
-  // Example: JB-A00031 (new) vs JB-A00001-JB-A00010 (existing)
-  const trayMatch = trayId.match(/(\d+)$/);
-  if (trayMatch) {
-    const trayNumber = parseInt(trayMatch[1]);
-    // Numbers > 30 are likely new trays (adjust based on your system)
-    if (trayNumber > 30) {
-      console.log(`[isNewTrayId] ${trayId} appears to be NEW tray (number=${trayNumber})`);
-      return true;
-    }
-  }
-  
-  console.log(`[isNewTrayId] ${trayId} appears to be EXISTING tray`);
-  return false;
-}
 
 
-// Place this after your existing .rejection-qty-input logic
+                // Place this after your existing .rejection-qty-input logic
         document.querySelectorAll('.rejection-qty-input').forEach(function(qtyInput) {
           qtyInput.addEventListener('input', function() {
             const row = qtyInput.closest('tr');
@@ -3805,7 +3966,7 @@ function handleTrayWiseRejectionWithFormData(batchId, stockLotId, formData) {
           lotStatusCell.innerHTML = `
             <div class="d-inline-block px-3 fw-semibold text-center rounded-pill"
               style="border: 2px solid #4997ac; background-color: #d1f2f3; color: #03425d;
-              font-size: clamp(0.75rem, 2vw, 0.875rem); white-space: nowrap;
+              font-size: 13px; white-space: nowrap;
               padding-top: 0.5rem; padding-bottom: 0.5rem;">
               Draft
             </div>
@@ -4169,7 +4330,7 @@ function showAcceptedTrayModal(rescanData, lotId, isDraft) {
 
   // ✅ UPDATED: Use actual backend data
   let html = `
-    <div class="modal-top-header" style="display: flex; align-items: center; gap: 20px; padding-bottom: 10px; margin: 0px !important; border-bottom: 1px solid #ddd;">
+    <div class="modal-top-header" style="display: flex; align-items: center; gap: 20px; padding-bottom: 10px;">
       <div class="user-profile" style="display: flex; align-items: center; gap: 8px">
         <img src="/static/assets/images/imagePlaceholder.png" alt="User Profile" style="border-radius: 50%; width: 50px; height: 50px; object-fit: cover;" />
         <span>Model No:</span>
@@ -5671,8 +5832,6 @@ function checkForDuplicateTrayId() {
     document.head.insertAdjacentHTML('beforeend', draftModeCSS);
   </script>
 
-
-
 <script nonce="{{ csp_nonce }}">
     document.addEventListener("DOMContentLoaded", function () {
       var triggers = document.querySelectorAll(".remark-tooltip-trigger");
@@ -6223,78 +6382,5 @@ document.addEventListener("DOMContentLoaded", function () {
   attachHoldToggleListeners();
 });
 </script>
-
-
-<!-- Script for restricting pointer events when modals are open -->
-<script nonce="{{ csp_nonce }}">
-document.addEventListener("DOMContentLoaded", function () {
-  // List all modal IDs you use
-  const modalIds = [
-    "trayScanModal_DayPlanning",
-    "trayScanModal",
-    "newPopupModal",
-    "imageSliderModal",
-    "holdRemarkModal"
-  ];
-
-  function isAnyModalOpen() {
-    return modalIds.some(id => {
-      const el = document.getElementById(id);
-      return el && (el.style.display === "block" || el.classList.contains("open") || el.style.display === "flex");
-    });
-  }
-
-  function setBodyModalState(active) {
-    if (active) {
-      document.body.style.overflow = "hidden";
-      document.body.style.pointerEvents = "none";
-      // Allow pointer events for modals only
-      modalIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.pointerEvents = "auto";
-      });
-      // Restrict pointer events for holding rows
-      document.querySelectorAll('tr.row-inactive, tr.row-inactive *').forEach(el => {
-        el.style.pointerEvents = "none";
-      });
-    } else {
-      document.body.style.overflow = "";
-      document.body.style.pointerEvents = "";
-      modalIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.pointerEvents = "";
-      });
-      // Restore pointer events for holding rows
-      document.querySelectorAll('tr.row-inactive, tr.row-inactive *').forEach(el => {
-        el.style.pointerEvents = "";
-      });
-    }
-  }
-
-  // Observe modal open/close changes
-  const observer = new MutationObserver(() => {
-    setBodyModalState(isAnyModalOpen());
-  });
-
-  modalIds.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) observer.observe(el, { attributes: true, attributeFilter: ["style", "class"] });
-  });
-
-  // Also check on click (for dynamic changes)
-  document.addEventListener("click", function () {
-    setTimeout(() => setBodyModalState(isAnyModalOpen()), 50);
-  });
-
-  // Always restrict pointer events for holding rows, even if no modal is open
-  setTimeout(() => {
-    document.querySelectorAll('tr.row-inactive, tr.row-inactive *').forEach(el => {
-      el.style.pointerEvents = "none";
-    });
-  }, 100);
-});
-</script>
-
-
 
 {% endblock %} {% endblock content %}

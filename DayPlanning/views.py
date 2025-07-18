@@ -117,6 +117,7 @@ class DPBulkUploadView(APIView):
             if len(actual_columns) > len(expected_columns):
                 extra_columns = actual_columns[len(expected_columns):]
                 print(f"⚠️ Warning: Found {len(extra_columns)} extra column(s) that will be ignored: {', '.join(extra_columns)}")
+                
             
             return True, "✅ Column validation passed", actual_columns
             

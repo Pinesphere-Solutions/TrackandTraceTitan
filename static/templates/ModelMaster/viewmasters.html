@@ -1,0 +1,940 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <!-- Include SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+  .container {
+  margin-top: 2.5rem !important; /* or 3rem, adjust as needed */
+}
+  /* Move the title slightly up */
+  h3.text-center {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+       /* Style for the tab buttons */
+  .nav-tabs .nav-link {
+    color: white;
+    border: none;
+    margin-right: 5px;
+    border-radius: 5px;
+    padding: 10px 15px;
+    text-align: center;
+    font-weight: bold;
+  }
+
+  /* Model Master Tab */
+ /* Model Master Tab */
+  #model-tab {
+    background-color: #d9eafc; /* Light Blue */
+    color: #004085;
+  }
+  #model-tab:hover {
+    background-color: #d9eafc;
+    color: #004085;
+  }
+  #model-tab.active {
+    background-color: #d9eafc;
+    color: #004085;
+  }
+
+  /* Polish Finish Tab */
+  #polish-tab {
+    background-color: #d4edda; /* Light Green */
+    color: #155724;
+  }
+  #polish-tab:hover {
+    background-color: #c3e6cb;
+    color: #155724;
+  }
+  #polish-tab.active {
+    background-color: #b1dfbb;
+    color: #155724;
+  }
+
+  /* Plating Colors Tab */
+  #plating-tab {
+    background-color: #d1ecf1; /* Light Blue */
+    color: #0c5460;
+  }
+  #plating-tab:hover {
+    background-color: #bee5eb;
+    color: #0c5460;
+  }
+  #plating-tab.active {
+    background-color: #abdde5;
+    color: #0c5460;
+  }
+
+  /* Tray Types Tab */
+  #tray-tab {
+    background-color: #fff3cd; /* Light Yellow */
+    color: #856404;
+  }
+  #tray-tab:hover {
+    background-color: #ffeeba;
+    color: #856404;
+  }
+  #tray-tab.active {
+    background-color: #ffe8a1;
+    color: #856404;
+  }
+
+  /* Vendor Tab */
+  #vendor-tab {
+    background-color: #ffe4f9;
+    color: #5a0547;
+  }
+  #vendor-tab:hover {
+    background-color: #ffe4f9;
+    color: #5a0547;
+  }
+  #vendor-tab.active {
+    background-color: #ffe4f9;
+    color: #5a0547;
+  }
+
+  /* Model Images Tab */
+  #images-tab {
+    background-color: #e2e3e5; /* Light Purple */
+    color: #41464b;
+  }
+  #images-tab:hover {
+    background-color: #d6d8db;
+    color: #41464b;
+  }
+  #images-tab.active {
+    background-color: #c8cacc;
+    color: #41464b;
+  }
+
+  /* Tray ID Tab */
+  #trayid-tab {
+    background-color: #f8d7da; /* Light Coral */
+    color: #721c24;
+  }
+  #trayid-tab:hover {
+    background-color: #f5c6cb;
+    color: #721c24;
+  }
+  #trayid-tab.active {
+    background-color: #f1b0b7;
+    color: #721c24;
+  }
+
+  /* Category Tab */
+  #category-tab {
+    background-color: #d1e7dd; /* Light Green */
+    color: #0f5132;
+  }
+  #category-tab:hover {
+    background-color: #c3e6cb;
+    color: #0f5132;
+  }
+  #category-tab.active {
+    background-color: #b9e3bc;
+    color: #0f5132;
+  }
+  /* Category Tab */
+  #iprejection-tab {
+    background-color: #e5f1be; /* Light Green */
+    color: #0f5132;
+  }
+  #iprejection-tab:hover {
+    background-color: #e9f8b7;
+    color: #0f5132;
+  }
+  #iprejection-tab.active {
+    background-color: #e9f8b7;
+    color: #0f5132;
+  }
+
+  /* Center the tabs */
+  .nav-tabs {
+    justify-content: center;
+  }
+
+  /* Add spacing between tabs and content */
+  .tab-content {
+    margin-top: 20px;
+  }
+
+  .nav-tabs .nav-link:hover {
+    background-color: #026b6b;
+    color: white;
+  }
+
+  .nav-tabs .nav-link.active {
+    background-color: #024f4f;
+    color: white;
+    font-weight: bold;
+  }
+
+  /* Center the tabs */
+  .nav-tabs {
+    justify-content: center;
+  }
+
+
+        /* Zebra striping for rows */
+        .table-striped tbody tr:nth-of-type(odd) {
+          background-color: #f9f9f9;
+        }      
+    /* Teal background for table headers */
+      /* Bring thead to front and set color */
+    thead {
+      position: relative;
+      z-index: 2;
+      color: #000 !important;
+    }
+     thead, thead th {
+    position: relative;
+    z-index: 2;
+    background: #ddf3fc !important;
+    color: #000 !important;
+  }
+    .table {
+      border: none;
+    }
+
+    /* Responsive table adjustments */
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    /* Add padding and spacing for better readability */
+    th, td {
+      padding: 10px;
+      text-align: center;
+    }
+
+    /* Zebra striping for rows */
+    .table-striped tbody tr:nth-of-type(odd) {
+      background-color: #f9f9f9;
+    }
+
+    /* Delete button styling */
+    .delete-btn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+      cursor: pointer;
+    }
+
+    .delete-btn:hover {
+      background-color: #c82333;
+    }
+
+    .delete-btn:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+
+    /* Checkbox styling */
+    .select-checkbox {
+      transform: scale(1.2);
+      margin: 0;
+    }
+
+    /* Selection counter */
+    .selection-info {
+      margin-bottom: 10px;
+      font-weight: bold;
+      color: #28a745;
+    }
+  </style>
+
+<h3 class="text-center">View Master Data</h3>
+
+  
+  <ul class="nav nav-tabs" id="viewTabs" role="tablist">
+    <li class="nav-item">
+      <button class="nav-link active" id="model-tab" data-bs-toggle="tab" data-bs-target="#model" type="button" role="tab">Model Master</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" id="polish-tab" data-bs-toggle="tab" data-bs-target="#polish" type="button" role="tab">Polish Finish</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" id="plating-tab" data-bs-toggle="tab" data-bs-target="#plating" type="button" role="tab">Plating Colors</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" id="tray-tab" data-bs-toggle="tab" data-bs-target="#tray" type="button" role="tab">Tray Types</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" id="vendor-tab" data-bs-toggle="tab" data-bs-target="#vendor" type="button" role="tab">Source</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" id="images-tab" data-bs-toggle="tab" data-bs-target="#images" type="button" role="tab">Model Images</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" id="trayid-tab" data-bs-toggle="tab" data-bs-target="#trayid" type="button" role="tab">Tray ID</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" id="category-tab" data-bs-toggle="tab" data-bs-target="#category" type="button" role="tab">Category</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" id="iprejection-tab" data-bs-toggle="tab" data-bs-target="#iprejection" type="button" role="tab">IP Rejection</button>
+    </li>
+  </ul>
+  
+ <div class="tab-content mt-3" id="viewTabsContent">
+    <!-- Model Master -->
+    <div class="tab-pane fade show active" id="model" role="tabpanel">
+      <div class="selection-info" id="model-selection-info">0 items selected</div>
+      <button type="button" class="delete-btn" id="delete-model-btn" disabled>
+        Delete Selected
+      </button>
+      <div class="table-responsive">
+        <form id="model-form">
+          {% csrf_token %}
+          <table id="modelTable" class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>
+                  <input type="checkbox" class="select-checkbox" id="select-all-model">
+                  <label for="select-all-model" style="margin-left: 5px;">Select All</label>
+                </th>
+                <th>S.No</th>
+                <th>Date</th>
+                <th>Model No</th>
+                <th>Polish Finish</th>
+                <th>EP Bath Type</th>
+                <th>Tray Type</th>
+                <th>Tray Capacity</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for obj in model_masters %}
+              <tr>
+                <td>
+                  <input type="checkbox" class="select-checkbox model-checkbox" name="selected_ids" value="{{ obj.id }}">
+                </td>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ obj.date_time|date:"Y-m-d" }}</td>
+                <td>{{ obj.model_no }}</td>
+                <td>{{ obj.polish_finish.polish_finish }}</td>
+                <td>{{ obj.ep_bath_type }}</td>
+                <td>{{ obj.tray_type.tray_type }}</td>
+                <td>{{ obj.tray_type.tray_capacity }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="8">No records found.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </form>
+      </div>
+    </div>
+
+    <!-- Polish Finish -->
+    <div class="tab-pane fade" id="polish" role="tabpanel">
+      <div class="selection-info" id="polish-selection-info">0 items selected</div>
+      <button type="button" class="delete-btn" id="delete-polish-btn" disabled>
+        Delete Selected
+      </button>
+      <div class="table-responsive">
+        <form id="polish-form">
+          {% csrf_token %}
+          <table id="polishTable" class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>
+                  <input type="checkbox" class="select-checkbox" id="select-all-polish">
+                  <label for="select-all-polish" style="margin-left: 5px;">Select All</label>
+                </th>
+                <th>S.No</th>
+                <th>Date</th>
+                <th>Polish Finish</th>
+                <th>Internal ID</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for obj in polish_finishes %}
+              <tr>
+                <td>
+                  <input type="checkbox" class="select-checkbox polish-checkbox" name="selected_ids" value="{{ obj.id }}">
+                </td>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ obj.date_time|date:"Y-m-d" }}</td>
+                <td>{{ obj.polish_finish }}</td>
+                <td>{{ obj.polish_internal }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5">No records found.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </form>
+      </div>
+    </div>
+
+    <!-- Plating Colors -->
+    <div class="tab-pane fade" id="plating" role="tabpanel">
+      <div class="selection-info" id="plating-selection-info">0 items selected</div>
+      <button type="button" class="delete-btn" id="delete-plating-btn" disabled>
+        Delete Selected
+      </button>
+      <div class="table-responsive">
+        <form id="plating-form">
+          {% csrf_token %}
+          <table id="platingTable" class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>
+                  <input type="checkbox" class="select-checkbox" id="select-all-plating">
+                  <label for="select-all-plating" style="margin-left: 5px;">Select All</label>
+                </th>
+                <th>S.No</th>
+                <th>Date</th>
+                <th>Plating Color</th>
+                <th>Internal ID</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for obj in plating_colors %}
+              <tr>
+                <td>
+                  <input type="checkbox" class="select-checkbox plating-checkbox" name="selected_ids" value="{{ obj.id }}">
+                </td>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ obj.date_time|date:"Y-m-d" }}</td>
+                <td>{{ obj.plating_color }}</td>
+                <td>{{ obj.plating_color_internal }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5">No records found.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </form>
+      </div>
+    </div>
+
+    <!-- Tray Types -->
+    <div class="tab-pane fade" id="tray" role="tabpanel">
+      <div class="selection-info" id="tray-selection-info">0 items selected</div>
+      <button type="button" class="delete-btn" id="delete-tray-btn" disabled>
+        Delete Selected
+      </button>
+      <div class="table-responsive">
+        <form id="tray-form">
+          {% csrf_token %}
+          <table id="trayTable" class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>
+                  <input type="checkbox" class="select-checkbox" id="select-all-tray">
+                  <label for="select-all-tray" style="margin-left: 5px;">Select All</label>
+                </th>
+                <th>S.No</th>
+                <th>Date</th>
+                <th>Tray Type</th>
+                <th>Tray Capacity</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for obj in tray_types %}
+              <tr>
+                <td>
+                  <input type="checkbox" class="select-checkbox tray-checkbox" name="selected_ids" value="{{ obj.id }}">
+                </td>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ obj.date_time|date:"Y-m-d" }}</td>
+                <td>{{ obj.tray_type }}</td>
+                <td>{{ obj.tray_capacity }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5">No records found.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </form>
+      </div>
+    </div>
+
+    <!-- Source -->
+    <div class="tab-pane fade" id="vendor" role="tabpanel">
+      <div class="selection-info" id="vendor-selection-info">0 items selected</div>
+      <button type="button" class="delete-btn" id="delete-vendor-btn" disabled>
+        Delete Selected
+      </button>
+      <div class="table-responsive">
+        <form id="vendor-form">
+          {% csrf_token %}
+          <table id="vendorTable" class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>
+                  <input type="checkbox" class="select-checkbox" id="select-all-vendor">
+                  <label for="select-all-vendor" style="margin-left: 5px;">Select All</label>
+                </th>
+                <th>S.No</th>
+                <th>Date</th>
+                <th>Source Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for obj in locations %}
+              <tr>
+                <td>
+                  <input type="checkbox" class="select-checkbox vendor-checkbox" name="selected_ids" value="{{ obj.id }}">
+                </td>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ obj.date_time|date:"Y-m-d" }}</td>
+                <td>{{ obj.location_name }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4">No records found.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </form>
+      </div>
+    </div>
+
+    <!-- Model Images -->
+    <div class="tab-pane fade" id="images" role="tabpanel">
+      <div class="selection-info" id="images-selection-info">0 items selected</div>
+      <button type="button" class="delete-btn" id="delete-images-btn" disabled>
+        Delete Selected
+      </button>
+      <div class="table-responsive">
+        <form id="images-form">
+          {% csrf_token %}
+          <table id="imagesTable" class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>
+                  <input type="checkbox" class="select-checkbox" id="select-all-images">
+                  <label for="select-all-images" style="margin-left: 5px;">Select All</label>
+                </th>
+                <th>S.No</th>
+                <th>Date</th>
+                <th>Image Name</th>
+                <th>Image Path</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for obj in model_images %}
+              <tr>
+                <td>
+                  <input type="checkbox" class="select-checkbox images-checkbox" name="selected_ids" value="{{ obj.id }}">
+                </td>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ obj.date_time|date:"Y-m-d" }}</td>
+                <td>{{ obj.master_image.name|default:"-" }}</td>
+                <td>
+                  {% if obj.master_image %}
+                    <a href="{{ obj.master_image.url }}" target="_blank">{{ obj.master_image.url }}</a>
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5">No records found.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </form>
+      </div>
+    </div>
+
+    <!-- Tray ID -->
+    <div class="tab-pane fade" id="trayid" role="tabpanel">
+      <div class="selection-info" id="trayid-selection-info">0 items selected</div>
+      <button type="button" class="delete-btn" id="delete-trayid-btn" disabled>
+        Delete Selected
+      </button>
+      <div class="table-responsive">
+        <form id="trayid-form">
+          {% csrf_token %}
+          <table id="trayIdTable" class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>
+                  <input type="checkbox" class="select-checkbox" id="select-all-trayid">
+                  <label for="select-all-trayid" style="margin-left: 5px;">Select All</label>
+                </th>
+                <th>S.No</th>
+                <th>Date</th>
+                <th>Tray ID</th>
+                <th>Tray Type</th>
+                <th>Tray Capacity</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for obj in tray_ids %}
+              <tr>
+                <td>
+                  <input type="checkbox" class="select-checkbox trayid-checkbox" name="selected_ids" value="{{ obj.id }}">
+                </td>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ obj.date|date:"Y-m-d" }}</td>
+                <td>{{ obj.tray_id }}</td>
+                <td>{{ obj.tray_type }}</td>
+                <td>{{ obj.tray_capacity }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="6">No records found.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </form>
+      </div>
+    </div>
+
+    <!-- Category -->
+    <div class="tab-pane fade" id="category" role="tabpanel">
+      <div class="selection-info" id="category-selection-info">0 items selected</div>
+      <button type="button" class="delete-btn" id="delete-category-btn" disabled>
+        Delete Selected
+      </button>
+      <div class="table-responsive">
+        <form id="category-form">
+          {% csrf_token %}
+          <table id="categoryTable" class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>
+                  <input type="checkbox" class="select-checkbox" id="select-all-category">
+                  <label for="select-all-category" style="margin-left: 5px;">Select All</label>
+                </th>
+                <th>S.No</th>
+                <th>Date</th>
+                <th>Category Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for obj in categories %}
+              <tr>
+                <td>
+                  <input type="checkbox" class="select-checkbox category-checkbox" name="selected_ids" value="{{ obj.id }}">
+                </td>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ obj.date_time|date:"Y-m-d" }}</td>
+                <td>{{ obj.category_name }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4">No records found.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </form>
+      </div>
+    </div>
+
+    <!-- IP Rejection -->
+    <div class="tab-pane fade" id="iprejection" role="tabpanel">
+      <div class="selection-info" id="iprejection-selection-info">0 items selected</div>
+      <button type="button" class="delete-btn" id="delete-iprejection-btn" disabled>
+        Delete Selected
+      </button>
+      <div class="table-responsive">
+        <form id="iprejection-form">
+          {% csrf_token %}
+          <table id="iprejectionTable" class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>
+                  <input type="checkbox" class="select-checkbox" id="select-all-iprejection">
+                  <label for="select-all-iprejection" style="margin-left: 5px;">Select All</label>
+                </th>
+                <th>S.No</th>
+                <th>Date</th>
+                <th>Rejection Reason ID</th>
+                <th>Rejection Reason</th>
+                <th>Rejection Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for obj in ip_rejections %}
+              <tr>
+                <td>
+                  <input type="checkbox" class="select-checkbox iprejection-checkbox" name="selected_ids" value="{{ obj.id }}">
+                </td>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ obj.date|date:"Y-m-d" }}</td>
+                <td>{{ obj.rejection_reason_id }}</td>
+                <td>{{ obj.rejection_reason }}</td>
+                <td>{{ obj.rejection_count }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="6">No records found.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script nonce="{{ csp_nonce }}">
+// Initialize on page load
+document.addEventListener("DOMContentLoaded", function () {
+  console.log('DOM Content Loaded - Initializing selection functionality');
+  
+  // Initialize selection info for all tabs
+  const tabNames = ['model', 'polish', 'plating', 'tray', 'vendor', 'images', 'trayid', 'category', 'iprejection'];
+  
+  tabNames.forEach(tabName => {
+    console.log(`Initializing tab: ${tabName}`);
+    
+    // Initialize selection count
+    updateSelectionInfo(tabName);
+    
+    // Add event listeners to individual checkboxes
+    const individualCheckboxes = document.querySelectorAll(`.${tabName}-checkbox`);
+    console.log(`Found ${individualCheckboxes.length} individual checkboxes for ${tabName}`);
+    
+    individualCheckboxes.forEach((checkbox, index) => {
+      checkbox.addEventListener('change', function() {
+        console.log(`Individual checkbox ${index} changed for ${tabName}, checked: ${this.checked}`);
+        updateSelectionInfo(tabName);
+      });
+    });
+    
+    // Add event listener to select all checkbox
+    const selectAllCheckbox = document.getElementById(`select-all-${tabName}`);
+    if (selectAllCheckbox) {
+      selectAllCheckbox.addEventListener('change', function() {
+        console.log(`Select all checkbox changed for ${tabName}, checked: ${this.checked}`);
+        toggleSelectAll(tabName);
+      });
+    } else {
+      console.error(`Select all checkbox not found for ${tabName}`);
+    }
+    
+    // Add event listener to delete button
+    const deleteBtn = document.getElementById(`delete-${tabName}-btn`);
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', function() {
+        console.log(`Delete button clicked for ${tabName}`);
+        deleteSelected(tabName);
+      });
+    } else {
+      console.error(`Delete button not found for ${tabName}`);
+    }
+  });
+});
+
+// Toggle select all functionality
+function toggleSelectAll(tabName) {
+  console.log(`toggleSelectAll called for: ${tabName}`);
+  
+  const selectAllCheckbox = document.getElementById(`select-all-${tabName}`);
+  const checkboxes = document.querySelectorAll(`.${tabName}-checkbox`);
+  
+  console.log('Select all checkbox:', selectAllCheckbox);
+  console.log('Individual checkboxes found:', checkboxes.length);
+  console.log('Select all checked:', selectAllCheckbox ? selectAllCheckbox.checked : 'not found');
+  
+  if (!selectAllCheckbox) {
+    console.error(`Select all checkbox not found for tab: ${tabName}`);
+    return;
+  }
+  
+  if (checkboxes.length === 0) {
+    console.error(`No individual checkboxes found for tab: ${tabName}`);
+    return;
+  }
+  
+  // Set all individual checkboxes to match the select all checkbox
+  checkboxes.forEach((checkbox, index) => {
+    checkbox.checked = selectAllCheckbox.checked;
+    console.log(`Setting checkbox ${index} to:`, selectAllCheckbox.checked);
+  });
+  
+  updateSelectionInfo(tabName);
+}
+
+// Update selection info and enable/disable delete button
+function updateSelectionInfo(tabName) {
+  console.log(`updateSelectionInfo called for: ${tabName}`);
+  
+  const checkboxes = document.querySelectorAll(`.${tabName}-checkbox:checked`);
+  const selectAllCheckbox = document.getElementById(`select-all-${tabName}`);
+  const allCheckboxes = document.querySelectorAll(`.${tabName}-checkbox`);
+  const selectionInfo = document.getElementById(`${tabName}-selection-info`);
+  const deleteBtn = document.getElementById(`delete-${tabName}-btn`);
+  
+  console.log('Checked checkboxes:', checkboxes.length);
+  console.log('Total checkboxes:', allCheckboxes.length);
+  
+  if (!selectionInfo) {
+    console.error(`Selection info element not found for tab: ${tabName}`);
+    return;
+  }
+  
+  if (!deleteBtn) {
+    console.error(`Delete button not found for tab: ${tabName}`);
+    return;
+  }
+  
+  const selectedCount = checkboxes.length;
+  
+  // Update selection info text
+  selectionInfo.textContent = `${selectedCount} item${selectedCount !== 1 ? 's' : ''} selected`;
+  
+  // Enable/disable delete button
+  deleteBtn.disabled = selectedCount === 0;
+  
+  // Update select all checkbox state
+  if (selectAllCheckbox) {
+    if (selectedCount === 0) {
+      selectAllCheckbox.indeterminate = false;
+      selectAllCheckbox.checked = false;
+    } else if (selectedCount === allCheckboxes.length) {
+      selectAllCheckbox.indeterminate = false;
+      selectAllCheckbox.checked = true;
+    } else {
+      selectAllCheckbox.indeterminate = true;
+    }
+  }
+  
+  console.log(`Updated selection info: ${selectedCount} items selected`);
+}
+
+// Delete selected items
+function deleteSelected(tabName) {
+  const checkboxes = document.querySelectorAll(`.${tabName}-checkbox:checked`);
+  
+  if (checkboxes.length === 0) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'No Selection',
+      text: 'Please select items to delete.',
+      confirmButtonColor: '#3085d6'
+    });
+    return;
+  }
+  
+  const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+  
+  // SweetAlert confirmation dialog
+  Swal.fire({
+    title: 'Are you sure?',
+    text: `You are about to delete ${selectedIds.length} selected item${selectedIds.length > 1 ? 's' : ''}. This action cannot be undone!`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: `Yes, delete ${selectedIds.length > 1 ? 'them' : 'it'}!`,
+    cancelButtonText: 'Cancel',
+    reverseButtons: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Show loading state
+      const deleteBtn = document.getElementById(`delete-${tabName}-btn`);
+      deleteBtn.disabled = true;
+      deleteBtn.textContent = 'Deleting...';
+      
+      // Show loading popup
+      Swal.fire({
+        title: 'Deleting...',
+        text: 'Please wait while we delete the selected items.',
+        icon: 'info',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      
+      // Create form data
+      const formData = new FormData();
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+      if (csrfToken) {
+        formData.append('csrfmiddlewaretoken', csrfToken.value);
+      }
+      formData.append('action', 'delete');
+      formData.append('tab_name', tabName);
+      selectedIds.forEach(id => {
+        formData.append('selected_ids', id);
+      });
+      
+      // Send AJAX request
+      fetch(window.location.href, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          Swal.fire({
+            title: 'Deleted!',
+            text: `Successfully deleted ${data.deleted_count} item${data.deleted_count > 1 ? 's' : ''}.`,
+            icon: 'success',
+            confirmButtonColor: '#3085d6',
+            timer: 2000,
+            timerProgressBar: true
+          }).then(() => {
+            location.reload(); // Reload the page to reflect changes
+          });
+        } else {
+          Swal.fire({
+            title: 'Error!',
+            text: 'Error deleting items: ' + (data.error || 'Unknown error'),
+            icon: 'error',
+            confirmButtonColor: '#3085d6'
+          });
+          // Reset delete button
+          deleteBtn.disabled = false;
+          deleteBtn.textContent = 'Delete Selected';
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+          title: 'Network Error!',
+          text: 'Error deleting items. Please check your connection and try again.',
+          icon: 'error',
+          confirmButtonColor: '#3085d6'
+        });
+        // Reset delete button
+        deleteBtn.disabled = false;
+        deleteBtn.textContent = 'Delete Selected';
+      });
+    }
+  });
+}
+
+// Test function for debugging - you can call this from browser console
+function testFunctionality(tabName = 'model') {
+  console.log(`Testing functionality for ${tabName}`);
+  console.log('Select all checkbox:', document.getElementById(`select-all-${tabName}`));
+  console.log('Individual checkboxes:', document.querySelectorAll(`.${tabName}-checkbox`));
+  console.log('Selection info:', document.getElementById(`${tabName}-selection-info`));
+  console.log('Delete button:', document.getElementById(`delete-${tabName}-btn`));
+}
+</script>
+{% endblock %}

@@ -14,7 +14,6 @@ urlpatterns = [
     path('is_accepted_form/', IS_Accepted_form.as_view(), name='is_accepted_form'),
     path('batch_rejection/', BatchRejectionAPIView.as_view(), name='batch_rejection'),
     path('tray_rejection/', TrayRejectionAPIView.as_view(), name='tray_rejection'),
-    path('reject_check_tray_id/', reject_check_tray_id, name='reject_check_tray_id'),
     path('get_accepted_tray_scan_data/', get_accepted_tray_scan_data, name='get_accepted_tray_scan_data'),
     path('ip_get_rejected_tray_scan_data/', ip_get_rejected_tray_scan_data, name='ip_get_rejected_tray_scan_data'),
     path('save_single_top_tray_scan/', save_single_top_tray_scan, name='save_single_top_tray_scan'),
@@ -36,10 +35,8 @@ urlpatterns = [
     path('get_rejection_draft/', get_rejection_draft, name='get_rejection_draft'),
     path('get_delink_tray_data/', get_delink_tray_data, name='get_delink_tray_data'),
     path('delink_check_tray_id/', delink_check_tray_id, name='delink_check_tray_id'),
-    path('reject_check_tray_id/', reject_check_tray_id, name='reject_check_tray_id'),
-    path('reject_check_tray_id_dynamic/', reject_check_tray_id_dynamic, name='reject_check_tray_id_dynamic'),
-    path('reject_check_tray_id_session_aware/', reject_check_tray_id_session_aware, name='reject_check_tray_id_session_aware'),
-    
+    path('reject_check_tray_id_simple/', reject_check_tray_id_simple, name='reject_check_tray_id_simple'),
+
     path('complete_tray_validate/', TrayValidate_Complete_APIView.as_view(), name='complete_tray_validate'),
     path('CompleteTable_tray_id_list/', TrayIdList_Complete_APIView.as_view(), name='CompleteTable_tray_id_list'),
     path('get_shortage_rejections/', GetShortageRejectionsView.as_view(), name='get_shortage_rejections'),

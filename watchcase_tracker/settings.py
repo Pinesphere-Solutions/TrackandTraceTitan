@@ -164,3 +164,28 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+""" 
+import os
+import datetime
+
+today = datetime.date.today().strftime("%Y-%m-%d")
+LOG_FILE_PATH = os.path.expanduser(f"~/ttt_logs/log_{today}.txt")
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'daily_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': LOG_FILE_PATH,
+        },
+    },
+    'loggers': {
+        'custom_logger': {
+            'handlers': ['daily_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+} """

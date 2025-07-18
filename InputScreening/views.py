@@ -19,6 +19,7 @@ from django.views.decorators.http import require_GET
 from math import ceil
 from django.db.models import Q
 from rest_framework.decorators import api_view, permission_classes
+from django.utils import timezone
 
 
 
@@ -386,9 +387,6 @@ class IPSaveTrayDraftAPIView(APIView):
             import traceback
             traceback.print_exc()
             return JsonResponse({'success': False, 'error': f'Unexpected error: {str(e)}'}, status=500)
-
-
-from django.utils import timezone
 
 class SaveIPCheckboxView(APIView):
     def post(self, request, format=None):
@@ -1154,6 +1152,16 @@ class TrayRejectionAPIView(APIView):
                 tray_qty = int(scan.get('tray_qty', 0))
                 reason_id = scan.get('reason_id')
                 
+                # Only update if this is a new tray (new_tray=True)
+                tray_obj = TrayId.objects.filter(tray_id=tray_id).first()
+                if tray_obj and getattr(tray_obj, 'new_tray', False):
+                    tray_obj.lot_id = lot_id  # Assign to selected lot_id if not already
+                    tray_obj.rejected_tray = True
+                    tray_obj.top_tray = False
+                    tray_obj.tray_quantity = tray_qty  # <-- Save the tray quantity
+
+                    tray_obj.save(update_fields=['lot_id', 'rejected_tray', 'top_tray',  'scanned','tray_quantity'])
+                
                 if tray_qty > 0 and reason_id and tray_id:
                     try:
                         reason_obj = IP_Rejection_Table.objects.get(rejection_reason_id=reason_id)
@@ -1281,48 +1289,41 @@ class TrayRejectionAPIView(APIView):
             traceback.print_exc()
             return Response({'success': False, 'error': str(e)}, status=500)
         
-#MAIN SESSION-AWARE VALIDATION: Handles both existing and new tray logic correctly
-
+# ==========================================
+# SIMPLIFIED TRAY VALIDATION - SINGLE VIEW
 @require_GET
-def reject_check_tray_id_session_aware(request):
-
+def reject_check_tray_id_simple(request):
+    """
+    Corrected tray validation: Consider current session allocations before validation
+    """
     tray_id = request.GET.get('tray_id', '')
     current_lot_id = request.GET.get('lot_id', '')
     rejection_qty = int(request.GET.get('rejection_qty', 0))
+    
+    # ✅ NEW: Get current session allocations from frontend
     current_session_allocations_str = request.GET.get('current_session_allocations', '[]')
     
-    print(f"[Session Validation] tray_id: {tray_id}, lot_id: {current_lot_id}, rejection_qty: {rejection_qty}")
+    print(f"[Simple Validation] tray_id: {tray_id}, lot_id: {current_lot_id}, qty: {rejection_qty}")
+    print(f"[Simple Validation] Current session allocations: {current_session_allocations_str}")
 
     try:
         # Parse current session allocations
-        current_session_allocations = json.loads(current_session_allocations_str)
-        print(f"[Session Validation] Current session allocations: {current_session_allocations}")
-
-        # Get current remaining tray distribution (from saved data)
-        remaining_distribution = get_current_remaining_tray_distribution(current_lot_id)
-        print(f"[Session Validation] Database remaining distribution: {remaining_distribution}")
+        import json
+        try:
+            current_session_allocations = json.loads(current_session_allocations_str)
+        except:
+            current_session_allocations = []
         
-        # ✅ FIXED: Calculate session-aware remaining with NEW vs EXISTING tray logic
-        session_remaining_distribution = calculate_session_remaining_distribution_corrected(
-            remaining_distribution, 
-            current_session_allocations
-        )
-        print(f"[Session Validation] Session-aware remaining distribution: {session_remaining_distribution}")
-        
-        # Check availability based on quantity counting
-        available_count_for_qty = session_remaining_distribution.count(rejection_qty)
-        print(f"[Session Validation] Available count for qty {rejection_qty}: {available_count_for_qty}")
-        
-        # Get tray object and perform basic validations
+        # Get tray object
+        from modelmasterapp.models import TrayId
         tray_obj = TrayId.objects.filter(tray_id=tray_id).first()
+        
         if not tray_obj:
             return JsonResponse({
                 'exists': False,
                 'valid_for_rejection': False,
                 'error': 'Tray ID not found',
-                'status_message': 'Not Found',
-                'session_remaining_distribution': session_remaining_distribution,
-                'available_count': available_count_for_qty
+                'status_message': 'Not Found'
             })
 
         # Basic validations
@@ -1335,26 +1336,7 @@ def reject_check_tray_id_session_aware(request):
                     'status_message': 'Not Verified'
                 })
 
-        # Check lot assignment
-        if tray_obj.lot_id:
-            if str(tray_obj.lot_id).strip() != str(current_lot_id).strip():
-                return JsonResponse({
-                    'exists': False,
-                    'valid_for_rejection': False,
-                    'error': 'Different lot',
-                    'status_message': 'Different Lot'
-                })
-        else:
-            # No lot_id = new tray
-            return JsonResponse({
-                'exists': True,
-                'valid_for_rejection': True,
-                'status_message': 'New Tray Available',
-                'validation_type': 'new_tray_no_lot',
-                'session_remaining_distribution': session_remaining_distribution
-            })
-
-        # Check already rejected
+        # Check if already rejected
         if tray_obj.rejected_tray:
             return JsonResponse({
                 'exists': False,
@@ -1364,140 +1346,95 @@ def reject_check_tray_id_session_aware(request):
             })
 
         # Get tray properties
-        is_tray_scanned = getattr(tray_obj, 'IP_tray_verified', False)
         is_new_tray = getattr(tray_obj, 'new_tray', False)
         
-        # ✅ MAIN VALIDATION LOGIC
-        if available_count_for_qty > 0:
-            # Exact quantity available in session distribution
-            if is_tray_scanned:
-                print(f"[Session Validation] ✅ EXISTING TRAY available for qty {rejection_qty}")
-                return JsonResponse({
-                    'exists': True,
-                    'valid_for_rejection': True,
-                    'status_message': f'Match Found ({available_count_for_qty} available)',
-                    'validation_type': 'existing_match',
-                    'available_count': available_count_for_qty,
-                    'session_remaining_distribution': session_remaining_distribution
-                })
-            elif is_new_tray:
-                print(f"[Session Validation] ✅ NEW TRAY available (existing also matches)")
-                return JsonResponse({
-                    'exists': True,
-                    'valid_for_rejection': True,
-                    'status_message': f'New Tray Available',
-                    'validation_type': 'new_tray_available',
-                    'session_remaining_distribution': session_remaining_distribution
-                })
-        else:
-            # No exact match - check if new tray is allowed
-            if is_new_tray:
-                print(f"[Session Validation] ✅ NEW TRAY only option for qty {rejection_qty}")
-                return JsonResponse({
-                    'exists': True,
-                    'valid_for_rejection': True,
-                    'status_message': f'New Tray Required',
-                    'validation_type': 'new_tray_required',
-                    'session_remaining_distribution': session_remaining_distribution
-                })
-            else:
-                print(f"[Session Validation] ❌ No option for qty {rejection_qty}")
+        # ✅ NEW TRAY: Always allow (any quantity)
+        if is_new_tray:
+            return JsonResponse({
+                'exists': True,
+                'valid_for_rejection': True,
+                'status_message': 'New Tray Available',
+                'validation_type': 'new_tray'
+            })
+
+        # ✅ EXISTING TRAY: Check lot assignment
+        if tray_obj.lot_id:
+            if str(tray_obj.lot_id).strip() != str(current_lot_id).strip():
                 return JsonResponse({
                     'exists': False,
                     'valid_for_rejection': False,
-                    'error': 'Not available',
-                    'status_message': f'Not Available ({rejection_qty})',
-                    'session_remaining_distribution': session_remaining_distribution
+                    'error': 'Different lot',
+                    'status_message': 'Different Lot'
                 })
-
-    except Exception as e:
-        print(f"[Session Validation] Error: {str(e)}")
-        traceback.print_exc()
-        return JsonResponse({
-            'exists': False,
-            'valid_for_rejection': False,
-            'error': 'System error',
-            'status_message': 'System Error'
-        })
-
-
-@require_GET
-def reject_check_tray_id_dynamic(request):
-    """
-    SIMPLIFIED DYNAMIC VALIDATION: For backward compatibility
-    """
-    tray_id = request.GET.get('tray_id', '')
-    current_lot_id = request.GET.get('lot_id', '')
-    rejection_qty = int(request.GET.get('rejection_qty', 0))
-    
-    print(f"[Dynamic Validation] tray_id: {tray_id}, lot_id: {current_lot_id}, rejection_qty: {rejection_qty}")
-
-    try:
-        # Get current remaining tray distribution
-        remaining_distribution = get_current_remaining_tray_distribution(current_lot_id)
-        print(f"[Dynamic Validation] Current remaining distribution: {remaining_distribution}")
-        
-        # Check if rejection quantity matches any remaining tray exactly
-        exact_match_found = rejection_qty in remaining_distribution
-        print(f"[Dynamic Validation] Exact match for qty {rejection_qty}: {exact_match_found}")
-        
-        # Get tray object and basic validations
-        tray_obj = TrayId.objects.filter(tray_id=tray_id).first()
-        if not tray_obj:
+        else:
             return JsonResponse({
                 'exists': False,
                 'valid_for_rejection': False,
-                'error': 'Tray ID not found',
-                'status_message': 'Not Found'
+                'error': 'Invalid tray state',
+                'status_message': 'Invalid State'
             })
 
-        # Basic validations
-        basic_validation_result = perform_basic_tray_validations(tray_obj, current_lot_id)
-        if not basic_validation_result['valid']:
-            return JsonResponse(basic_validation_result['response'])
+        # ✅ NEW: Apply current session allocations to get updated available quantities
+        available_tray_quantities, true_free_space = get_available_quantities_with_session_allocations(
+            current_lot_id, current_session_allocations
+        )
 
-        # Get tray properties
-        is_tray_scanned = getattr(tray_obj, 'IP_tray_verified', False)
-        is_new_tray = getattr(tray_obj, 'new_tray', False)
-        
-        # Dynamic validation logic
-        if exact_match_found:
-            if is_tray_scanned:
+        original_capacities = get_tray_capacities_for_lot(current_lot_id)
+        total_current_qty = sum(available_tray_quantities)  # ✅ Now this works
+        total_capacity = sum(original_capacities)
+
+        print(f"[Simple Validation] Available tray quantities (with session): {available_tray_quantities}")
+        print(f"[Simple Validation] Total current qty: {total_current_qty}")
+        print(f"[Simple Validation] Total capacity: {total_capacity}")
+        print(f"[Simple Validation] True free space: {true_free_space}")
+        print(f"[Simple Validation] Rejection qty: {rejection_qty}")
+
+        # Check if rejection is possible with existing trays
+        if rejection_qty <= total_current_qty:
+            # Check if there's enough free space to rearrange OR exact match exists
+            if true_free_space > 0 or rejection_qty in available_tray_quantities:
+                # Either there's free space for rearrangement OR exact match exists
+                if rejection_qty in available_tray_quantities:
+                    status_msg = f'Exact match ({rejection_qty})'
+                else:
+                    status_msg = f'Available (can rearrange, {true_free_space} true free space)'
+                
                 return JsonResponse({
                     'exists': True,
                     'valid_for_rejection': True,
-                    'status_message': f'Exact Match ({rejection_qty})',
-                    'validation_type': 'exact_match_existing',
-                    'remaining_distribution': remaining_distribution
-                })
-            elif is_new_tray:
-                return JsonResponse({
-                    'exists': True,
-                    'valid_for_rejection': True,
-                    'status_message': f'New Tray Available',
-                    'validation_type': 'exact_match_new'
-                })
-        else:
-            if is_new_tray:
-                return JsonResponse({
-                    'exists': True,
-                    'valid_for_rejection': True,
-                    'status_message': 'New Tray Required',
-                    'validation_type': 'no_match_new_only',
-                    'remaining_distribution': remaining_distribution
+                    'status_message': status_msg,
+                    'validation_type': 'existing_rearrangeable',
+                    'available_quantities': available_tray_quantities,
+                    'total_current': total_current_qty,
+                    'true_free_space': true_free_space  # ✅ Use true free space
                 })
             else:
+                # No free space and no exact match - only NEW tray allowed
                 return JsonResponse({
                     'exists': False,
                     'valid_for_rejection': False,
-                    'error': 'New tray required',
-                    'status_message': f'New Tray Required (No match for {rejection_qty})',
-                    'validation_type': 'no_match_existing_blocked',
-                    'remaining_distribution': remaining_distribution
+                    'error': 'No free space for rearrangement',
+                    'status_message': f'Need NEW tray (all trays full: {available_tray_quantities})',
+                    'validation_type': 'existing_no_space',
+                    'available_quantities': available_tray_quantities,
+                    'true_free_space': true_free_space
                 })
+        else:
+            # Rejection quantity exceeds total available
+            return JsonResponse({
+                'exists': False,
+                'valid_for_rejection': False,
+                'error': 'Insufficient total quantity',
+                'status_message': f'Need NEW tray (have {total_current_qty}, need {rejection_qty})',
+                'validation_type': 'existing_insufficient',
+                'available_quantities': available_tray_quantities,
+                'total_current': total_current_qty
+            })
 
     except Exception as e:
-        print(f"[Dynamic Validation] Error: {str(e)}")
+        print(f"[Simple Validation] Error: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return JsonResponse({
             'exists': False,
             'valid_for_rejection': False,
@@ -1506,569 +1443,388 @@ def reject_check_tray_id_dynamic(request):
         })
 
 
-@require_GET  
-def reject_check_tray_id(request):
+def get_available_quantities_with_session_allocations(lot_id, current_session_allocations):
     """
-    ORIGINAL VALIDATION: Kept for backward compatibility
-    """
-    tray_id = request.GET.get('tray_id', '')
-    current_lot_id = request.GET.get('lot_id', '')
-
-    try:
-        tray_obj = TrayId.objects.filter(tray_id=tray_id).first()
-        if not tray_obj:
-            return JsonResponse({
-                'exists': False,
-                'error': 'Tray ID not found',
-                'status_message': 'Not Found'
-            })
-
-        # Basic validations
-        basic_validation_result = perform_basic_tray_validations(tray_obj, current_lot_id)
-        if not basic_validation_result['valid']:
-            return JsonResponse(basic_validation_result['response'])
-
-        # Success response
-        scanned_tray_type = getattr(tray_obj, 'tray_type', 'Normal') or 'Normal'
-        return JsonResponse({
-            'exists': True,
-            'status_message': f'Available ({scanned_tray_type})',
-            'delink_tray': getattr(tray_obj, 'delink_tray', False),
-            'rejected_tray': getattr(tray_obj, 'rejected_tray', False),
-            'tray_status': 'available',
-            'tray_type': scanned_tray_type
-        })
-
-    except Exception as e:
-        print(f"[Original Validation] System error: {str(e)}")
-        return JsonResponse({
-            'exists': False,
-            'error': 'System error',
-            'status_message': 'System Error'
-        })
-
-
-# ==========================================
-# CORE DISTRIBUTION CALCULATION FUNCTIONS
-# ==========================================
-
-def calculate_session_remaining_distribution_corrected(original_remaining, session_allocations):
-    """
-    ✅ CORRECTED: Properly handles NEW vs EXISTING tray logic
+    Calculate available tray quantities and TRUE free space
     """
     try:
-        print(f"[Session Remaining CORRECTED] Starting with: {original_remaining}")
+        # Get original distribution and track free space separately
+        original_distribution = get_original_tray_distribution(lot_id)
+        original_capacities = get_tray_capacities_for_lot(lot_id)
         
-        # Calculate original total quantity
-        original_total_qty = sum(original_remaining)
-        print(f"[Session Remaining CORRECTED] Original total quantity: {original_total_qty}")
+        available_quantities = original_distribution.copy()
+        true_free_space = 0  # ✅ Track actual free space created by NEW trays
         
-        # Separate existing tray usage from new tray usage
-        existing_trays_consumed = []
-        total_new_tray_rejected_qty = 0
+        print(f"[Session Validation] Starting with: {available_quantities}")
         
-        for allocation in session_allocations:
-            qty = allocation.get('qty', 0)
-            tray_count = allocation.get('tray_count', 0)
-            reason_id = allocation.get('reason_id', 'Unknown')
+        # First, apply saved rejections
+        from modelmasterapp.models import IP_Rejected_TrayScan
+        saved_rejections = IP_Rejected_TrayScan.objects.filter(lot_id=lot_id).order_by('id')
+        
+        for rejection in saved_rejections:
+            rejected_qty = rejection.rejected_tray_quantity or 0
+            tray_id = rejection.rejected_tray_id
             
-            if qty <= 0 or tray_count <= 0:
+            if rejected_qty <= 0:
                 continue
                 
-            print(f"[Session Remaining CORRECTED] Processing allocation: reason={reason_id}, qty={qty}, trays={tray_count}")
-            
-            # ✅ KEY FIX: Determine if this used existing trays or new trays
-            if qty in original_remaining:
-                # This quantity matches original distribution - likely used existing trays
-                for _ in range(tray_count):
-                    existing_trays_consumed.append(qty)
-                print(f"[Session Remaining CORRECTED] EXISTING tray usage: {qty} × {tray_count}")
+            if tray_id and is_new_tray_by_id(tray_id):
+                # NEW tray creates actual free space
+                true_free_space += rejected_qty
+                available_quantities = reduce_quantities_optimally(available_quantities, rejected_qty)
+                print(f"[Session Validation] NEW tray saved rejection: +{rejected_qty} free space")
             else:
-                # This quantity doesn't match - likely used new trays
-                total_new_tray_rejected_qty += (qty * tray_count)
-                print(f"[Session Remaining CORRECTED] NEW tray usage: {qty} × {tray_count} = {qty * tray_count}")
+                # EXISTING tray just consumes available quantities
+                available_quantities = reduce_quantities_optimally(available_quantities, rejected_qty)
+                print(f"[Session Validation] EXISTING tray saved rejection: -{rejected_qty} consumed")
         
-        print(f"[Session Remaining CORRECTED] Existing trays consumed: {existing_trays_consumed}")
-        print(f"[Session Remaining CORRECTED] Total NEW tray rejected qty: {total_new_tray_rejected_qty}")
+        # Then, apply current session allocations
+        for allocation in current_session_allocations:
+            try:
+                reason_text = allocation.get('reason_text', '')
+                qty = int(allocation.get('qty', 0))
+                is_new_tray = allocation.get('is_new_tray', False)
+                
+                if qty <= 0 or reason_text.upper() == 'SHORTAGE':
+                    continue
+                
+                if is_new_tray:
+                    # NEW tray creates actual free space
+                    true_free_space += qty
+                    available_quantities = reduce_quantities_optimally(available_quantities, qty)
+                    print(f"[Session Validation] NEW tray session: +{qty} free space, result: {available_quantities}")
+                else:
+                    # EXISTING tray just consumes available quantities
+                    available_quantities = reduce_quantities_optimally(available_quantities, qty)
+                    print(f"[Session Validation] EXISTING tray session: -{qty} consumed, result: {available_quantities}")
+                    
+            except Exception as e:
+                print(f"[Session Validation] Error processing allocation: {e}")
+                continue
         
-        # Step 1: Remove consumed existing trays from distribution
-        adjusted_distribution = original_remaining.copy()
-        for consumed_qty in existing_trays_consumed:
-            if consumed_qty in adjusted_distribution:
-                adjusted_distribution.remove(consumed_qty)
-                print(f"[Session Remaining CORRECTED] Removed existing tray: {consumed_qty}")
+        # Calculate totals
+        total_available = sum(available_quantities)
+        total_capacity = sum(original_capacities)
         
-        # Step 2: Calculate remaining total after all rejections
-        remaining_from_existing = sum(adjusted_distribution)
-        final_remaining_qty = remaining_from_existing - total_new_tray_rejected_qty
+        print(f"[Session Validation] FINAL:")
+        print(f"  Available quantities: {available_quantities}")
+        print(f"  Total available: {total_available}")
+        print(f"  Total capacity: {total_capacity}")
+        print(f"  True free space (from NEW trays): {true_free_space}")
+        print(f"  Misleading 'free space': {total_capacity - total_available}")
         
-        print(f"[Session Remaining CORRECTED] Remaining from existing: {remaining_from_existing}")
-        print(f"[Session Remaining CORRECTED] Final remaining quantity: {final_remaining_qty}")
-        
-        if final_remaining_qty <= 0:
-            print(f"[Session Remaining CORRECTED] No quantity remaining")
-            return []
-        
-        # Step 3: Redistribute optimally with remainder-first approach
-        optimal_distribution = redistribute_quantity_optimally(final_remaining_qty)
-        
-        print(f"[Session Remaining CORRECTED] FINAL distribution: {optimal_distribution}")
-        return optimal_distribution
+        return available_quantities, true_free_space
         
     except Exception as e:
-        print(f"[Session Remaining CORRECTED] Error: {e}")
-        traceback.print_exc()
-        return original_remaining
+        print(f"[Session Validation] Error: {e}")
+        return get_original_tray_distribution(lot_id), 0
 
 
-def redistribute_quantity_optimally(total_qty):
+def reduce_quantities_optimally(available_quantities, qty_to_reduce):
     """
-    Redistribute total quantity optimally with remainder-first approach
+    Reduce available quantities optimally (largest first for NEW, smallest first for EXISTING)
     """
-    if total_qty <= 0:
-        return []
+    quantities = available_quantities.copy()
+    remaining = qty_to_reduce
     
-    standard_capacity = get_standard_tray_capacity()
+    # Use largest first (more efficient for freeing space)
+    for i in range(len(quantities)):
+        if remaining <= 0:
+            break
+            
+        current_qty = quantities[i]
+        if current_qty >= remaining:
+            quantities[i] = current_qty - remaining
+            remaining = 0
+        elif current_qty > 0:
+            remaining -= current_qty
+            quantities[i] = 0
     
-    remainder = total_qty % standard_capacity
-    full_trays = total_qty // standard_capacity
-    
-    distribution = []
-    
-    # ✅ REMAINDER FIRST (if exists)
-    if remainder > 0:
-        distribution.append(remainder)
-    
-    # ✅ THEN FULL TRAYS
-    for _ in range(full_trays):
-        distribution.append(standard_capacity)
-    
-    print(f"[Redistribute] {total_qty} pieces → {distribution}")
-    return distribution
+    return quantities
+# ==========================================
+# KEY HELPER FUNCTION
+# ==========================================
 
-
-def get_current_remaining_tray_distribution(lot_id):
+def get_available_tray_quantities_for_lot(lot_id):
     """
-    Get current remaining tray distribution after considering all previous rejections
+    Get list of available tray quantities after considering previous rejections
     """
     try:
         # Get original tray distribution
         original_distribution = get_original_tray_distribution(lot_id)
-        print(f"[Distribution] Original: {original_distribution}")
+        original_capacities = get_tray_capacities_for_lot(lot_id)  # Track original capacities
         
-        # Get all previous rejections for this lot
-        previous_rejections = get_previous_rejections_summary(lot_id)
-        print(f"[Distribution] Previous rejections: {previous_rejections}")
+        print(f"[Available Quantities] Original distribution: {original_distribution}")
+        print(f"[Available Quantities] Original capacities: {original_capacities}")
         
-        # Calculate remaining distribution
-        remaining_distribution = calculate_remaining_distribution(original_distribution, previous_rejections)
-        print(f"[Distribution] Remaining: {remaining_distribution}")
+        # Get all previous rejections
+        from modelmasterapp.models import IP_Rejected_TrayScan
+        rejections = IP_Rejected_TrayScan.objects.filter(lot_id=lot_id).order_by('id')
         
-        return remaining_distribution
+        available_quantities = original_distribution.copy()
+        
+        for rejection in rejections:
+            rejected_qty = rejection.rejected_tray_quantity or 0
+            tray_id = rejection.rejected_tray_id
+            
+            if rejected_qty <= 0:
+                continue
+            
+            print(f"[Available Quantities] Processing rejection: {rejected_qty} qty, tray: {tray_id}")
+            
+            # Check if NEW tray was used
+            if tray_id and is_new_tray_by_id(tray_id):
+                print(f"[Available Quantities] NEW tray used: {tray_id}, qty: {rejected_qty}")
+                print(f"[Available Quantities] NEW tray usage FREES UP existing tray content")
+                
+                remaining_to_free = rejected_qty
+                
+                # ✅ FIXED: Use index-based approach without sorting to preserve order
+                for i in range(len(available_quantities)):
+                    if remaining_to_free <= 0:
+                        break
+                        
+                    current_tray_qty = available_quantities[i]
+                    
+                    if current_tray_qty >= remaining_to_free:
+                        # This tray can provide all remaining quantity
+                        available_quantities[i] = current_tray_qty - remaining_to_free
+                        print(f"[Available Quantities] Freed {remaining_to_free} from tray {i}, new qty: {available_quantities[i]}")
+                        remaining_to_free = 0
+                    elif current_tray_qty > 0:
+                        # Free entire tray content
+                        remaining_to_free -= current_tray_qty
+                        print(f"[Available Quantities] Freed entire tray {i}: {current_tray_qty}")
+                        available_quantities[i] = 0
+                
+                continue
+            
+            # EXISTING tray was used - reduce existing tray quantities
+            remaining_to_consume = rejected_qty
+            
+            # ✅ FIXED: Use index-based approach to preserve positions
+            for i in range(len(available_quantities)):
+                if remaining_to_consume <= 0:
+                    break
+                    
+                current_tray_qty = available_quantities[i]
+                
+                if current_tray_qty >= remaining_to_consume:
+                    # This tray can handle the remaining quantity
+                    available_quantities[i] = current_tray_qty - remaining_to_consume
+                    print(f"[Available Quantities] Consumed {remaining_to_consume} from tray {i}, remaining: {available_quantities[i]}")
+                    remaining_to_consume = 0
+                elif current_tray_qty > 0:
+                    # Consume entire tray and continue
+                    remaining_to_consume -= current_tray_qty
+                    print(f"[Available Quantities] Consumed entire tray {i}: {current_tray_qty}")
+                    available_quantities[i] = 0
+        
+        # ✅ FIXED: Don't remove zeros - they represent freed capacity!
+        # Just ensure non-negative values
+        available_quantities = [max(0, qty) for qty in available_quantities]
+        
+        print(f"[Available Quantities] FINAL available quantities: {available_quantities}")
+        return available_quantities
         
     except Exception as e:
-        print(f"[Distribution] Error: {e}")
-        return get_original_tray_distribution(lot_id)
-
-
+        print(f"[Available Quantities] Error: {e}")
+        return []
 def get_original_tray_distribution(lot_id):
     """
-    Get original tray distribution for the lot
+    Get original tray quantity distribution for the lot
+    Returns list like [6, 12, 12] representing individual tray capacities
     """
     try:
-        print(f"[Original Distribution] Starting calculation for lot_id: {lot_id}")
+        print(f"[Original Distribution] Getting distribution for lot_id: {lot_id}")
         
-        # Get TotalStockModel for reliable data
+        # Get TrayId records for this lot
+        from modelmasterapp.models import TrayId
+        tray_objects = TrayId.objects.filter(lot_id=lot_id).exclude(
+            rejected_tray=True
+        ).order_by('date')
+        
+        print(f"[Original Distribution] Found {tray_objects.count()} tray objects")
+        
+        if tray_objects.exists():
+            # Use actual tray quantities from database
+            quantities = []
+            for tray in tray_objects:
+                tray_qty = getattr(tray, 'tray_quantity', None)
+                print(f"[Original Distribution] Tray {tray.tray_id}: quantity = {tray_qty}")
+                if tray_qty and tray_qty > 0:
+                    quantities.append(tray_qty)
+            
+            if quantities:
+                print(f"[Original Distribution] From TrayId objects: {quantities}")
+                return quantities
+        
+        # Fallback: Calculate from total quantity and standard capacity
+        from modelmasterapp.models import TotalStockModel
         total_stock = TotalStockModel.objects.filter(lot_id=lot_id).first()
         if not total_stock:
             print(f"[Original Distribution] No TotalStockModel found for lot_id: {lot_id}")
-            return [12, 12, 12, 12]  # Fallback
+            return []
         
-        # Get tray capacity
-        tray_capacity = get_tray_capacity_for_lot(total_stock)
-        
-        # Get total quantity
         total_qty = get_total_quantity_for_lot(total_stock)
+        tray_capacity = get_tray_capacity_for_lot(lot_id)  # ✅ Pass lot_id instead of total_stock
         
-        if not total_qty or total_qty <= 0:
-            print(f"[Original Distribution] No valid total quantity found")
-            return [12, 12, 12, 12]  # Fallback
+        print(f"[Original Distribution] Fallback calculation - total_qty: {total_qty}, tray_capacity: {tray_capacity}")
         
-        # Calculate distribution
-        print(f"[Original Distribution] Calculating with total_qty: {total_qty}, tray_capacity: {tray_capacity}")
+        if not total_qty or not tray_capacity:
+            return []
         
+        # Calculate distribution: remainder first, then full trays
         remainder = total_qty % tray_capacity
         full_trays = total_qty // tray_capacity
         
         distribution = []
-        
-        # TOP TRAY FIRST (remainder if exists)
         if remainder > 0:
             distribution.append(remainder)
-            print(f"[Original Distribution] Added top tray: {remainder}")
         
-        # THEN FULL TRAYS
-        for i in range(full_trays):
+        for _ in range(full_trays):
             distribution.append(tray_capacity)
-            print(f"[Original Distribution] Added full tray {i+1}: {tray_capacity}")
         
-        # Validation
-        calculated_total = sum(distribution)
-        if calculated_total != total_qty:
-            print(f"[Original Distribution] ERROR: Calculated total ({calculated_total}) != expected total ({total_qty})")
-            # Fix the distribution
-            if calculated_total < total_qty:
-                missing = total_qty - calculated_total
-                if distribution:
-                    distribution[-1] += missing
-                    print(f"[Original Distribution] Fixed: Added {missing} to last tray")
-                else:
-                    distribution.append(missing)
-                    print(f"[Original Distribution] Fixed: Created new tray with {missing}")
-        
-        print(f"[Original Distribution] FINAL: {distribution} (total: {sum(distribution)})")
+        print(f"[Original Distribution] Calculated: {distribution} (total: {total_qty}, capacity: {tray_capacity})")
         return distribution
         
     except Exception as e:
         print(f"[Original Distribution] Error: {e}")
+        import traceback
         traceback.print_exc()
-        return [12, 12, 12, 12]  # Safe fallback
+        return []
 
 
-def get_previous_rejections_summary(lot_id):
+def is_new_tray_by_id(tray_id):
     """
-    Get summary of all previous rejections for this lot
+    Check if a tray ID represents a NEW tray
     """
+    if not tray_id:
+        return False
+    
     try:
-        rejections = IP_Rejected_TrayScan.objects.filter(lot_id=lot_id).order_by('created_at')
+        from modelmasterapp.models import TrayId
+        tray_obj = TrayId.objects.filter(tray_id=tray_id).first()
         
-        complete_trays_rejected = 0
-        partial_rejections = []
-        tray_usage = {}
+        if tray_obj:
+            # Check if marked as new_tray or has no lot_id
+            return getattr(tray_obj, 'new_tray', False) or not tray_obj.lot_id
         
-        print(f"[Rejection Summary] Processing {rejections.count()} rejections for lot {lot_id}")
+        # Heuristic: Check tray number pattern for new trays
+        import re
+        tray_match = re.search(r'(\d+)$', tray_id)
+        if tray_match:
+            tray_number = int(tray_match.group(1))
+            # Numbers > 30 are likely new trays (adjust based on your system)
+            return tray_number > 30
         
-        for rejection in rejections:
-            tray_id = rejection.rejected_tray_id
-            qty = rejection.rejected_tray_quantity
-            reason = rejection.rejection_reason.rejection_reason if rejection.rejection_reason else "Unknown"
-            
-            print(f"[Rejection Summary] Processing: tray_id={tray_id}, qty={qty}, reason={reason}")
-            
-            if tray_id and tray_id.strip():  
-                # Has tray_id - using existing tray
-                if tray_id not in tray_usage:
-                    tray_usage[tray_id] = {'total_qty': 0, 'is_complete': False}
-                
-                tray_usage[tray_id]['total_qty'] += qty
-                
-                # Each tray_id rejection = 1 complete tray consumed
-                if not tray_usage[tray_id]['is_complete']:
-                    complete_trays_rejected += 1
-                    tray_usage[tray_id]['is_complete'] = True
-                    print(f"[Rejection Summary] Complete tray consumed: {tray_id} (total: {complete_trays_rejected})")
-            else:  
-                # No tray_id - partial rejection (SHORTAGE or new tray)
-                partial_rejections.append(qty)
-                print(f"[Rejection Summary] Partial rejection: {qty}")
-        
-        summary = {
-            'complete_trays_rejected': complete_trays_rejected,
-            'partial_rejections': partial_rejections,
-            'tray_usage_details': tray_usage
-        }
-        
-        print(f"[Rejection Summary] FINAL: {summary}")
-        return summary
+        return False
         
     except Exception as e:
-        print(f"[Rejection Summary] Error: {e}")
-        traceback.print_exc()
-        return {'complete_trays_rejected': 0, 'partial_rejections': [], 'tray_usage_details': {}}
-
-
-def calculate_remaining_distribution(original_distribution, rejections_summary):
-    """
-    Calculate remaining tray distribution after rejections
-    """
-    try:
-        remaining = original_distribution.copy()
-        
-        print(f"[Remaining Calculation] Starting with: {remaining}")
-        print(f"[Remaining Calculation] Complete trays to remove: {rejections_summary['complete_trays_rejected']}")
-        print(f"[Remaining Calculation] Partial rejections: {rejections_summary['partial_rejections']}")
-        
-        # Step 1: Remove complete trays (from the beginning)
-        complete_rejected = rejections_summary['complete_trays_rejected']
-        for i in range(complete_rejected):
-            if remaining:
-                removed_tray = remaining.pop(0)  # Remove first tray
-                print(f"[Remaining Calculation] Removed complete tray {i+1}: {removed_tray}")
-            else:
-                print(f"[Remaining Calculation] Warning: No trays left to remove")
-                break
-        
-        print(f"[Remaining Calculation] After removing complete trays: {remaining}")
-        
-        # Step 2: Handle partial rejections
-        partial_rejections = rejections_summary['partial_rejections']
-        for idx, partial_qty in enumerate(partial_rejections):
-            print(f"[Remaining Calculation] Processing partial rejection {idx+1}: {partial_qty}")
-            
-            if not remaining:
-                print(f"[Remaining Calculation] Warning: No trays left for partial rejection {partial_qty}")
-                break
-                
-            if partial_qty <= 0:
-                continue
-            
-            remaining_partial = partial_qty
-            tray_index = 0
-            
-            while remaining_partial > 0 and tray_index < len(remaining):
-                current_tray_qty = remaining[tray_index]
-                
-                if current_tray_qty > remaining_partial:
-                    remaining[tray_index] -= remaining_partial
-                    print(f"[Remaining Calculation] Reduced tray {tray_index}: {current_tray_qty} → {remaining[tray_index]}")
-                    remaining_partial = 0
-                elif current_tray_qty == remaining_partial:
-                    removed = remaining.pop(tray_index)
-                    print(f"[Remaining Calculation] Removed entire tray {tray_index}: {removed}")
-                    remaining_partial = 0
-                else:
-                    remaining_partial -= current_tray_qty
-                    removed = remaining.pop(tray_index)
-                    print(f"[Remaining Calculation] Consumed entire tray {tray_index}: {removed}, still need: {remaining_partial}")
-        
-        # Clean up
-        remaining = [qty for qty in remaining if qty > 0]
-        
-        print(f"[Remaining Calculation] FINAL RESULT: {remaining}")
-        return remaining
-        
-    except Exception as e:
-        print(f"[Remaining Calculation] Error: {e}")
-        traceback.print_exc()
-        return original_distribution
-
-
-# ==========================================
-# HELPER FUNCTIONS
-# ==========================================
-
-def perform_basic_tray_validations(tray_obj, current_lot_id):
-    """
-    Perform basic tray validations - centralized logic
-    """
-    try:
-        # Check if tray is verified or new
-        if not getattr(tray_obj, 'IP_tray_verified', False):
-            if not getattr(tray_obj, 'new_tray', False):
-                return {
-                    'valid': False,
-                    'response': {
-                        'exists': False,
-                        'error': 'Tray not verified',
-                        'status_message': 'Not Verified',
-                        'tray_status': 'not_verified'
-                    }
-                }
-
-        # Check tray type compatibility
-        tray_type_result = check_tray_type_compatibility(tray_obj, current_lot_id)
-        if not tray_type_result['valid']:
-            return tray_type_result
-
-        # Check lot assignment
-        if tray_obj.lot_id:
-            if str(tray_obj.lot_id).strip() != str(current_lot_id).strip():
-                return {
-                    'valid': False,
-                    'response': {
-                        'exists': False,
-                        'error': 'Not in same lot',
-                        'status_message': 'Different Lot',
-                        'tray_status': 'different_lot'
-                    }
-                }
-        else:
-            # No lot_id = new tray (allow)
-            return {
-                'valid': True,
-                'is_new_tray': True,
-                'response': {
-                    'exists': True,
-                    'status_message': 'New Tray allowed',
-                    'tray_status': 'new_tray',
-                    'new_tray': True
-                }
-            }
-
-        # Check if already rejected
-        if tray_obj.rejected_tray and not tray_obj.delink_tray:
-            return {
-                'valid': False,
-                'response': {
-                    'exists': False,
-                    'error': 'Already rejected',
-                    'status_message': 'Already Rejected',
-                    'tray_status': 'already_rejected'
-                }
-            }
-
-        return {'valid': True}
-
-    except Exception as e:
-        print(f"[Basic Validation] Error: {e}")
-        return {
-            'valid': False,
-            'response': {
-                'exists': False,
-                'error': 'Validation error',
-                'status_message': 'System Error'
-            }
-        }
-
-
-def check_tray_type_compatibility(tray_obj, current_lot_id):
-    """
-    Check if tray type is compatible with current lot
-    """
-    try:
-        # Get expected tray type for current lot
-        total_stock = TotalStockModel.objects.filter(lot_id=current_lot_id).first()
-        if not total_stock or not total_stock.batch_id:
-            return {'valid': True}  # Can't determine, allow
-        
-        expected_tray_type = getattr(total_stock.batch_id, 'tray_type', None)
-        if not expected_tray_type:
-            return {'valid': True}  # No requirement, allow
-        
-        # Get scanned tray type
-        scanned_tray_type = getattr(tray_obj, 'tray_type', 'Normal') or 'Normal'
-        
-        # Check compatibility
-        if expected_tray_type.lower() != scanned_tray_type.lower():
-            return {
-                'valid': False,
-                'response': {
-                    'exists': False,
-                    'error': 'Wrong tray type',
-                    'status_message': f'Wrong Type ({scanned_tray_type})',
-                    'tray_status': 'wrong_tray_type',
-                    'expected_type': expected_tray_type,
-                    'scanned_type': scanned_tray_type
-                }
-            }
-        
-        return {'valid': True}
-
-    except Exception as e:
-        print(f"[Tray Type Check] Error: {e}")
-        return {'valid': True}  # Allow on error
-
-
-def get_tray_capacity_for_lot(total_stock):
-    """
-    Get tray capacity for a lot with multiple fallback options
-    """
-    try:
-        # Method 1: From batch_id
-        if hasattr(total_stock, 'batch_id') and total_stock.batch_id:
-            batch_capacity = getattr(total_stock.batch_id, 'tray_capacity', None)
-            if batch_capacity and batch_capacity > 0:
-                print(f"[Tray Capacity] From batch: {batch_capacity}")
-                return batch_capacity
-        
-        # Method 2: From ModelMasterCreation
-        if hasattr(total_stock, 'batch_id') and total_stock.batch_id:
-            if hasattr(total_stock.batch_id, 'model_no') and total_stock.batch_id.model_no:
-                try:
-                    model_master = ModelMasterCreation.objects.filter(
-                        model_no=total_stock.batch_id.model_no
-                    ).first()
-                    if model_master and hasattr(model_master, 'tray_capacity') and model_master.tray_capacity:
-                        print(f"[Tray Capacity] From model: {model_master.tray_capacity}")
-                        return model_master.tray_capacity
-                except Exception as e:
-                    print(f"[Tray Capacity] Error getting model capacity: {e}")
-        
-        # Fallback
-        print(f"[Tray Capacity] Using default: 12")
-        return 12
-
-    except Exception as e:
-        print(f"[Tray Capacity] Error: {e}")
-        return 12
+        print(f"[is_new_tray_by_id] Error: {e}")
+        return False
 
 
 def get_total_quantity_for_lot(total_stock):
+    """Get total quantity for a lot"""
+    try:
+        print(f"[get_total_quantity_for_lot] Processing total_stock object")
+        
+        if hasattr(total_stock, 'dp_physical_qty') and total_stock.dp_physical_qty:
+            print(f"[get_total_quantity_for_lot] Using dp_physical_qty: {total_stock.dp_physical_qty}")
+            return total_stock.dp_physical_qty
+            
+        if hasattr(total_stock, 'total_stock') and total_stock.total_stock:
+            print(f"[get_total_quantity_for_lot] Using total_stock: {total_stock.total_stock}")
+            return total_stock.total_stock
+            
+        if hasattr(total_stock, 'batch_id') and total_stock.batch_id:
+            if hasattr(total_stock.batch_id, 'total_batch_quantity'):
+                print(f"[get_total_quantity_for_lot] Using batch total_batch_quantity: {total_stock.batch_id.total_batch_quantity}")
+                return total_stock.batch_id.total_batch_quantity
+                
+        print(f"[get_total_quantity_for_lot] No valid quantity found, returning 0")
+        return 0
+    except Exception as e:
+        print(f"[get_total_quantity_for_lot] Error: {e}")
+        return 0
+
+
+def get_tray_capacities_for_lot(lot_id):
     """
-    Get total quantity for a lot with multiple fallback options
+    Get all tray capacities for a lot (in case different trays have different capacities)
+    Returns list of capacities corresponding to each tray
     """
     try:
-        # Option 1: dp_physical_qty (current physical quantity)
-        if hasattr(total_stock, 'dp_physical_qty') and total_stock.dp_physical_qty and total_stock.dp_physical_qty > 0:
-            print(f"[Total Quantity] Using dp_physical_qty: {total_stock.dp_physical_qty}")
-            return total_stock.dp_physical_qty
+        print(f"[get_tray_capacities_for_lot] Getting all capacities for lot_id: {lot_id}")
         
-        # Option 2: total_stock (original total)
-        elif hasattr(total_stock, 'total_stock') and total_stock.total_stock and total_stock.total_stock > 0:
-            print(f"[Total Quantity] Using total_stock: {total_stock.total_stock}")
-            return total_stock.total_stock
+        from modelmasterapp.models import TrayId
+        tray_objects = TrayId.objects.filter(lot_id=lot_id).exclude(rejected_tray=True).order_by('date')
         
-        # Option 3: From batch total_batch_quantity
-        elif hasattr(total_stock, 'batch_id') and total_stock.batch_id:
-            if hasattr(total_stock.batch_id, 'total_batch_quantity') and total_stock.batch_id.total_batch_quantity:
-                print(f"[Total Quantity] Using batch total: {total_stock.batch_id.total_batch_quantity}")
-                return total_stock.batch_id.total_batch_quantity
+        capacities = []
+        for tray in tray_objects:
+            capacity = getattr(tray, 'tray_capacity', None)
+            if capacity and capacity > 0:
+                capacities.append(capacity)
+            else:
+                # Fallback to standard capacity if not set
+                standard_capacity = get_tray_capacity_for_lot(lot_id)
+                capacities.append(standard_capacity)
+                
+        print(f"[get_tray_capacities_for_lot] Capacities: {capacities}")
+        return capacities
         
-        print(f"[Total Quantity] No valid quantity found")
-        return None
-
     except Exception as e:
-        print(f"[Total Quantity] Error: {e}")
-        return None
+        print(f"[get_tray_capacities_for_lot] Error: {e}")
+        return []
 
 
-def get_standard_tray_capacity():
+def get_tray_capacity_for_lot(lot_id):
     """
-    Get standard tray capacity (can be made configurable)
+    Get tray capacity for a lot from TrayId table (DYNAMIC)
+    Returns the tray capacity used for this specific lot
     """
-    return 12
-
-
-# ==========================================
-# DEPRECATED/UNUSED FUNCTIONS (for reference)
-# ==========================================
-
-def count_quantity_usage_in_session(target_qty, session_allocations):
-    """
-    Count how many times a specific quantity has been used in current session
-    (Used in older logic, kept for reference)
-    """
-    usage_count = 0
-    
-    for allocation in session_allocations:
-        allocated_qty = allocation.get('qty', 0)
-        tray_count = allocation.get('tray_count', 0)
+    try:
+        print(f"[get_tray_capacity_for_lot] Getting capacity for lot_id: {lot_id}")
         
-        if allocated_qty == target_qty and tray_count > 0:
-            usage_count += tray_count
-            print(f"[Usage Count] Found {tray_count} usage(s) of qty {target_qty}")
-    
-    print(f"[Usage Count] Total usage of qty {target_qty}: {usage_count}")
-    return usage_count
-
-
-
-# ==========================================
-# handles multi-tray allocations
-# ==========================================
-
-
-
+        # Get tray capacity from TrayId table for this specific lot
+        from modelmasterapp.models import TrayId
+        tray_objects = TrayId.objects.filter(lot_id=lot_id).exclude(rejected_tray=True)
+        
+        if tray_objects.exists():
+            # Get tray_capacity from first tray (all trays in same lot should have same capacity)
+            first_tray = tray_objects.first()
+            tray_capacity = getattr(first_tray, 'tray_capacity', None)
+            
+            if tray_capacity and tray_capacity > 0:
+                print(f"[get_tray_capacity_for_lot] Found tray_capacity from TrayId: {tray_capacity}")
+                return tray_capacity
+                
+            # If tray_capacity is not set, check all trays for a valid capacity
+            for tray in tray_objects:
+                capacity = getattr(tray, 'tray_capacity', None)
+                if capacity and capacity > 0:
+                    print(f"[get_tray_capacity_for_lot] Found valid tray_capacity: {capacity}")
+                    return capacity
+        
+        # Fallback: Get from TotalStockModel > batch_id
+        from modelmasterapp.models import TotalStockModel
+        total_stock = TotalStockModel.objects.filter(lot_id=lot_id).first()
+        if total_stock and hasattr(total_stock, 'batch_id') and total_stock.batch_id:
+            batch_capacity = getattr(total_stock.batch_id, 'tray_capacity', None)
+            if batch_capacity and batch_capacity > 0:
+                print(f"[get_tray_capacity_for_lot] Using batch tray_capacity: {batch_capacity}")
+                return batch_capacity
+                
+        print(f"[get_tray_capacity_for_lot] Using default capacity: 12")
+        return 12  # Final fallback
+        
+    except Exception as e:
+        print(f"[get_tray_capacity_for_lot] Error: {e}")
+        import traceback
+        traceback.print_exc()
+        return 12
+#===========================================
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -2978,9 +2734,13 @@ class IS_Completed_Table(APIView):
                     # No rejections or no stock data = 0 accepted
                     data['display_accepted_qty'] = 0
         print("=== END MANUAL LOOKUP ===")
+        accepted_data = [d for d in master_data if d.get('accepted_Ip_stock')]
+        rejected_data = [d for d in master_data if d.get('rejected_ip_stock') or d.get('few_cases_accepted_Ip_stock')]
+
         
         # 🔥 NEW: Add date information to context
         context = {
+
             'master_data': master_data,
             'page_obj': page_obj,
             'paginator': paginator,
@@ -3591,13 +3351,14 @@ def get_rejection_draft(request):
     except Exception as e:
         return Response({'success': False, 'error': str(e)}, status=500)
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_delink_tray_data(request):
     """
-    Get delink tray data for both rejected tray qty and SHORTAGE rejections.
-    Shows delink trays for SHORTAGE rejections only when rejected_tray_quantity equals tray_capacity.
+    Get delink tray data based on empty trays after all rejections are applied.
+    NEW tray usage frees up existing tray space.
+    Existing tray usage consumes existing tray space.
+    Number of delink rows = number of trays with 0 quantity.
     """
     try:
         # 1. Get lot_id from request
@@ -3608,108 +3369,315 @@ def get_delink_tray_data(request):
         
         print(f"DEBUG: Received lot_id: {lot_id}")
         
-        # 2. Get TotalStockModel first (this should always exist)
+        # 2. Get TotalStockModel
         stock = TotalStockModel.objects.filter(lot_id=lot_id).first()
         if not stock:
             print(f"No TotalStockModel found for lot_id: {lot_id}")
             return Response({'success': False, 'error': 'No stock record found for this lot'}, status=404)
         
-        # 3. Get tray_capacity from TotalStockModel
-        tray_capacity = stock.batch_id.tray_capacity if stock.batch_id and hasattr(stock.batch_id, 'tray_capacity') else 10
+        # 3. Get original tray distribution
+        original_distribution = get_actual_tray_distribution_for_delink(lot_id, stock)
+        print(f"DEBUG: Original distribution: {original_distribution}")
         
-        print(f"DEBUG: stock found - tray_capacity={tray_capacity}")
+        # 4. Calculate current distribution after all rejections
+        current_distribution = calculate_distribution_after_rejections(lot_id, original_distribution)
+        print(f"DEBUG: Current distribution after rejections: {current_distribution}")
         
-        # 4. Get rejection reason store (this might not exist if no rejections)
-        reason_store = IP_Rejection_ReasonStore.objects.filter(lot_id=lot_id).order_by('-id').first()
-        total_rejection_qty = reason_store.total_rejection_quantity if reason_store else 0
+        # 5. Count empty trays (quantity = 0)
+        empty_trays = [i for i, qty in enumerate(current_distribution) if qty == 0]
+        num_empty_trays = len(empty_trays)
         
-        print(f"DEBUG: reason_store exists: {reason_store is not None}, total_rejection_qty={total_rejection_qty}")
-
+        print(f"DEBUG: Empty trays indices: {empty_trays}")
+        print(f"DEBUG: Number of empty trays (delink needed): {num_empty_trays}")
+        
+        # 6. Create delink data for empty trays
         delink_data = []
-        used_tray_ids = set()
-
-        # --- Case 1: Delink for rejected tray qty ---
-        num_rows_rejection = 0
-        if total_rejection_qty > 0:
-            # Calculate total number of trays that would be rejected
-            total_rejected_trays = (total_rejection_qty + tray_capacity - 1) // tray_capacity  # Ceiling division
-            print(f"DEBUG: Rejection calculation - total_rejection_qty={total_rejection_qty}, tray_capacity={tray_capacity}, total_rejected_trays={total_rejected_trays}")
-            
-            # Get TrayId records for this lot to check scanned status
-            # We need to get trays that would be used for rejection but are scanned=False
-            unscanned_rejection_trays = TrayId.objects.filter(
-                lot_id=lot_id,
-                scanned=False
-            ).values('tray_id', 'tray_quantity', 'id').order_by('id')[:total_rejected_trays]
-            
-            print(f"DEBUG: Found {len(unscanned_rejection_trays)} unscanned trays out of {total_rejected_trays} total rejected trays")
-            
-            # Create delink rows only for unscanned rejected trays
-            for idx, tray in enumerate(unscanned_rejection_trays):
-                delink_data.append({
-                    'sno': len(delink_data) + 1,
-                    'tray_id': '',  # Empty - user will scan to delink
-                    'tray_quantity': tray['tray_quantity'] or tray_capacity,
-                    'id': tray['id'],
-                    'source': 'rejection'
-                })
-                used_tray_ids.add(tray['tray_id']) if tray['tray_id'] else None
-                print(f"DEBUG: Added rejection delink row {idx+1}: expected_tray_id={tray['tray_id']}, tray_qty={tray['tray_quantity'] or tray_capacity}")
-            
-            num_rows_rejection = len(unscanned_rejection_trays)
+        for i, tray_index in enumerate(empty_trays):
+            original_qty = original_distribution[tray_index] if tray_index < len(original_distribution) else 0
+            delink_data.append({
+                'sno': i + 1,
+                'tray_id': '',  # Empty - user will scan to delink
+                'tray_quantity': original_qty,
+                'tray_index': tray_index,
+                'source': 'empty_tray'
+            })
         
-        print(f"CASE 1: Rejected tray delinks: {num_rows_rejection}")
-
-        # --- Case 2: Delink for SHORTAGE rejections where rejected_tray_quantity equals tray_capacity ---
-        num_rows_shortage = 0
+        print(f"DEBUG: Generated {len(delink_data)} delink rows")
         
-        # Get SHORTAGE rejection records from IP_Rejected_TrayScan
-        shortage_rejections = IP_Rejected_TrayScan.objects.filter(
-            lot_id=lot_id,
-            rejection_reason__rejection_reason__iexact='SHORTAGE'  # Case-insensitive match for SHORTAGE
-        ).select_related('rejection_reason')
-        
-        print(f"DEBUG: Found {len(shortage_rejections)} SHORTAGE rejection records")
-        
-        for shortage in shortage_rejections:
-            rejected_qty = int(shortage.rejected_tray_quantity) if shortage.rejected_tray_quantity.isdigit() else 0
-            print(f"DEBUG: SHORTAGE rejection - rejected_tray_quantity={rejected_qty}, tray_capacity={tray_capacity}")
-            
-            # Only show delink if rejected_tray_quantity equals tray_capacity
-            if rejected_qty == tray_capacity:
-                delink_data.append({
-                    'sno': len(delink_data) + 1,
-                    'tray_id': '',  # Empty - user will scan to delink
-                    'tray_quantity': rejected_qty,
-                    'id': None,
-                    'source': 'shortage',
-                    'rejected_tray_id': shortage.rejected_tray_id or ''
-                })
-                num_rows_shortage += 1
-                print(f"DEBUG: Added SHORTAGE delink row: rejected_tray_id={shortage.rejected_tray_id}, tray_qty={rejected_qty}")
-            else:
-                print(f"DEBUG: Skipped SHORTAGE rejection - rejected_tray_quantity ({rejected_qty}) != tray_capacity ({tray_capacity})")
-        
-        print(f"CASE 2: SHORTAGE delinks: {num_rows_shortage}")
-        print(f"TOTAL delink rows populated: {len(delink_data)}")
-
-        # 5. Return response (even if no delink rows - this is valid)
         return Response({
             'success': True,
             'delink_trays': delink_data,
             'total_count': len(delink_data),
             'lot_id': lot_id,
-            'total_rejection_qty': total_rejection_qty,
-            'tray_capacity': tray_capacity,
-            'num_rows_rejection': num_rows_rejection,
-            'num_rows_shortage': num_rows_shortage,
+            'original_distribution': original_distribution,
+            'current_distribution': current_distribution,
+            'empty_trays_count': num_empty_trays,
+            'debug_info': {
+                'empty_tray_indices': empty_trays,
+                'reasoning': 'NEW tray usage creates empty trays (delink needed). Existing tray usage removes trays entirely (no delink).',
+                'logic': 'Delink rows = trays with 0 quantity after all rejections'
+            }
         })
-
+        
     except Exception as e:
         import traceback
         traceback.print_exc()
         return Response({'success': False, 'error': str(e)}, status=500)
 
+
+def calculate_distribution_after_rejections(lot_id, original_distribution):
+    """
+    Calculate the current tray distribution after applying all rejections.
+    NEW tray usage frees up existing tray space (creates empty trays).
+    Existing tray usage removes that tray entirely from distribution.
+    """
+    current_distribution = original_distribution.copy()
+    
+    # Get all rejections for this lot ordered by creation
+    rejections = IP_Rejected_TrayScan.objects.filter(lot_id=lot_id).order_by('id')
+    
+    print(f"DEBUG: Processing {rejections.count()} rejections for lot {lot_id}")
+    print(f"DEBUG: Starting distribution: {original_distribution}")
+    
+    for rejection in rejections:
+        rejected_qty = int(rejection.rejected_tray_quantity) if rejection.rejected_tray_quantity else 0
+        tray_id = rejection.rejected_tray_id
+        reason = rejection.rejection_reason.rejection_reason if rejection.rejection_reason else 'Unknown'
+        
+        if rejected_qty <= 0:
+            print(f"DEBUG: Skipping rejection with 0 quantity")
+            continue
+        
+        print(f"DEBUG: Processing rejection - Reason: {reason}, Qty: {rejected_qty}, Tray ID: '{tray_id}'")
+        
+        # Enhanced debugging for tray type identification
+        if not tray_id or tray_id.strip() == '':
+            print(f"DEBUG: Empty tray_id - treating as SHORTAGE (no distribution change)")
+            # SHORTAGE rejections don't affect tray distribution
+            continue
+        
+        is_new_tray = is_new_tray_by_id(tray_id)
+        print(f"DEBUG: is_new_tray_by_id('{tray_id}') = {is_new_tray}")
+        
+        # Check if NEW tray was used
+        if is_new_tray:
+            print(f"DEBUG: ✅ NEW tray used - freeing up {rejected_qty} space in existing trays")
+            current_distribution = free_up_space_optimally(current_distribution, rejected_qty)
+        else:
+            print(f"DEBUG: ❌ Existing tray used - removing {rejected_qty} from distribution entirely")
+            current_distribution = remove_rejected_tray_from_distribution(current_distribution, rejected_qty)
+        
+        print(f"DEBUG: Distribution after this rejection: {current_distribution}")
+    
+    print(f"DEBUG: Final distribution: {current_distribution}")
+    return current_distribution
+
+
+
+def remove_rejected_tray_from_distribution(distribution, rejected_qty):
+    """
+    Remove rejected tray entirely from distribution when existing tray is used.
+    Find the tray that matches the rejected quantity and remove it completely.
+    If no exact match, remove the best matching tray.
+    """
+    result = distribution.copy()
+    # Remove tray with exact qty
+    for i, qty in enumerate(result):
+        if qty == rejected_qty:
+            result.pop(i)
+            return result
+    # If no exact match, remove the smallest tray that can fit
+    best_match_index = -1
+    best_match_qty = float('inf')
+    for i, qty in enumerate(result):
+        if qty >= rejected_qty and qty < best_match_qty:
+            best_match_index = i
+            best_match_qty = qty
+    if best_match_index != -1:
+        result.pop(best_match_index)
+        return result
+    # Fallback: remove from largest tray
+    if result:
+        max_index = result.index(max(result))
+        if result[max_index] >= rejected_qty:
+            result[max_index] -= rejected_qty
+            if result[max_index] == 0:
+                result.pop(max_index)
+    return result
+
+def free_up_space_optimally(distribution, qty_to_free):
+    """
+    Free up space in existing trays when NEW tray is used for rejection.
+    Always zero out the smallest trays first, so delink is possible.
+    Example: [6, 12, 12] with NEW tray for 6 qty → [0, 12, 12]
+    """
+    result = distribution.copy()
+    remaining = qty_to_free
+    # Free from smallest trays first (to maximize empty trays)
+    sorted_indices = sorted(range(len(result)), key=lambda i: result[i])
+    for i in sorted_indices:
+        if remaining <= 0:
+            break
+        current_qty = result[i]
+        if current_qty >= remaining:
+            result[i] = current_qty - remaining
+            remaining = 0
+        elif current_qty > 0:
+            remaining -= current_qty
+            result[i] = 0
+    return result
+
+
+def get_original_capacity_for_tray(tray_index, current_distribution):
+    """
+    Get the original capacity for a tray. 
+    For simplicity, we'll assume all trays have the same capacity.
+    You can enhance this to get actual individual tray capacities if needed.
+    """
+    # Find the maximum quantity in current distribution as a reference
+    max_qty = max(current_distribution) if current_distribution else 12
+    return max_qty if max_qty > 0 else 12
+
+
+def get_actual_tray_distribution_for_delink(lot_id, stock):
+    """
+    Get the actual tray distribution for a lot for delink calculations.
+    This should match the distribution used in rejection validation.
+    """
+    try:
+        print(f"🔍 DEBUG: get_actual_tray_distribution_for_delink called with lot_id={lot_id}")
+        
+        # ✅ PRIORITY: Always get fresh data from TotalStockModel using lot_id
+        try:
+            fresh_stock = TotalStockModel.objects.filter(lot_id=lot_id).first()
+            if fresh_stock:
+                print(f"🔍 DEBUG: Fresh stock found - total_stock={getattr(fresh_stock, 'total_stock', 'N/A')}")
+                print(f"🔍 DEBUG: Fresh stock - dp_physical_qty={getattr(fresh_stock, 'dp_physical_qty', 'N/A')}")
+                
+                # Get tray capacity
+                tray_capacity = 10  # Default fallback
+                if fresh_stock.batch_id and hasattr(fresh_stock.batch_id, 'tray_capacity'):
+                    tray_capacity = fresh_stock.batch_id.tray_capacity
+                print(f"🔍 DEBUG: tray_capacity from fresh_stock = {tray_capacity}")
+                
+                # Try total_stock first
+                total_qty = None
+                if hasattr(fresh_stock, 'total_stock') and fresh_stock.total_stock and fresh_stock.total_stock > 0:
+                    total_qty = fresh_stock.total_stock
+                    print(f"✅ Using total_stock = {total_qty}")
+                elif hasattr(fresh_stock, 'dp_physical_qty') and fresh_stock.dp_physical_qty and fresh_stock.dp_physical_qty > 0:
+                    total_qty = fresh_stock.dp_physical_qty
+                    print(f"✅ Using dp_physical_qty = {total_qty}")
+                
+                if total_qty and total_qty > 0:
+                    # Calculate distribution: remainder first, then full capacity trays
+                    remainder = total_qty % tray_capacity
+                    full_trays = total_qty // tray_capacity
+                    
+                    print(f"🔍 CALCULATION: {total_qty} ÷ {tray_capacity} = {full_trays} full trays + {remainder} remainder")
+                    
+                    distribution = []
+                    
+                    # Top tray with remainder (if exists)
+                    if remainder > 0:
+                        distribution.append(remainder)
+                        print(f"🔍 Added remainder tray: {remainder}")
+                    
+                    # Full capacity trays
+                    for i in range(full_trays):
+                        distribution.append(tray_capacity)
+                        print(f"🔍 Added full tray {i+1}: {tray_capacity}")
+                    
+                    print(f"✅ FINAL calculated distribution: {distribution}")
+                    return distribution
+                else:
+                    print(f"❌ No valid total_qty found in fresh_stock")
+        except Exception as fresh_error:
+            print(f"❌ Error getting fresh stock: {fresh_error}")
+        
+        # Method 1: Try to get from TrayId records if they have individual quantities
+        print(f"🔍 Trying Method 1: TrayId records")
+        tray_records = TrayId.objects.filter(lot_id=lot_id).order_by('created_at')
+        if tray_records.exists():
+            print(f"🔍 Found {tray_records.count()} TrayId records")
+            tray_quantities = []
+            for tray in tray_records:
+                if hasattr(tray, 'tray_quantity') and tray.tray_quantity:
+                    tray_quantities.append(tray.tray_quantity)
+                    print(f"🔍 TrayId {tray.tray_id}: quantity = {tray.tray_quantity}")
+            
+            if tray_quantities:
+                print(f"✅ Method 1 SUCCESS: Found tray distribution from TrayId records: {tray_quantities}")
+                return tray_quantities
+        
+        # Get tray capacity from passed stock object
+        tray_capacity = 10  # Default fallback
+        if hasattr(stock, 'batch_id') and stock.batch_id and hasattr(stock.batch_id, 'tray_capacity'):
+            tray_capacity = stock.batch_id.tray_capacity
+        
+        print(f"🔍 Method 2: Using passed stock object, tray_capacity = {tray_capacity}")
+        
+        # Method 2: Calculate from total_stock (primary method)
+        if hasattr(stock, 'total_stock') and stock.total_stock and stock.total_stock > 0:
+            total_qty = stock.total_stock
+            print(f"🔍 Method 2: total_stock = {total_qty}")
+            
+            # Calculate distribution: remainder first, then full capacity trays
+            remainder = total_qty % tray_capacity
+            full_trays = total_qty // tray_capacity
+            
+            distribution = []
+            
+            # Top tray with remainder (if exists)
+            if remainder > 0:
+                distribution.append(remainder)
+            
+            # Full capacity trays
+            for _ in range(full_trays):
+                distribution.append(tray_capacity)
+            
+            print(f"✅ Method 2 SUCCESS: Calculated from total_stock: total_qty={total_qty}, tray_capacity={tray_capacity}")
+            print(f"   Formula: {total_qty} ÷ {tray_capacity} = {full_trays} full trays + {remainder} remainder")
+            print(f"   Result: {distribution}")
+            return distribution
+        
+        # Method 3: Try to get from TotalStockModel.dp_physical_qty
+        elif hasattr(stock, 'dp_physical_qty') and stock.dp_physical_qty and stock.dp_physical_qty > 0:
+            total_qty = stock.dp_physical_qty
+            print(f"🔍 Method 3: dp_physical_qty = {total_qty}")
+            
+            remainder = total_qty % tray_capacity
+            full_trays = total_qty // tray_capacity
+            
+            distribution = []
+            if remainder > 0:
+                distribution.append(remainder)
+            for _ in range(full_trays):
+                distribution.append(tray_capacity)
+            
+            print(f"✅ Method 3 SUCCESS: Calculated from dp_physical_qty: total_qty={total_qty}, tray_capacity={tray_capacity}")
+            print(f"   Formula: {total_qty} ÷ {tray_capacity} = {full_trays} full trays + {remainder} remainder")
+            print(f"   Result: {distribution}")
+            return distribution
+        
+        # Last resort: minimal fallback
+        print(f"⚠️ ALL METHODS FAILED: Using minimal fallback distribution with tray_capacity={tray_capacity}")
+        return [tray_capacity]  # At least one tray with standard capacity
+        
+    except Exception as e:
+        print(f"❌ Error getting tray distribution: {e}")
+        import traceback
+        traceback.print_exc()
+        # Emergency fallback - try to get at least tray_capacity
+        tray_capacity = 10
+        try:
+            if hasattr(stock, 'batch_id') and stock.batch_id and hasattr(stock.batch_id, 'tray_capacity'):
+                tray_capacity = stock.batch_id.tray_capacity
+        except:
+            pass
+        print(f"⚠️ Emergency fallback: [{tray_capacity}]")
+        return [tray_capacity]
+    
 # ✅ UPDATED: Enhanced delink_check_tray_id function
 @require_GET
 def delink_check_tray_id(request):
@@ -3859,7 +3827,7 @@ class TrayIdList_Complete_APIView(APIView):
     def get(self, request):
         batch_id = request.GET.get('batch_id')
         stock_lot_id = request.GET.get('stock_lot_id')
-        lot_id = request.GET.get('lot_id') or stock_lot_id  # Support both parameter names
+        lot_id = request.GET.get('lot_id') or stock_lot_id
         accepted_ip_stock = request.GET.get('accepted_ip_stock', 'false').lower() == 'true'
         rejected_ip_stock = request.GET.get('rejected_ip_stock', 'false').lower() == 'true'
         few_cases_accepted_ip_stock = request.GET.get('few_cases_accepted_ip_stock', 'false').lower() == 'true'
@@ -3869,25 +3837,24 @@ class TrayIdList_Complete_APIView(APIView):
         
         if not lot_id:
             return JsonResponse({'success': False, 'error': 'Missing lot_id or stock_lot_id'}, status=400)
-        
-        print(f"[TrayIdList_Complete_APIView] Filtering trays for batch_id={batch_id}, lot_id={lot_id}")
-        print(f"Stock status: accepted={accepted_ip_stock}, rejected={rejected_ip_stock}, few_cases={few_cases_accepted_ip_stock}")
-        
-        # ✅ NEW: Check for batch rejection
+                
+        # ✅ Check for batch rejection
         batch_rejection_record = IP_Rejection_ReasonStore.objects.filter(
             lot_id=lot_id, batch_rejection=True
         ).first()
         is_batch_rejection = bool(batch_rejection_record)
 
-        # ✅ Get rejected tray IDs from IP_Rejected_TrayScan based on lot_id
+        # ✅ Get rejected tray scans with detailed info
         rejected_tray_scans = IP_Rejected_TrayScan.objects.filter(lot_id=lot_id)
         rejected_tray_ids = []
-        rejected_tray_data = {}  # Store rejection details
+        rejected_tray_data = {}
+        rejected_tray_quantities = {}  # Store quantities from rejection records
         
         for scan in rejected_tray_scans:
-            if scan.rejected_tray_id:  # Only include non-empty tray IDs (exclude SHORTAGE)
+            if scan.rejected_tray_id:  # Only include non-empty tray IDs
                 rejected_tray_ids.append(scan.rejected_tray_id)
-                # Store rejection details for this tray
+                rejected_tray_quantities[scan.rejected_tray_id] = scan.rejected_tray_quantity
+                
                 if scan.rejected_tray_id not in rejected_tray_data:
                     rejected_tray_data[scan.rejected_tray_id] = []
                 rejected_tray_data[scan.rejected_tray_id].append({
@@ -3899,28 +3866,39 @@ class TrayIdList_Complete_APIView(APIView):
         
         print(f"Found {len(rejected_tray_ids)} rejected tray IDs: {rejected_tray_ids}")
         
-        # Base queryset - only include trays with quantity > 0
+        # Base queryset - trays from TrayId table
         base_queryset = TrayId.objects.filter(
             batch_id__batch_id=batch_id,
             tray_quantity__gt=0,
             lot_id=lot_id
         )
         
-        # ✅ UPDATED: Apply filtering based on stock status using rejected tray IDs from IP_Rejected_TrayScan
+        # ✅ FIXED: Ensure rejected trays are included even if not in TrayId table
+        existing_tray_ids = list(base_queryset.values_list('tray_id', flat=True))
+        missing_rejected_trays = [tray_id for tray_id in rejected_tray_ids if tray_id not in existing_tray_ids]
+        
+        print(f"Existing tray IDs in TrayId table: {existing_tray_ids}")
+        print(f"Missing rejected trays (not in TrayId): {missing_rejected_trays}")
+        
+        # Apply filtering based on stock status
         if accepted_ip_stock and not few_cases_accepted_ip_stock:
             queryset = base_queryset.exclude(tray_id__in=rejected_tray_ids)
-            print(f"Filtering for accepted trays only (excluding rejected tray IDs)")
+            include_missing_rejected = False
+            print(f"Filtering for accepted trays only")
         elif rejected_ip_stock and not few_cases_accepted_ip_stock:
             queryset = base_queryset.filter(tray_id__in=rejected_tray_ids)
-            print(f"Filtering for rejected trays only (including rejected tray IDs)")
+            include_missing_rejected = True
+            print(f"Filtering for rejected trays only")
         elif few_cases_accepted_ip_stock:
             queryset = base_queryset
+            include_missing_rejected = True
             print(f"Showing both accepted and rejected trays")
         else:
             queryset = base_queryset
+            include_missing_rejected = False
             print(f"Using default filter - showing all trays")
         
-        # --- NEW LOGIC: Determine top tray field based on accepted/rejected status ---
+        # Determine top tray
         top_tray = None
         if accepted_ip_stock and not few_cases_accepted_ip_stock:
             top_tray = base_queryset.filter(top_tray=True).first()
@@ -3931,92 +3909,74 @@ class TrayIdList_Complete_APIView(APIView):
             top_tray = base_queryset.filter(ip_top_tray=True).first()
         
         # Remove top tray from other_trays queryset
-        other_trays = base_queryset.exclude(pk=top_tray.pk if top_tray else None).order_by('id')
+        other_trays = queryset.exclude(pk=top_tray.pk if top_tray else None).order_by('id')
         
         data = []
         row_counter = 1
 
-        # Add top tray first if it exists
-        if top_tray:
-            top_tray_qty = getattr(top_tray, 'tray_quantity', None)
-            if top_tray_qty is None:
-                top_tray_qty = top_tray.tray_quantity
-        
-            # --- Batch rejection logic ---
+        # ✅ Helper function to create tray data
+        def create_tray_data(tray_obj, tray_id, is_top=False, is_missing=False):
+            nonlocal row_counter
+            
             if is_batch_rejection:
                 is_rejected = True
                 rejection_details = [{
                     'rejection_reason': 'Lot Rejection',
-                    'rejected_quantity': top_tray_qty,
+                    'rejected_quantity': tray_obj.tray_quantity if tray_obj else rejected_tray_quantities.get(tray_id, 0),
                     'user': batch_rejection_record.user.username if batch_rejection_record and batch_rejection_record.user else None
                 }]
-                tray_qty = top_tray_qty
+                tray_qty = tray_obj.tray_quantity if tray_obj else rejected_tray_quantities.get(tray_id, 0)
             else:
-                is_rejected = top_tray.tray_id in rejected_tray_ids
-                rejection_details = rejected_tray_data.get(top_tray.tray_id, []) if is_rejected else []
-                # 🔥 FIX: For rejected top tray, get tray_qty from IP_Rejected_TrayScan
-                if is_rejected:
-                    scan_obj = IP_Rejected_TrayScan.objects.filter(
-                        lot_id=lot_id,
-                        rejected_tray_id=top_tray.tray_id
-                    ).order_by('-id').first()
-                    tray_qty = scan_obj.rejected_tray_quantity if scan_obj else top_tray_qty
+                is_rejected = tray_id in rejected_tray_ids
+                rejection_details = rejected_tray_data.get(tray_id, []) if is_rejected else []
+                
+                if is_rejected and is_missing:
+                    # For missing rejected trays, use quantity from rejection record
+                    tray_qty = rejected_tray_quantities.get(tray_id, 0)
+                elif is_rejected and tray_obj:
+                    # For existing rejected trays, use quantity from rejection record
+                    tray_qty = rejected_tray_quantities.get(tray_id, tray_obj.tray_quantity)
                 else:
-                    tray_qty = top_tray_qty
-        
-            data.append({
+                    # For accepted trays, use original quantity
+                    tray_qty = tray_obj.tray_quantity if tray_obj else 0
+            
+            return {
                 's_no': row_counter,
-                'tray_id': top_tray.tray_id,
-                'tray_quantity': tray_qty,
-                'position': 0,
-                'is_top_tray': True,
-                'rejected_tray': is_rejected,
-                'rejection_details': rejection_details,
-                'ip_top_tray': getattr(top_tray, 'ip_top_tray', False),
-                'ip_top_tray_qty': getattr(top_tray, 'ip_top_tray_qty', None),
-                'top_tray': getattr(top_tray, 'top_tray', False),
-            })
-            row_counter += 1
-        # Add other trays
-        for tray in other_trays:
-            # --- Batch rejection logic ---
-            if is_batch_rejection:
-                is_rejected = True
-                rejection_details = [{
-                    'rejection_reason': 'Lot Rejection',
-                    'rejected_quantity': tray.tray_quantity,
-                    'user': batch_rejection_record.user.username if batch_rejection_record and batch_rejection_record.user else None
-                }]
-                tray_qty = tray.tray_quantity
-            else:
-                is_rejected = tray.tray_id in rejected_tray_ids
-                rejection_details = rejected_tray_data.get(tray.tray_id, []) if is_rejected else []
-                # 🔥 FIX: For rejected trays, get tray_qty from IP_Rejected_TrayScan
-                if is_rejected:
-                    scan_obj = IP_Rejected_TrayScan.objects.filter(
-                        lot_id=lot_id,
-                        rejected_tray_id=tray.tray_id
-                    ).order_by('-id').first()
-                    tray_qty = scan_obj.rejected_tray_quantity if scan_obj else tray.tray_quantity
-                else:
-                    tray_qty = tray.tray_quantity
-            data.append({
-                's_no': row_counter,
-                'tray_id': tray.tray_id,
+                'tray_id': tray_id,
                 'tray_quantity': tray_qty,
                 'position': row_counter - 1,
-                'is_top_tray': False,
+                'is_top_tray': is_top,
                 'rejected_tray': is_rejected,
                 'rejection_details': rejection_details,
-                'ip_top_tray': getattr(tray, 'ip_top_tray', False),
-                'ip_top_tray_qty': getattr(tray, 'ip_top_tray_qty', None),
-                'top_tray': getattr(tray, 'top_tray', False),
-            })
+                'ip_top_tray': getattr(tray_obj, 'ip_top_tray', False) if tray_obj else False,
+                'ip_top_tray_qty': getattr(tray_obj, 'ip_top_tray_qty', None) if tray_obj else None,
+                'top_tray': getattr(tray_obj, 'top_tray', False) if tray_obj else False,
+                'is_missing_from_trayid': is_missing  # Flag to indicate this tray is missing from TrayId table
+            }
+
+        # Add top tray first if it exists
+        if top_tray:
+            tray_data = create_tray_data(top_tray, top_tray.tray_id, is_top=True)
+            data.append(tray_data)
             row_counter += 1
+
+        # Add other existing trays
+        for tray in other_trays:
+            tray_data = create_tray_data(tray, tray.tray_id, is_top=False)
+            data.append(tray_data)
+            row_counter += 1
+        
+        # ✅ FIXED: Add missing rejected trays if they should be included
+        if include_missing_rejected and missing_rejected_trays:
+            print(f"Adding {len(missing_rejected_trays)} missing rejected trays to response")
+            for missing_tray_id in missing_rejected_trays:
+                tray_data = create_tray_data(None, missing_tray_id, is_top=False, is_missing=True)
+                data.append(tray_data)
+                row_counter += 1
             
         print(f"Total trays returned: {len(data)}")
         
-        # ✅ NEW: Also return summary of rejections for this lot
+        # Rejection summary
         rejection_summary = {
             'total_rejected_trays': len(rejected_tray_ids),
             'rejected_tray_ids': rejected_tray_ids,
@@ -4027,14 +3987,15 @@ class TrayIdList_Complete_APIView(APIView):
             ).count() or IP_Rejected_TrayScan.objects.filter(
                 lot_id=lot_id, 
                 rejected_tray_id=''
-            ).count()
+            ).count(),
+            'missing_rejected_trays': missing_rejected_trays  # ✅ NEW: Track missing trays
         }
         
         return JsonResponse({
             'success': True, 
             'trays': data,
-            'rejection_summary': rejection_summary  # ✅ NEW: Include rejection summary
-        })  
+            'rejection_summary': rejection_summary
+        })   
         
 @method_decorator(csrf_exempt, name='dispatch')
 class GetShortageRejectionsView(APIView):
