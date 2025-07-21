@@ -134,7 +134,7 @@
     {{ row.plating_stk_no|highlight_plating_color|safe_html }}
 
     <div class="model-image-tooltip"
-         style="position: absolute; left: 60% !important; top: 0%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 10010; display: flex; align-items: center; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s;">          
+         style="position: absolute; left: 238%; top: 0%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 10010; display: flex; align-items: center; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s;">          
       <button class="img-scroll-left" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8592;</button>
       <div class="img-gallery" style="display: flex; gap: 6px; overflow: hidden; width: 180px;">
         {% for img_url in row.model_images %}
@@ -558,110 +558,123 @@
   <!-- Script for Model / Stock No - Image Mouse Hover -->
 
  
-<!-- Plating Stk - Image hover - fixed position while hitting the Plating Stk No -->
+<!-- Plating Stk No - Fullscreen image modal with Info & Close (matches Pick Table) -->
 <script nonce="{{ csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function () {
-  let openTooltip = null;
-
-  // 👉 Directly add a second button next to the red "Close" button
-  const redCloseButtons = document.querySelectorAll("button");
-
-  redCloseButtons.forEach(function (btn) {
-    if (
-      btn.textContent.trim().toLowerCase() === "close" &&
-      !btn.classList.contains("second-button-added")
-    ) {
-      // ✅ Create new blue button
-      const blueBtn = document.createElement("button");
-      blueBtn.textContent = "Info"; // ➕ New button text
-      blueBtn.style.cssText =
-        "margin-left: 10px; color: white; background-color: blue; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;";
-      
-      // ✅ Insert next to red Close button
-      btn.insertAdjacentElement("afterend", blueBtn);
-      btn.classList.add("second-button-added");
-    }
-  });
-
-  // 👉 Add Info and Close buttons inside tooltip window
-  document.querySelectorAll(".model-image-tooltip").forEach(function (tooltip) {
-    // Only add if not already present
-    if (!tooltip.querySelector(".info-btn")) {
-      const infoBtn = document.createElement("button");
-      infoBtn.className = "info-btn";
-      infoBtn.textContent = "Info";
-      infoBtn.style.cssText =
-        "position: absolute; top: 32px; left: 32px; background: #007bff; color: #fff; border: none; border-radius: 8px; padding: 10px 24px; font-size: 18px; cursor: pointer; z-index: 100001;";
-      infoBtn.addEventListener("click", function () {
-        alert("Info button clicked!");
-      });
-      tooltip.appendChild(infoBtn);
-    }
-        
-    if (!tooltip.querySelector(".close-btn")) {
-      const closeBtn = document.createElement("button");
-      closeBtn.className = "close-btn";
-      closeBtn.textContent = "Close";
-      closeBtn.style.cssText =
-        "position: absolute; top: 32px; right: 32px; background: #dc3545; color: #fff; border: none; border-radius: 8px; padding: 10px 24px; font-size: 18px; cursor: pointer; z-index: 100001;";
-      closeBtn.addEventListener("click", function () {
-        tooltip.style.display = "none";
-        tooltip.classList.remove("pinned");
-        tooltip.setAttribute("data-force-closed", "true");
-        openTooltip = null;
-        // Also close the modal popup if present
-        var modal = document.getElementById("trayScanModal");
-        if (modal && modal.classList.contains("open")) {
-          modal.classList.remove("open");
-        }
-      });
-      tooltip.appendChild(closeBtn);
-    }
-  });
-
-  // Tooltip show/hide logic
+  let hoverTimeout;
+ 
   document.querySelectorAll(".model-hover-trigger").forEach(function (trigger) {
     const tooltip = trigger.querySelector(".model-image-tooltip");
-
-    trigger.addEventListener("mouseenter", function () {
-      if (tooltip && tooltip.getAttribute("data-force-closed") !== "true") tooltip.style.display = "block";
+ 
+    // Remove existing hover event listeners by cloning (prevents double triggers)
+    const newTrigger = trigger.cloneNode(true);
+    trigger.parentNode.replaceChild(newTrigger, trigger);
+ 
+    // Hover: show modal with first image
+    newTrigger.addEventListener("mouseenter", function () {
+      hoverTimeout = setTimeout(() => {
+        const firstImg = newTrigger.querySelector(".model-image-tooltip img");
+        if (firstImg) showDirectImageModal(firstImg.src);
+      }, 200);
     });
-
-    trigger.addEventListener("mouseleave", function () {
-      if (tooltip && !tooltip.classList.contains("pinned")) {
-        tooltip.style.display = "none";
-      }
+    newTrigger.addEventListener("mouseleave", function () {
+      clearTimeout(hoverTimeout);
     });
-
-    trigger.addEventListener("click", function (e) {
+ 
+    // Click: show modal with first image
+    newTrigger.addEventListener("click", function (e) {
+      e.preventDefault();
       e.stopPropagation();
-
-      if (tooltip && tooltip.getAttribute("data-force-closed") !== "true") {
-        document.querySelectorAll(".model-image-tooltip.pinned").forEach((tt) => {
-          tt.classList.remove("pinned");
-          tt.style.display = "none";
-        });
-
-        tooltip.classList.add("pinned");
-        tooltip.style.display = "block";
-        openTooltip = tooltip;
+      const firstImg = newTrigger.querySelector(".model-image-tooltip img");
+      if (firstImg) showDirectImageModal(firstImg.src);
+    });
+  });
+ 
+  function showDirectImageModal(imageSrc) {
+    // Remove any existing modal
+    const existingModal = document.getElementById('directImageModal');
+    if (existingModal) existingModal.remove();
+ 
+    // Create modal
+    const modal = document.createElement("div");
+    modal.id = 'directImageModal';
+    modal.style.cssText = `
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.8);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100000; backdrop-filter: blur(2px);
+    `;
+ 
+    // Add the image
+    const largeImg = document.createElement("img");
+    largeImg.src = imageSrc;
+    largeImg.style.cssText = `
+      max-width: 90%; max-height: 90%; border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3); object-fit: contain;
+    `;
+    modal.appendChild(largeImg);
+ 
+    // Close button
+    const closeBtn = document.createElement("button");
+    closeBtn.innerHTML = "&times;";
+    closeBtn.style.cssText = `
+      position: absolute; top: 20px; right: 20px; width: 50px; height: 50px;
+      background: #dc3545; color: white; border: none; border-radius: 50%;
+      font-size: 24px; font-weight: bold; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(220,53,69,0.4);
+      transition: all 0.3s ease;
+    `;
+    closeBtn.addEventListener("click", function () { modal.remove(); });
+    closeBtn.addEventListener("mouseenter", function () {
+      closeBtn.style.transform = "scale(1.1)";
+      closeBtn.style.background = "#c82333";
+    });
+    closeBtn.addEventListener("mouseleave", function () {
+      closeBtn.style.transform = "scale(1)";
+      closeBtn.style.background = "#dc3545";
+    });
+    modal.appendChild(closeBtn);
+ 
+    // Info button
+    const infoBtn = document.createElement("button");
+    infoBtn.innerHTML = "ℹ";
+    infoBtn.style.cssText = `
+      position: absolute; top: 20px; left: 20px; width: 50px; height: 50px;
+      background: #007bff; color: white; border: none; border-radius: 50%;
+      font-size: 20px; font-weight: bold; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,123,255,0.4);
+      transition: all 0.3s ease;
+    `;
+    infoBtn.addEventListener("click", function () {
+      alert("Model information will be displayed here.");
+    });
+    infoBtn.addEventListener("mouseenter", function () {
+      infoBtn.style.transform = "scale(1.1)";
+      infoBtn.style.background = "#0056b3";
+    });
+    infoBtn.addEventListener("mouseleave", function () {
+      infoBtn.style.transform = "scale(1)";
+      infoBtn.style.background = "#007bff";
+    });
+    modal.appendChild(infoBtn);
+ 
+    // Close on outside click
+    modal.addEventListener("click", function (e) {
+      if (e.target === modal) modal.remove();
+    });
+ 
+    // Close on Escape key
+    const escapeHandler = function(e) {
+      if (e.key === 'Escape') {
+        modal.remove();
+        document.removeEventListener('keydown', escapeHandler);
       }
-    });
-  });
-
-  document.addEventListener("click", function () {
-    if (openTooltip) {
-      openTooltip.classList.remove("pinned");
-      openTooltip.style.display = "none";
-      openTooltip = null;
-    }
-  });
-
-  document.querySelectorAll(".model-image-tooltip").forEach(function (tooltip) {
-    tooltip.addEventListener("click", function (e) {
-      e.stopPropagation();
-    });
-  });
+    };
+    document.addEventListener('keydown', escapeHandler);
+ 
+    document.body.appendChild(modal);
+  }
 });
 </script>
 

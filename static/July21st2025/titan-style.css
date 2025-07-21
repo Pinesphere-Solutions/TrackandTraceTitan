@@ -405,10 +405,6 @@ body.sidebar-icon-only .table-responsive {
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
-  margin-right: 10px !important; /* Add space to the right */
-  padding-right: 10px !important; /* Add padding to the right */
-
-
 }
 
 .content-wrapper,
@@ -513,7 +509,13 @@ body.sidebar-icon-only .table-responsive {
   }
 }
 
-
+/* Title spacing */
+.card-body > h5.text-left.mt-0.mb-4 {
+  margin-bottom: 12px !important;
+  margin-top: -5px !important;
+  padding-bottom: 0 !important;
+  margin-left: 5px !important;
+}
 .content-wrapper > h5.text-left.mt-0.mb-4 {
   margin-top: -50px !important;
   margin-bottom: -5px !important;
@@ -581,7 +583,12 @@ td:first-child * {
   align-items: flex-end;
   gap: 8px;
 }
-
+#modalModelNo_DayPlanning {
+  margin-top: 10px !important;
+  display: inline-block;
+  font-weight: 600;
+  color: #028084;
+}
 /* Dim or blur main content when read-only tray scan modal is open */
 .tray-scan-modal-DayPlanning.open ~ .content-wrapper {
   opacity: 0.3;
@@ -782,7 +789,7 @@ td:first-child * {
 .model-image-tooltip {
   position: fixed !important;
   top: 20% !important;
-  left: 60% !important;
+  left: 50% !important;
   width: 100vw !important;
   height: 100vh !important;
   aspect-ratio: 1 / 1 !important;
@@ -1087,8 +1094,6 @@ td:first-child * {
 #order-listing th:last-child,
 #order-listing td:last-child {
   border-right: none;
-  max-width: 95px;
-  min-width: 100px;
 }
 /* Overall Table Shrink */
 #order-listing tr,
@@ -1164,19 +1169,19 @@ td:first-child * {
   max-width: 100px;
 } /* Source */
 #order-listing th:nth-child(11) {
-  min-width: 90px;
+  min-width: 80px;
   max-width: 90px;
 } /* No of Trays */
 #order-listing th:nth-child(12) {
-  min-width: 95px;
-  max-width: 95px;
+  min-width: 80px;
+  max-width: 90px;
 } /* Input Qty */
 #order-listing th:nth-child(13) {
-  min-width: 110px;
+  min-width: 100px;
   max-width: 110px;
 } /* Process Status */
 #order-listing th:nth-child(14) {
-  min-width: 90px;
+  min-width: 80px;
   max-width: 100px;
 } /*  Action */
 #order-listing th:nth-child(15) {
@@ -1373,7 +1378,7 @@ h6 {
 
 .tray-scan-close {
   position: absolute;
-  top: 12px;
+  top: -5px;
   right: 10px;
   font-size: 24px;
   font-weight: bold;
@@ -1731,6 +1736,12 @@ thead th {
   display: flex;
   align-items: flex-end;
   gap: 8px;
+}
+#modalModelNo_DayPlanning {
+  margin-top: 10px !important;
+  display: inline-block;
+  font-weight: 600;
+  color: #028084;
 }
 
 /* Dim or blur main content when read-only tray scan modal is open */
@@ -2166,7 +2177,7 @@ thead th {
   font-size: 16px !important;
   font-weight: 600 !important;
   color: #028084 !important;
-  margin-top: 0 !important;
+  margin-top: 10px !important;
   display: inline-block;
 }
 
@@ -2972,7 +2983,7 @@ html {
 /* Title spacing */
 .card-body > h5.text-left.mt-0.mb-4 {
   margin-bottom: 10px !important;
-  margin-top: 15px !important;
+  margin-top: 10px !important;
   padding-bottom: 0 !important;
   margin-left: 5px !important;
 }
@@ -3007,108 +3018,14 @@ html {
   z-index: 9999;
 }
 
-/* ...existing code... */
-
-/* Rejection Details Modal Styles */
 .new-popup-modal {
-  position: fixed;
-  top: 50px;
-  right: 0;
-  width: 420px;
-  max-width: 95vw;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-  z-index: 10001;
-  padding: 0;
-  display: none;
-  transition: width 0.3s, right 0.3s;
+  right: -440px; /* hidden by default */
+  z-index: 10000;
 }
+
 .new-popup-modal.open {
-  display: block;
-  animation: slideInFromRight 0.3s;
+  right: 0; /* When open, slides in from the right */
 }
-@keyframes slideInFromRight {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-.rejection-modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 24px 10px 24px;
-  border-bottom: 1.5px solid #e0e0e0;
-  background: linear-gradient(90deg, #028084 0%, #009688 100%);
-  border-radius: 16px 16px 0 0;
-}
-.rejection-modal-header .modal-title {
-  color: #fff;
-  font-size: 1.18rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.tray-scan-close:hover {
-  color: #d9534f;
-}
-.rejection-content {
-  padding: 18px 24px 24px 24px;
-  background: #fff;
-  border-radius: 0 0 16px 16px;
-}
-.rejection-loader {
-  text-align: center;
-  font-size: 1rem;
-  color: #028084;
-  margin-bottom: 18px;
-}
-.rejection-table-responsive {
-  width: 100%;
-  overflow-x: auto;
-}
-.rejection-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 0;
-  font-size: 14px;
-  background: #fff;
-}
-.rejection-table th, .rejection-table td {
-  padding: 10px 12px;
-  text-align: left;
-  border-bottom: 1px solid #e0e0e0;
-}
-.rejection-table th {
-  background: #e0f7fa;
-  color: #028084;
-  font-weight: 600;
-  font-size: 15px;
-}
-.rejection-table tbody tr:last-child td {
-  border-bottom: none;
-}
-@media (max-width: 600px) {
-  .new-popup-modal {
-    width: 98vw;
-    right: 0;
-    top: 0;
-    border-radius: 0;
-    min-width: unset;
-    max-width: 100vw;
-  }
-  .rejection-modal-header, .rejection-content {
-    padding: 12px 8px;
-  }
-  .rejection-table th, .rejection-table td {
-    padding: 8px 6px;
-    font-size: 13px;
-  }
-  .tray-scan-close {
-    font-size: 24px;
-  }
-}
-
-/* ...existing code... */
 
 .tray-scan-close {
   position: absolute;

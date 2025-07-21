@@ -36,10 +36,12 @@ urlpatterns = [
     path('get_delink_tray_data/', get_delink_tray_data, name='get_delink_tray_data'),
     path('delink_check_tray_id/', delink_check_tray_id, name='delink_check_tray_id'),
     path('reject_check_tray_id_simple/', reject_check_tray_id_simple, name='reject_check_tray_id_simple'),
-
+   
+    
     path('complete_tray_validate/', TrayValidate_Complete_APIView.as_view(), name='complete_tray_validate'),
     path('CompleteTable_tray_id_list/', TrayIdList_Complete_APIView.as_view(), name='CompleteTable_tray_id_list'),
     path('get_shortage_rejections/', GetShortageRejectionsView.as_view(), name='get_shortage_rejections'),
 
-    
+    path('delink_selected_trays/', delink_selected_trays, name='delink_selected_trays'),
+
 ]

@@ -141,15 +141,16 @@
                       {% endif %}
                       <span class="sno-value">{{ page_obj.start_index|add:forloop.counter0 }}</span>
                     </span>
-                  </td>             
-                    <td {% if data.ip_hold_lot %} class="row-inactive-blur" {% endif %}>
+                  </td>   
+                  <!-- Plating Stk No Column -->       
+                    <td {% if data.ip_hold_lot %} class="row-inactive-blur" {% endif %}style="white-space:normal;word-break:break-all;">
                               {{ data.created_at|date:"d-M-y"  }}<br>
-                        <span style="display:inline-block; margin-top:4px;">{{ data.created_at|date:"h:i A" }}</span>
+                        <span style="display:inline-block; margin-top:4px;word-break: break-all;">{{ data.created_at|date:"h:i A" }}</span>
                         </td>
                     <td {% if data.ip_hold_lot %} class="row-inactive-blur" {% endif %}>
-                        <span class="model-hover-trigger" style="cursor: pointer;">
+                        <span class="model-hover-trigger" style="cursor: pointer; word-break: break-all;">
                           {{ data.plating_stk_no|highlight_plating_color|safe_html }}
-                          <div class="model-image-tooltip" style="position: absolute; left: 50%; top: 110%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 9999; display: flex; align-items: center; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s;">
+                          <div class="model-image-tooltip" style="position: absolute; left: 80%; top: 110%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 9999; display: flex; align-items: center; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s;">
                             <button class="img-scroll-left" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8592;</button>
                             <div class="img-gallery" style="display: flex; gap: 6px; overflow: hidden; width: 180px;">
                               {% for img_url in data.model_images %}
@@ -310,13 +311,12 @@
                         <div
                           class="d-inline-block px-3 fw-semibold text-center rounded-pill"
                           style="
-                            border: 2px solid #dc3545;
+                            border: 1px solid #dc3545;
                             background-color: #f8d7da;
                             color: #721c24;
-                            font-size: clamp(0.75rem, 2vw, 0.875rem);
+                            font-size: 12px;
                             white-space: nowrap;
-                            padding-top: 0.5rem;
-                            padding-bottom: 0.5rem;
+                            padding: 5px;
                           "
                         >
                           On Hold
@@ -325,13 +325,12 @@
                         <div
                           class="d-inline-block px-3 fw-semibold text-center rounded-pill"
                           style="
-                            border: 2px solid #4997ac;
+                            border: 1px solid #4997ac;
                             background-color: #d1f2f3;
                             color: #03425d;
-                            font-size: clamp(0.75rem, 2vw, 0.875rem);
+                            font-size: 12px;
                             white-space: nowrap;
-                            padding-top: 0.5rem;
-                            padding-bottom: 0.5rem;
+                            padding: 5px;
                           "
                         >
                           Draft
@@ -340,13 +339,12 @@
                         <div
                           class="d-inline-block px-3 fw-semibold text-center rounded-pill"
                           style="
-                            border: 2px solid #4997ac;
+                            border: 1px solid #4997ac;
                             background-color: #d1f2f3;
                             color: #03425d;
-                            font-size: clamp(0.75rem, 2vw, 0.875rem);
+                            font-size: 12px;
                             white-space: nowrap;
-                            padding-top: 0.5rem;
-                            padding-bottom: 0.5rem;
+                            padding: 5px;
                           "
                         >
                           Draft
@@ -1887,8 +1885,8 @@ document.addEventListener("DOMContentLoaded", function () {
       if (lotStatusCell) {
         lotStatusCell.innerHTML = `
           <div class="d-inline-block px-3 fw-semibold text-center rounded-pill"
-              style="border: 2px solid #4997ac; background-color: #d1f2f3; color: #03425d; 
-                     font-size: clamp(0.75rem, 2vw, 0.875rem); white-space: nowrap; 
+              style="border: 1px solid #4997ac; background-color: #d1f2f3; color: #03425d; 
+                     font-size: 12px; white-space: nowrap; 
                      padding-top: 0.5rem; padding-bottom: 0.5rem;">
             Draft (Qty Calculated)
           </div>
@@ -2882,7 +2880,7 @@ function generateDynamicTrayIdInputs(row, quantity, trayIdCell) {
   trayIdContainer.className = 'tray-id-container';
   trayIdContainer.style.cssText = `
     display: flex; flex-direction: column; gap: 6px; padding: 8px;
-    background-color: #f8f9fa; border: 2px solid #007bff; border-radius: 8px;
+    background-color: #f8f9fa; border: 1px solid #007bff; border-radius: 8px;
   `;
   
   // Add header for tray container
@@ -2921,7 +2919,7 @@ function generateDynamicTrayIdInputs(row, quantity, trayIdCell) {
     trayInput.className = 'form-control rejection-tray-id-input';
     trayInput.style.cssText = `
       flex: 1; font-size: 12px; padding: 6px 10px;
-      border: 2px solid #ced4da; border-radius: 6px;
+      border: 1px solid #ced4da; border-radius: 6px;
       transition: all 0.2s ease; text-align: center; font-weight: 500;
     `;
     trayInput.placeholder = `Scan Tray ID ${i + 1}`;
@@ -3804,8 +3802,8 @@ function handleTrayWiseRejectionWithFormData(batchId, stockLotId, formData) {
         if (lotStatusCell) {
           lotStatusCell.innerHTML = `
             <div class="d-inline-block px-3 fw-semibold text-center rounded-pill"
-              style="border: 2px solid #4997ac; background-color: #d1f2f3; color: #03425d;
-              font-size: clamp(0.75rem, 2vw, 0.875rem); white-space: nowrap;
+              style="border: 1px solid #4997ac; background-color: #d1f2f3; color: #03425d;
+              font-size: 12px; white-space: nowrap;
               padding-top: 0.5rem; padding-bottom: 0.5rem;">
               Draft
             </div>
@@ -4225,14 +4223,14 @@ function showAcceptedTrayModal(rescanData, lotId, isDraft) {
       <i class="fa fa-info-circle"></i> <strong>Top Tray Scan Required</strong><br>
     </div>
     
-    <div style="display: flex; align-items: center; gap: 15px; padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; background: #f9f9f9;">
+    <div style="display: flex; align-items: center; gap: 15px; padding: 15px; border: 1px solid #e0e0e0; border-radius: 8px; background: #f9f9f9;">
       <div style="flex: 1;">
         <label style="font-weight: bold; margin-bottom: 5px; display: block;">Scan or enter top tray ID:</label>
         <input type="text" 
                id="topTrayIdInput" 
                placeholder="Scan Tray ID..." 
                value="${draftTrayId}"
-               style="width: 300px; padding: 8px 12px; border: 2px solid #ddd; border-radius: 4px; font-size: 16px; ${draftTrayId ? 'background-color: #d4edda; border-color: #28a745;' : ''}" 
+               style="width: 300px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; ${draftTrayId ? 'background-color: #d4edda; border-color: #28a745;' : ''}" 
                class="top-tray-id-input" 
                ${(!isDraft && draftTrayId) } />
                <div id="topTrayError" style="color: #dc3545; font-size: 12px; margin-top: 4px; display: none;"></div>
@@ -5548,7 +5546,7 @@ function checkForDuplicateTrayId() {
         
         /* Enhanced styling for single top tray scan */
         .top-tray-input-section {
-          border: 2px solid #e0e0e0;
+          border: 1px solid #e0e0e0;
           border-radius: 8px;
           background: #f9f9f9;
           padding: 15px;
@@ -5638,7 +5636,7 @@ function checkForDuplicateTrayId() {
           display: inline-block;
           width: 16px;
           height: 16px;
-          border: 2px solid #f3f3f3;
+          border: 1px solid #f3f3f3;
           border-top: 2px solid #007bff;
           border-radius: 50%;
           animation: spin 1s linear infinite;
@@ -6295,6 +6293,47 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+<!-- Plating Stk No - with info & close btn -->
+<script nonce="{{ csp_nonce }}">
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.model-hover-trigger').forEach(function(trigger) {
+    const tooltip = trigger.querySelector('.model-image-tooltip');
+    if (!tooltip) return;
 
+    // Prevent duplicate buttons
+    if (tooltip.querySelector('.info-btn') || tooltip.querySelector('.close-btn')) return;
+
+    // Create Info button
+    const infoBtn = document.createElement("button");
+    infoBtn.className = "info-btn";
+    infoBtn.textContent = "Info";
+    infoBtn.style.cssText = "background:#007bff;color:#fff;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:13px;";
+
+    // Create Close button
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "close-btn";
+    closeBtn.textContent = "Close";
+    closeBtn.style.cssText = "background:#dc3545;color:#fff;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:13px;";
+
+    // Insert buttons at the end of tooltip
+    tooltip.appendChild(infoBtn);
+    tooltip.appendChild(closeBtn);
+
+    // Info button event
+    infoBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      // You can show a modal, tooltip, or console log
+      console.log("Info button clicked for model:", trigger.textContent.trim());
+    });
+
+    // Close button event
+    closeBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      tooltip.style.opacity = "0";
+      tooltip.style.pointerEvents = "none";
+    });
+  });
+});
+</script>
 
 {% endblock %} {% endblock content %}

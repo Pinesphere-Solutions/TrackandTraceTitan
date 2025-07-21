@@ -2,50 +2,18 @@
 
 
 <div class="content-wrapper">
- 
+  <div class="row">
     <div class="col-12 grid-margin stretch-card">
-     
-        <div class="card-body">
-          <h5 class="text-left mt-0 mb-4" style="font-weight:700;">Input Screening Completed Table</h5>
-          
-          <!-- 🔥 NEW: Date Filter Section -->
-          <div class="calendar-bar">
-            <div class="date-input-group">
-              <label for="from-date-simple" style="font-weight: 600; color: #028084; margin-right: 8px;">From Date:</label>
-              <input type="date" id="from-date-simple" name="from_date" 
-                     value="{{ from_date }}" 
-                     max="{{ 'now'|date:'Y-m-d' }}"
-                     style="border: 1.5px solid #028084; border-radius: 6px; padding: 6px 12px; font-size: 14px; color: #028084; font-weight: 600;">
-            </div>
-            
-            <div class="date-input-group">
-              <label for="to-date-simple" style="font-weight: 600; color: #028084; margin-right: 8px;">To Date:</label>
-              <input type="date" id="to-date-simple" name="to_date" 
-                     value="{{ to_date }}" 
-                     max="{{ 'now'|date:'Y-m-d' }}"
-                     style="border: 1.5px solid #028084; border-radius: 6px; padding: 6px 12px; font-size: 14px; color: #028084; font-weight: 600;">
-            </div>
-            
-            <button id="search-date-range-simple" type="button" style="background: #028084; border: none; border-radius: 6px; cursor: pointer; padding: 8px 18px; color: #fff; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 6px;">
-              <i class="fa fa-search"></i> Search
-            </button>
-            
-            <button id="clear-date-filter-simple" type="button" style="background: #6c757d; border: none; border-radius: 6px; cursor: pointer; padding: 8px 18px; color: #fff; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 6px; margin-left: 10px;">
-              <i class="fa fa-times"></i> Clear Filter
-            </button>
-          </div>
-
-          <input type="hidden" id="from-date" value="{{ from_date }}" />
-          <input type="hidden" id="to-date" value="{{ to_date }}" />
-          <!-- 🔥 END: Date Filter Section -->
-          
-         
+      <div class="card">
+         <div class="card-body" style="padding-bottom:12px;">
+          <h5 class="text-left mt-0 mb-4" style="font-weight:700;">Input Screening Rejected Table</h5>
             <!-- Table Section -->
             <div class="table-responsive">
               <table id="order-listing" class="table">
                 <thead>
-                    <tr>
-                      <th>
+                  <tr>
+                    <th>
+                      
                       S.No <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
@@ -57,10 +25,6 @@
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Polishing <br>Stk No
-                      <i class="fa fa-filter" aria-hidden="true"></i>
-                    </th>
-                    <th>
                       Plating Color
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
@@ -69,10 +33,10 @@
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Polish Finish
+                      Polish <br>Finish
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
-                    <th>
+                     <th>
                       Tray Cate-<br>Capacity
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
@@ -80,62 +44,33 @@
                       Input Source
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
-                    
+                   
                     <th>
-                      No of <br>Trays <i class="fa fa-filter" aria-hidden="true"></i>
+                      No of <br>Tray <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
-                    <th>
-                      LOT Qty
-                      <i class="fa fa-filter" aria-hidden="true"></i>
-                    </th>
-                    
-
-                    <th>
-                      Accept Qty
-                      <i class="fa fa-filter" aria-hidden="true"></i>
-                      </th>
                     <th>
                       Reject Qty
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Process Status
+                      Rejection Reasons
                       <i class="fa fa-filter" aria-hidden="true"></i>
-                    </th>
-                    <th>
-                      Action <i class="fa fa-filter" aria-hidden="true"></i>
-                    </th>
-                    <th>
-                      Lot Status
-                      <i class="fa fa-filter" aria-hidden="true"></i>
-                    </th>
-                    <th>
-                      Current Stage
-                      <i class="fa fa-filter" aria-hidden="true"></i>
-                    </th>
-                    <th>
-                      Remarks <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                    
                   </tr>
                 </thead>
                 <tbody>
-                  <!-- Row 1 - Highlighted -->
-                   {% for data in master_data %}
+                {% for data in master_data %}
 
-                  <tr class="highlighted-tray-scan" 
-                      data-batch-id="{{data.batch_id}}" 
-                      data-available-qty="{{ data.available_qty }}" 
-                      data-ip-onhold-picking="{{ data.ip_onhold_picking }}"
-                      data-stock-lot-id="{{ data.stock_lot_id }}">
-
+                  <tr class="highlighted-tray-scan"
+                    data-lot-id="{{ data.stock_lot_id }}">
                      <td>{{ page_obj.start_index|add:forloop.counter0 }}
 
                     </td>                 
-                    <td>{{ data.last_process_date_time|date:"Y-m-d" }}<br>
-                        <span style="display:inline-block; margin-top:4px;">{{ data.last_process_date_time|date:"h:i A" }}</span>
-                    <td>
-                      <span class="model-hover-trigger" style="cursor: pointer; word-break: break-all;">
+                      <td>{{ data.last_process_date_time|date:"Y-m-d" }}<br>
+                        <span style="display:inline-block; margin-top:4px;">{{ data.last_process_date_time|date:"h:i A" }}</span>                     
+                        <td>
+                      <span class="model-hover-trigger" style="cursor: pointer;word-break: break-all;">
                         {{ data.plating_stk_no }}
                         <div class="model-image-tooltip" style="position: absolute; left: 50%; top: 110%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 9999; display: flex; align-items: center; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s;">
                           <button class="img-scroll-left" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8592;</button>
@@ -148,7 +83,6 @@
                         </div>
                       </span>
                     </td>
-                    <td>{{data.polishing_stk_no}}</td>
                     <td>{{ data.plating_color }}</td>
                     <td>{{ data.category }}</td>
                     <td>{{data.polish_finish}}</td>
@@ -156,123 +90,8 @@
                     <td>{{data.location__location_name}}</td>
                     <td>{{data.no_of_trays}}</td>
                     <td>
-                      <span class="lot-qty" style="min-width: 30px; text-align: right">{{ data.total_stock }}</span>
-                      <span style="display: inline-flex; align-items: center; gap: 4px;">
-                        <input type="checkbox"
-                                class="ip-checkbox"
-                                data-lot-id="{{ data.stock_lot_id }}"
-                                style="width: 15px; height: 15px"
-                                {% if data.ip_person_qty_verified %}checked disabled{% endif %} />
-                        
-                      </span>
-                    </td>
-                 
-                   
-                    <td>
-                        {{ data.display_accepted_qty|default:0 }}    
-                    </td>
-                                        <td>
-
-                        {{ data.ip_rejection_total_qty|default:0 }}
-                    </td>
-                    <td>
-                      <div class="d-flex">
-                        <!-- Q: Green if ip_person_qty_verified, else gray -->
-                        <div
-                          title="Tray Scan"
-                          class="d-flex align-items-center justify-content-center rounded-circle ms-1"
-                          style="
-                            width: 20px;
-                            height: 20px;
-                            background-color: {% if data.ip_person_qty_verified %}#0c8249{% else %}#bdbdbd{% endif %};
-                            color: white;
-                            font-weight: bold;
-                            line-height: 20px;
-                            text-align: center;
-                            padding-top: 1px;
-                            padding-right: 1px;
-                          "
-                        >
-                          Q
-                        </div>
-                       
-
-                        <!-- S: Green if rejected_ip_stock or accepted_Ip_stock, else gray -->
-                        <div
-                          title="Tray Scan"
-                          class="d-flex align-items-center justify-content-center rounded-circle ms-1"
-                          style="
-                            width: 20px;
-                            height: 20px;
-                            background-color: {% if data.rejected_ip_stock or data.accepted_Ip_stock or data.few_cases_accepted_Ip_stock %}#0c8249{% else %}#bdbdbd{% endif %};
-                            color: white;
-                            font-weight: bold;
-                            line-height: 20px;
-                            text-align: center;
-                            padding-top: 1px;
-                            padding-right: 1px;
-                          "
-                        >
-                          S
-                        </div>
-                      </div>
-                    </td>
-<td>
-  
-
-  <!-- Status Display (Simplified) -->
-  {% if data.accepted_Ip_stock %}
-    <!-- Show "Accepted" status -->
-    <span class="status-badge accepted" style="
-      background-color: #66bb6a; 
-      color: white; 
-      padding: 6px 12px; 
-      border-radius: 20px; 
-      font-size: 12px; 
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    ">
-      <i class="fa fa-check-circle"></i>Accepted
-    </span>
-
-  {% elif data.rejected_ip_stock %}
-    <!-- Show "Rejected" status -->
-    <span class="status-badge rejected" style="
-      background-color: #e57373; 
-      color: white; 
-      padding: 6px 12px; 
-      border-radius: 20px; 
-      font-size: 12px; 
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    ">
-      <i class="fa fa-times-circle"></i>Rejected
-    </span>
-
-  {% elif data.few_cases_accepted_Ip_stock %}
-    <!-- Show "Partial Reject" status -->
-    <span class="status-badge partial-rejected" style="
-      background-color: #fb9393; 
-      color: white; 
-      padding: 6px 12px; 
-      border-radius: 20px; 
-      font-size: 12px; 
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    ">
-      <i class="fa fa-adjust"></i>Partial Rejected
-    </span>
-
-  {% endif %}
-
-    <!-- Eye icon to view submitted "Tray Scan Table" -->
-    <a href="#"
+                      {{data.ip_rejection_total_qty}}
+                          <a href="#"
       title="View"
       class="text-primary tray-scan-btn-Jig"
       style="text-decoration: underline; margin-left: 8px;"
@@ -285,102 +104,46 @@
       data-tray-qty-list="{{ data.tray_qty_list|default:'[]'|safe }}"
       data-accepted-ip-stock="{{ data.accepted_Ip_stock|yesno:'true,false' }}"
       data-rejected-ip-stock="{{ data.rejected_ip_stock|yesno:'true,false' }}"
-      data-model-image="{{ data.model_images.0|default:'' }}"
       data-few-cases-accepted-ip-stock="{{ data.few_cases_accepted_Ip_stock|yesno:'true,false' }}">
-      
       <img src="{% static 'assets/icons/view.png' %}"
           alt="View"
           style="width: 20px; margin-right: 8px; height: auto; cursor:pointer;" />
     </a>
-</td>
-                    <td>
-                    
-                      {% if data.rejected_ip_stock or data.few_cases_accepted_Ip_stock or data.accepted_Ip_stock %}
-                        <div class="d-inline-block px-3 fw-semibold text-center rounded-pill"
-                            style="border: 2px solid #0d5d17; background-color: #c5f9c2; color: #2f801b; font-size: clamp(0.3rem, 2vw, 0.875rem); white-space: nowrap; padding: 0.3rem;">
-                          Yet to Release
-                        </div>
-                      
-                      {% endif %}
                     </td>
                     <td>
-                      <div
-                        class="d-inline-block px-3 fw-semibold text-center rounded-pill"
-                        style="
-                          border: 2px solid
-                            {% if data.last_process_module|lower == 'input screening' %}
-                              #0d5d17
-                            {% elif data.last_process_module == 'dayplanning' %}
-                              #1976d2
-                            {% else %}
-                              #9adeed
-                            {% endif %};
-                          background-color:
-                            {% if data.last_process_module|lower == 'input screening' %}
-                              #c5f9c2
-                            {% elif data.last_process_module == 'dayplanning' %}
-                              #d1eaff
-                            {% else %}
-                              #d1edf3
-                            {% endif %};
-                          color:
-                            {% if data.last_process_module|lower == 'input screening' %}
-                              #2f801b
-                            {% elif data.last_process_module == 'dayplanning' %}
-                              #033b5d
-                            {% else %}
-                              #033b5d
-                            {% endif %};
-                          font-size: clamp(0.75rem, 2vw, 0.875rem);
-                          white-space: nowrap;
-                          padding-top: 0.5rem;
-                          padding-bottom: 0.5rem;
-                        "
-                      >
-                        {{ data.last_process_module|default:"N/A" }}
+                      <div class="avatar-group rejection-popup-trigger" style="cursor:pointer;">
+                        <!-- Show rejection reason letters if they exist -->
+                        {% for letter in data.rejection_reason_letters %}
+                          <div class="avatar blue">{{ letter }}</div>
+                        {% endfor %}
+                        
+                        <!-- Show 'S' for Shortage if dp_missing_qty > 0 -->
+                        {% if data.dp_missing_qty and data.dp_missing_qty > 0 %}
+                          <div class="avatar orange" title="Shortage">S</div>
+                        {% endif %}
+                        
+                        <!-- Show arrow if any letters are displayed -->
+                        {% if data.rejection_reason_letters or data.dp_missing_qty and data.dp_missing_qty > 0 %}
+                          <div class="avatar gray">
+                            <span class="arrow">&rsaquo;</span>
+                          </div>
+                        {% endif %}
+                        
+                        <!-- Show batch rejection message only if no other reasons -->
+                        {% if data.batch_rejection and not data.rejection_reason_letters and not data.dp_missing_qty %}
+                          <span style="color:#fb8c00;font-weight:bold;white-space:nowrap;">
+                            Lot Rejection: No individual reasons recorded
+                          </span>
+                        {% endif %}
                       </div>
                     </td>
-<td>
-
-  <!-- Audio Remark Icon -->
-  {% if data.audio_remark %}
-    <span class="remark-tooltip-trigger" style="display: inline-flex; align-items: center; height: 28px; margin-left: 0; position: relative; cursor: default;">
-      <img src="{% static 'assets/icons/rec.png' %}" alt="Audio Remark" style="width: 20px; height: 20px;" />
-      <div class="remark-tooltip" style="position: absolute; top: 110%; left: 50%; transform: translateX(-50%); width: 300px; background: #fff; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; padding: 15px; z-index: 1000;">
-        <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 10px solid #fff;"></div>
-        <span style="font-size: 12px; color: #333;">Audio remark available</span>
-      </div>
-    </span>
-  {% else %}
-    <span title="No audio remark" style="display: inline-flex; align-items: center; height: 28px; margin-left: 0; opacity: 0.5; cursor: not-allowed;">
-      <img src="{% static 'assets/icons/rec.png' %}" alt="Audio Remark Disabled" style="width: 20px; height: 20px; filter: grayscale(1) opacity(0.5);" />
-    </span>
-  {% endif %}
-
-  <!-- Text Remark Icon -->
-  {% if data.IP_pick_remarks %}
-    <span class="remark-tooltip-trigger" style="display: inline-flex; align-items: center; height: 20px; margin-left: 5px; position: relative; cursor: default;">
-      <img src="{% static 'assets/icons/chat1.png' %}" alt="Chat"
-        style="width: 20px; height: 20px; filter: grayscale(0) brightness(1.1) sepia(1) hue-rotate(80deg) saturate(3) contrast(1.2); opacity: 1;" />
-      <div class="remark-tooltip" style="position: absolute; top: 110%; left: 50%; transform: translateX(-50%); width: 300px; background: #fff; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; padding: 15px; z-index: 1000;">
-        <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 10px solid #fff;"></div>
-        <div style="font-size: 12px; color: #333;">{{ data.IP_pick_remarks }}</div>
-      </div>
-    </span>
-  {% else %}
-    <span title="No remarks" style="display: inline-flex; align-items: center; height: 20px; margin-left: 5px; opacity: 0.5; cursor: not-allowed;">
-      <img src="{% static 'assets/icons/chat1.png' %}" alt="Chat Disabled" style="width: 20px; height: 20px; filter: grayscale(1) opacity(0.5);" />
-    </span>
-  {% endif %}
-
-</td>
-                   
                   </tr>
-                  {% endfor%}
-              
+                {% endfor %}
+
                 </tbody>
               </table>
-<div
+
+              <div
   id="trayScanModal_DayPlanning"
   class="tray-scan-modal-DayPlanning"
   style="display:none"
@@ -413,8 +176,28 @@
     </div>
   </div>
 </div>
+              <!-- Rejection Popup Modal -->
+                        <div id="rejectionPopupModal" class="new-popup-modal">
+                            <span class="tray-scan-close" id="closeRejectionPopup">&times;</span>
+                            <h3 class="modal-title">Rejection Details</h3>
+                            <div class="rejection-content">
+                              <div id="rejection-details-loader" style="display:none;text-align:center;">Loading...</div>
+                              <table class="rejection-table">
+                                <thead>
+                                  <tr>
+                                    <th>Rejected Reason</th>
+                                    <th>Rejection Qty</th>
+                                  </tr>
+                                </thead>
+                                <tbody id="rejection-details-body">
+                                  <!-- Dynamic rows go here -->
+                                </tbody>
+                              </table>
+                            </div>
+                        </div>
+            
           <!-- Pagination Section -->
-            <div class="pagination-wrapper">
+                      <div class="pagination-wrapper">
               <nav aria-label="Page navigation">
                                 <ul class="pagination justify-content-end mb-0">
                   {# Previous button #}
@@ -472,12 +255,43 @@
                 </ul>
               </nav>
             </div>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+  <!-- Image Slider Modal (popup) -->
+  <div id="imageSliderModal" class="image-slider-modal">
+    <span id="closeImageSliderModal" class="modal-close">&times;</span>
+    <h3>Visual Aid</h3>
+    <div class="slider" id="slider">
+      <div class="slides" id="slidesContainer">
+        <div class="slide active">
+          <img src="{% static 'assets/images/carousel/banner_1.jpg' %}" alt="Slide 1">
+        </div>
+        <div class="slide">
+          <img src="{% static 'assets/images/carousel/banner_2.jpg' %}" alt="Slide 2">
+        </div>
+        <div class="slide">
+          <img src="{% static 'assets/images/carousel/banner_3.jpg' %}" alt="Slide 3">
         </div>
       </div>
- 
-  
+      <button class="prev" id="prevBtn">&#10094;</button>
+      <button class="next" id="nextBtn">&#10095;</button>
+    </div>
+  </div>
+  <!-- Image Slider Modal -->
+  <div id="imageSliderModal" class="image-slider-modal">
+    <span id="closeImageSliderModal" class="modal-close">&times;</span>
+    <div class="slider" id="slider">
+      <button class="prev" id="prevBtn">&#8592;</button>
+      <div class="slides"></div>
+      <button class="next" id="nextBtn">&#8594;</button>
+    </div>
+  </div>
+  {% block script %}
 
-  
+    
 <script nonce="{{ csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function () {
   const redoBtn = document.getElementById("trayScanRedoBtn");
@@ -866,25 +680,22 @@ function buildTableHTML(showValidationColumn = false) {
       </thead>
       <tbody>
   `;
-  let topTrayShown = false;
-
+  
   let rowCounter = 2; // ✅ FIXED: Start from 2 since top tray is 1
   
   // ✅ First, add all regular trays (with tray_id)
   if (traysData && traysData.length > 0) {
-    traysData.forEach((tray, index) => {
+  traysData
+    .filter(tray => tray.rejected_tray) // Only show rejected trays
+    .forEach((tray, index) => {
       // ✅ FIXED: Proper S.no numbering
       let displaySNo;
-       if (!topTrayShown && tray.ip_top_tray) {
-          displaySNo = '1 (Top Tray)';
-          topTrayShown = true;
-        } else if (!topTrayShown && tray.top_tray) {
-          displaySNo = '1 (Top Tray)';
-          topTrayShown = true;
-        } else {
-          displaySNo = rowCounter;
-          rowCounter++;
-        }
+      if (tray.ip_top_tray || tray.top_tray) {
+        displaySNo = '1 (Top Tray)';
+      } else {
+        displaySNo = rowCounter;
+        rowCounter++; // Increment after assigning
+      }
       
       // Use ip_top_tray_qty for top tray, regular tray_quantity for others
       // ...inside buildTableHTML()...
@@ -899,20 +710,17 @@ function buildTableHTML(showValidationColumn = false) {
         displayQuantity = tray.tray_quantity;
       }
       // ✅ Keep existing status tag logic
-let statusTag = '';
-      if (tray.delink_tray) {
-        // If tray is delinked, show DELINKED status (highest priority)
-        statusTag = '<span style="background: #9e9e9e; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">DELINKED</span>';
-      } else if (fewCasesAcceptedIpStock) {
+      let statusTag = '';
+      if (fewCasesAcceptedIpStock) {
         if (tray.rejected_tray) {
-          statusTag = '<span style="background: #f44336; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">REJECTED</span>';
+          statusTag = '<span style="background: #f44336; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">Rejected</span>';
         } else {
-          statusTag = '<span style="background: #4caf50; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">ACCEPTED</span>';
+          statusTag = '<span style="background: #4caf50; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">Accepted</span>';
         }
       } else if (acceptedIpStock && !tray.rejected_tray) {
-        statusTag = '<span style="background: #4caf50; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">ACCEPTED</span>';
+        statusTag = '<span style="background: #4caf50; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">Accepted</span>';
       } else if (rejectedIpStock && tray.rejected_tray) {
-        statusTag = '<span style="background: #f44336; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">REJECTED</span>';
+        statusTag = '<span style="background: #f44336; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">Rejected</span>';
       }
       
       const rowClass = (tray.ip_top_tray || tray.top_tray) ? 'top-tray-row' : '';
@@ -1034,192 +842,6 @@ let statusTag = '';
   }
 });
 </script>
-
-
-  <!-- Image Slider Modal (popup) -->
-  <div id="imageSliderModal" class="image-slider-modal">
-    <span id="closeImageSliderModal" class="modal-close-BQ">&times;</span>
-    <h3>Visual Aid</h3>
-    <div class="slider" id="slider">
-      <div class="slides" id="slidesContainer">
-        <div class="slide active">
-          <img src="{% static 'assets/images/carousel/banner_1.jpg' %}" alt="Slide 1">
-        </div>
-        <div class="slide">
-          <img src="{% static 'assets/images/carousel/banner_2.jpg' %}" alt="Slide 2">
-        </div>
-        <div class="slide">
-          <img src="{% static 'assets/images/carousel/banner_3.jpg' %}" alt="Slide 3">
-        </div>
-      </div>
-      <button class="prev" id="prevBtn">&#10094;</button>
-      <button class="next" id="nextBtn">&#10095;</button>
-    </div>
-  </div>
-  <!-- Image Slider Modal -->
-  <div id="imageSliderModal" class="image-slider-modal">
-    <span id="closeImageSliderModal" class="modal-close-BQ">&times;</span>
-    <div class="slider" id="slider">
-      <button class="prev" id="prevBtn">&#8592;</button>
-      <div class="slides"></div>
-      <button class="next" id="nextBtn">&#8594;</button>
-    </div>
-  </div>
-  {% block script %}
-
-  <!-- 🔥 NEW: Date Filter JavaScript -->
-  <script nonce="{{ csp_nonce }}">
-    document.addEventListener("DOMContentLoaded", function() {
-      console.log('🔄 Initializing HTML5 date filtering for IS Completed Table...');
-      
-      // ✅ FIXED: Use the correct IDs that match your HTML
-      const fromInput = document.getElementById('from-date-simple');
-      const toInput = document.getElementById('to-date-simple');
-      const searchBtn = document.getElementById('search-date-range-simple');
-      const clearBtn = document.getElementById('clear-date-filter-simple');
-      
-      console.log('📋 Elements found:');
-      console.log('- From input:', fromInput);
-      console.log('- To input:', toInput);
-      console.log('- Search button:', searchBtn);
-      console.log('- Clear button:', clearBtn);
-      
-      // ✅ NEW: Set default dates if not provided by Django
-      function setDefaultDates() {
-        const today = new Date();
-        const twoDaysAgo = new Date();
-        twoDaysAgo.setDate(today.getDate() - 2);
-        
-        // Format dates as YYYY-MM-DD for HTML5 date inputs
-        const formatDate = (date) => {
-          return date.getFullYear() + '-' + 
-                 String(date.getMonth() + 1).padStart(2, '0') + '-' + 
-                 String(date.getDate()).padStart(2, '0');
-        };
-        
-        // Set default values if inputs are empty
-        if (fromInput && !fromInput.value) {
-          fromInput.value = formatDate(twoDaysAgo);
-          console.log('📅 Set default from date:', fromInput.value);
-        }
-        
-        if (toInput && !toInput.value) {
-          toInput.value = formatDate(today);
-          console.log('📅 Set default to date:', toInput.value);
-        }
-      }
-      
-      // Call the function to set default dates
-      setDefaultDates();
-      
-      // ✅ Date validation
-      if (fromInput && toInput) {
-        fromInput.addEventListener('change', function() {
-          console.log('📅 From date changed:', fromInput.value);
-          if (toInput.value && fromInput.value > toInput.value) {
-            toInput.value = fromInput.value;
-          }
-          toInput.min = fromInput.value;
-        });
-        
-        toInput.addEventListener('change', function() {
-          console.log('📅 To date changed:', toInput.value);
-          if (fromInput.value && toInput.value < fromInput.value) {
-            fromInput.value = toInput.value;
-          }
-          fromInput.max = toInput.value;
-        });
-      }
-      
-      // ✅ FIXED: Search functionality
-      if (searchBtn) {
-        searchBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          
-          const fromDate = fromInput ? fromInput.value : '';
-          const toDate = toInput ? toInput.value : '';
-          
-          console.log('🔍 Search clicked - From:', fromDate, 'To:', toDate);
-          
-          if (!fromDate || !toDate) {
-            if (typeof Swal !== 'undefined') {
-              Swal.fire({
-                icon: 'warning',
-                title: 'Date Selection Required',
-                text: 'Please select both start and end dates.',
-                timer: 2000,
-                showConfirmButton: false
-              });
-            } else {
-              alert('Please select both start and end dates.');
-            }
-            return;
-          }
-          
-          if (new Date(fromDate) > new Date(toDate)) {
-            if (typeof Swal !== 'undefined') {
-              Swal.fire({
-                icon: 'error',
-                title: 'Invalid Date Range',
-                text: 'Start date must be before or equal to end date.',
-                timer: 2000,
-                showConfirmButton: false
-              });
-            } else {
-              alert('Start date must be before or equal to end date.');
-            }
-            return;
-          }
-          
-          // ✅ FIXED: Proper URL construction with date parameters
-          const currentUrl = window.location.href.split('?')[0];
-          const newUrl = `${currentUrl}?from_date=${fromDate}&to_date=${toDate}`;
-          console.log('🔄 Redirecting to:', newUrl);
-          window.location.href = newUrl;
-        });
-      } else {
-        console.error('❌ Search button not found with ID: search-date-range-simple');
-      }
-      
-      // ✅ UPDATED: Clear functionality with date field clearing and reset to defaults
-      if (clearBtn) {
-        clearBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          
-          // Clear the date input fields visually
-          if (fromInput) {
-            fromInput.value = '';
-            fromInput.removeAttribute('min');
-            fromInput.removeAttribute('max');
-          }
-          if (toInput) {
-            toInput.value = '';
-            toInput.removeAttribute('min');
-            toInput.removeAttribute('max');
-          }
-          
-          console.log('🧹 Date fields cleared');
-          
-          // Reset to default dates after clearing
-          setTimeout(() => {
-            setDefaultDates();
-          }, 50);
-          
-          // Redirect to clean URL after a small delay
-          setTimeout(() => {
-            const currentUrl = window.location.href.split('?')[0];
-            console.log('🔄 Redirecting to:', currentUrl);
-            window.location.href = currentUrl;
-          }, 200);
-        });
-      } else {
-        console.error('❌ Clear button not found with ID: clear-date-filter-simple');
-      }
-      
-      console.log('✅ HTML5 date filtering initialization complete for IS Completed Table');
-    });
-  </script>
-            
   <!-- Table Sorting Script -->
   <script nonce="{{ csp_nonce }}">
     document.addEventListener("DOMContentLoaded", function () {
@@ -1249,268 +871,205 @@ let statusTag = '';
       });
     });
   </script>
-  <!-- Script for Text Remarks (unchanged) -->
+
+
+
+
   <script nonce="{{ csp_nonce }}">
-    document.addEventListener("DOMContentLoaded", function () {
-      var triggers = document.querySelectorAll(".remark-tooltip-trigger");
-      triggers.forEach(function (trigger) {
-        var tooltip = trigger.querySelector(".remark-tooltip");
-        var sendButton = tooltip ? tooltip.querySelector("button") : null;
-        function showTooltip() {
-          tooltip.style.opacity = "1";
-          tooltip.style.visibility = "visible";
-          var rect = tooltip.getBoundingClientRect();
-          if (rect.right > window.innerWidth) {
-            tooltip.style.left = "auto";
-            tooltip.style.right = "0";
-            tooltip.style.transform = "none";
+  document.addEventListener("DOMContentLoaded", function() {
+    // Attach event to all .rejection-popup-trigger elements
+    document.querySelectorAll('.rejection-popup-trigger').forEach(function(trigger, idx) {
+      trigger.addEventListener('click', function(e) {
+        // Find the closest row and get the lot_id from data attribute or hidden cell
+        const row = trigger.closest('tr');
+        let lot_id = null;
+        if (row) {
+          // Try to get from a hidden cell or data attribute
+          lot_id = row.querySelector('[data-lot-id]')?.getAttribute('data-lot-id');
+          if (!lot_id) {
+            // Try to get from a hidden cell if you render it in the template
+            lot_id = row.querySelector('.lot-id-cell')?.textContent?.trim();
           }
-          if (rect.left < 0) {
-            tooltip.style.left = "0";
-            tooltip.style.transform = "none";
+          // Or, if you render lot_id as a data attribute on the row:
+          if (!lot_id && row.dataset.lotId) lot_id = row.dataset.lotId;
+        }
+        // Fallback: try to get from Django context if you render it in the table
+        if (!lot_id) {
+          lot_id = "{{ data.stock_lot_id|default:'' }}";
+        }
+        if (!lot_id) {
+          alert("Lot ID not found for this row.");
+          return;
+        }
+  
+        // Show loader
+        document.getElementById('rejection-details-loader').style.display = 'block';
+        document.getElementById('rejection-details-body').innerHTML = '';
+  
+        // Open modal
+        document.getElementById('rejectionPopupModal').classList.add("open");
+  
+        // Fetch rejection details
+        fetch(`/inputscreening/get_rejection_details/?lot_id=${encodeURIComponent(lot_id)}`, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(resp => resp.json())
+        .then(data => {
+          document.getElementById('rejection-details-loader').style.display = 'none';
+          const tbody = document.getElementById('rejection-details-body');
+          tbody.innerHTML = '';
+          if (data.success && data.reasons.length > 0) {
+            data.reasons.forEach(item => {
+              const tr = document.createElement('tr');
+              tr.innerHTML = `<td>${item.reason}</td><td>${item.qty}</td>`;
+              tbody.appendChild(tr);
+            });
+          } else {
+            tbody.innerHTML = `<tr><td colspan="2">No rejection details found.</td></tr>`;
           }
-          var textarea = tooltip.querySelector("textarea");
-          if (textarea) {
-            textarea.focus();
-          }
-        }
-        function hideTooltip() {
-          tooltip.style.opacity = "0";
-          tooltip.style.visibility = "hidden";
-        }
-        trigger.addEventListener("mouseenter", showTooltip);
-        trigger.addEventListener("mouseleave", function () {
-          setTimeout(function () {
-            if (!trigger.matches(":hover") && !tooltip.matches(":hover")) {
-              hideTooltip();
-            }
-          }, 100);
+        })
+        .catch(err => {
+          document.getElementById('rejection-details-loader').style.display = 'none';
+          document.getElementById('rejection-details-body').innerHTML = `<tr><td colspan="2">Error loading data.</td></tr>`;
         });
-        tooltip.addEventListener("mouseleave", function () {
-          setTimeout(function () {
-            if (!tooltip.matches(":hover") && !trigger.matches(":hover")) {
-              hideTooltip();
-            }
-          }, 100);
-        });
-        trigger.addEventListener("click", function (e) {
-          e.preventDefault();
-        });
-        if (sendButton) {
-          sendButton.addEventListener("click", hideTooltip);
-        }
       });
     });
+  
+    // Close modal
+    document.getElementById('closeRejectionPopup').addEventListener('click', function() {
+      document.getElementById('rejectionPopupModal').classList.remove("open");
+    });
+  });
   </script>
-  <!-- Image Slider Script -->
-  <!-- Script for Model / Stock No - Image Mouse Hover -->
+<!-- Script for Model / Stock No - Image Mouse Hover -->
 <script nonce="{{ csp_nonce }}">
-  document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.model-hover-trigger').forEach(function(trigger) {
-      const tooltip = trigger.querySelector('.model-image-tooltip');
-      let currentIndex = 0;
-      let tooltipPinned = false;
-      const images = Array.from(tooltip.querySelectorAll('.img-gallery img'));
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.model-hover-trigger').forEach(function(trigger) {
+    const tooltip = trigger.querySelector('.model-image-tooltip');
+    let currentIndex = 0;
+    let tooltipPinned = false;
+    const images = Array.from(tooltip.querySelectorAll('.img-gallery img'));
 
-      function showImages(start) {
-        images.forEach((img, i) => {
-          img.style.display = (i >= start && i < start + 3) ? 'block' : 'none';
-        });
-      }
-      showImages(currentIndex);
+    function showImages(start) {
+      images.forEach((img, i) => {
+        img.style.display = (i >= start && i < start + 3) ? 'block' : 'none';
+      });
+    }
+    showImages(currentIndex);
 
-      trigger.addEventListener('mouseenter', function() {
-        if (!tooltipPinned) {
-          tooltip.style.opacity = '1';
-          tooltip.style.pointerEvents = 'auto';
-        }
-      });
-      trigger.addEventListener('mouseleave', function() {
-        if (!tooltipPinned) {
-          tooltip.style.opacity = '0';
-          tooltip.style.pointerEvents = 'none';
-        }
-      });
-      tooltip.addEventListener('mouseenter', function() {
-        if (!tooltipPinned) {
-          tooltip.style.opacity = '1';
-          tooltip.style.pointerEvents = 'auto';
-        }
-      });
-      tooltip.addEventListener('mouseleave', function() {
-        if (!tooltipPinned) {
-          tooltip.style.opacity = '0';
-          tooltip.style.pointerEvents = 'none';
-        }
-      });
-
-      // Pin tooltip on click
-      trigger.addEventListener('click', function(e) {
-        e.preventDefault();
-        tooltipPinned = true;
+    trigger.addEventListener('mouseenter', function() {
+      if (!tooltipPinned) {
         tooltip.style.opacity = '1';
         tooltip.style.pointerEvents = 'auto';
-      });
-
-      // Unpin tooltip if user clicks outside
-      document.addEventListener('mousedown', function(e) {
-        if (!trigger.contains(e.target) && !tooltip.contains(e.target)) {
-          tooltipPinned = false;
-          tooltip.style.opacity = '0';
-          tooltip.style.pointerEvents = 'none';
-        }
-      });
-
-      tooltip.querySelector('.img-scroll-left').addEventListener('click', function(e) {
-        e.stopPropagation();
-        if (currentIndex > 0) {
-          currentIndex--;
-          showImages(currentIndex);
-        }
-      });
-      tooltip.querySelector('.img-scroll-right').addEventListener('click', function(e) {
-        e.stopPropagation();
-        if (currentIndex < images.length - 3) {
-          currentIndex++;
-          showImages(currentIndex);
-        }
-      });
-
-      // Add click event to images for modal slider
-      images.forEach(function(img, idx) {
-        img.style.cursor = 'pointer';
-        img.addEventListener('click', function(e) {
-          e.stopPropagation();
-          openImageSlider(images.map(i => i.src), idx);
-        });
-      });
-    });
-
-    // Modal slider functions
-    const modal = document.getElementById("imageSliderModal");
-    const closeModal = document.getElementById("closeImageSliderModal");
-    const slidesContainer = modal.querySelector(".slides");
-    let sliderImages = [];
-    let currentSlide = 0;
-
-    function openImageSlider(srcArray, startIdx) {
-      sliderImages = srcArray;
-      slidesContainer.innerHTML = '';
-      sliderImages.forEach(src => {
-        const slide = document.createElement('div');
-        slide.className = 'slide';
-        const img = document.createElement('img');
-        img.src = src;
-        slide.appendChild(img);
-        slidesContainer.appendChild(slide);
-      });
-      currentSlide = startIdx;
-      showSlide(currentSlide);
-      modal.classList.add('open');
-    }
-
-    function showSlide(n) {
-      const slides = slidesContainer.querySelectorAll('.slide');
-      if (!slides.length) return;
-      currentSlide = (n + slides.length) % slides.length;
-      slides.forEach((slide, idx) => {
-        slide.classList.toggle('active', idx === currentSlide);
-      });
-    }
-
-    modal.querySelector("#prevBtn").addEventListener("click", function(e) {
-      e.stopPropagation();
-      showSlide(currentSlide - 1);
-    });
-    modal.querySelector("#nextBtn").addEventListener("click", function(e) {
-      e.stopPropagation();
-      showSlide(currentSlide + 1);
-    });
-    closeModal.addEventListener("click", function() {
-      modal.classList.remove("open");
-    });
-    modal.addEventListener("click", function(e) {
-      if (e.target === modal) modal.classList.remove("open");
-    });
-  });
-</script>
-<!-- Active table row highlight -->
-<script nonce="{{ csp_nonce }}">
-// Row highlight & position swap for tray-scan-btn-Jig (like completed-table.html)
-document.addEventListener("DOMContentLoaded", function() {
-  // Add highlight style if not present
-  if (!document.getElementById('dp-row-action-highlight-style')) {
-    var style = document.createElement('style');
-    style.id = 'dp-row-action-highlight-style';
-    style.innerHTML = `
-      .dp-row-action-highlight {
-        transition: box-shadow 1.3s;
-        background-color: #f0f8ff !important;
-        animation: highlightAnimation 2s ease-in-out;
       }
-    `;
-    document.head.appendChild(style);
-  }
-
-  let originalRowIndex = null;
-  let movedRow = null;
-  let placeholderRow = null;
-
-  document.querySelectorAll('.tray-scan-btn-Jig').forEach(function(link) {
-    link.addEventListener('click', function(event) {
-      // Remove highlight from all rows
-      document.querySelectorAll('tbody tr').forEach(function(row) {
-        row.classList.remove('dp-row-action-highlight');
-      });
-      // Move the clicked row to the top and highlight
-      var row = event.target.closest('tr');
-      if (row && row.parentNode) {
-        const tbody = row.parentNode;
-        // Only move if not already at top
-        if (tbody.firstElementChild !== row) {
-          // If a previous move exists, restore it first
-          if (movedRow && placeholderRow && placeholderRow.parentNode) {
-            placeholderRow.parentNode.insertBefore(movedRow, placeholderRow);
-            placeholderRow.parentNode.removeChild(placeholderRow);
-            movedRow.classList.remove('dp-row-action-highlight');
-            movedRow = null;
-            placeholderRow = null;
-            originalRowIndex = null;
-          }
-          // Store original index and row
-          originalRowIndex = Array.from(tbody.children).indexOf(row);
-          movedRow = row;
-          // Insert a placeholder at the original position
-          placeholderRow = document.createElement('tr');
-          placeholderRow.style.display = 'none';
-          tbody.insertBefore(placeholderRow, tbody.children[originalRowIndex]);
-          // Move row to top
-          tbody.insertBefore(row, tbody.firstElementChild);
-        }
-        row.classList.add('dp-row-action-highlight');
+    });
+    trigger.addEventListener('mouseleave', function() {
+      if (!tooltipPinned) {
+        tooltip.style.opacity = '0';
+        tooltip.style.pointerEvents = 'none';
       }
+    });
+    tooltip.addEventListener('mouseenter', function() {
+      if (!tooltipPinned) {
+        tooltip.style.opacity = '1';
+        tooltip.style.pointerEvents = 'auto';
+      }
+    });
+    tooltip.addEventListener('mouseleave', function() {
+      if (!tooltipPinned) {
+        tooltip.style.opacity = '0';
+        tooltip.style.pointerEvents = 'none';
+      }
+    });
+
+    // Pin tooltip on click
+    trigger.addEventListener('click', function(e) {
+      e.preventDefault();
+      tooltipPinned = true;
+      tooltip.style.opacity = '1';
+      tooltip.style.pointerEvents = 'auto';
+    });
+
+    // Unpin tooltip if user clicks outside
+    document.addEventListener('mousedown', function(e) {
+      if (!trigger.contains(e.target) && !tooltip.contains(e.target)) {
+        tooltipPinned = false;
+        tooltip.style.opacity = '0';
+        tooltip.style.pointerEvents = 'none';
+      }
+    });
+
+    tooltip.querySelector('.img-scroll-left').addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (currentIndex > 0) {
+        currentIndex--;
+        showImages(currentIndex);
+      }
+    });
+    tooltip.querySelector('.img-scroll-right').addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (currentIndex < images.length - 3) {
+        currentIndex++;
+        showImages(currentIndex);
+      }
+    });
+
+    // Add click event to images for modal slider
+    images.forEach(function(img, idx) {
+      img.style.cursor = 'pointer';
+      img.addEventListener('click', function(e) {
+        e.stopPropagation();
+        openImageSlider(images.map(i => i.src), idx);
+      });
     });
   });
 
-  // On modal close, restore row to original position and remove highlight
-  var closeBtn = document.getElementById('closetrayScanModal_Jig');
-  if (closeBtn) {
-    closeBtn.addEventListener('click', function() {
-      if (movedRow && placeholderRow && placeholderRow.parentNode) {
-        placeholderRow.parentNode.insertBefore(movedRow, placeholderRow);
-        placeholderRow.parentNode.removeChild(placeholderRow);
-        movedRow.classList.remove('dp-row-action-highlight');
-        movedRow = null;
-        placeholderRow = null;
-        originalRowIndex = null;
-      }
-      // Also remove highlight from any row just in case
-      document.querySelectorAll('tbody tr').forEach(function(row) {
-        row.classList.remove('dp-row-action-highlight');
-        row.classList.remove('highlighted-tray-scan');
-      });
+  // Modal slider functions
+  const modal = document.getElementById("imageSliderModal");
+  const closeModal = document.getElementById("closeImageSliderModal");
+  const slidesContainer = modal.querySelector(".slides");
+  let sliderImages = [];
+  let currentSlide = 0;
+
+  function openImageSlider(srcArray, startIdx) {
+    sliderImages = srcArray;
+    slidesContainer.innerHTML = '';
+    sliderImages.forEach(src => {
+      const slide = document.createElement('div');
+      slide.className = 'slide';
+      const img = document.createElement('img');
+      img.src = src;
+      slide.appendChild(img);
+      slidesContainer.appendChild(slide);
+    });
+    currentSlide = startIdx;
+    showSlide(currentSlide);
+    modal.classList.add('open');
+  }
+
+  function showSlide(n) {
+    const slides = slidesContainer.querySelectorAll('.slide');
+    if (!slides.length) return;
+    currentSlide = (n + slides.length) % slides.length;
+    slides.forEach((slide, idx) => {
+      slide.classList.toggle('active', idx === currentSlide);
     });
   }
+
+  modal.querySelector("#prevBtn").addEventListener("click", function(e) {
+    e.stopPropagation();
+    showSlide(currentSlide - 1);
+  });
+  modal.querySelector("#nextBtn").addEventListener("click", function(e) {
+    e.stopPropagation();
+    showSlide(currentSlide + 1);
+  });
+  closeModal.addEventListener("click", function() {
+    modal.classList.remove("open");
+  });
+  modal.addEventListener("click", function(e) {
+    if (e.target === modal) modal.classList.remove("open");
+  });
 });
 </script>
 
@@ -1556,5 +1115,5 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
-
 {% endblock %} {% endblock content %}
+</div>

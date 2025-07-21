@@ -1294,7 +1294,7 @@ class TrayRejectionAPIView(APIView):
 @require_GET
 def reject_check_tray_id_simple(request):
     """
-    Corrected tray validation: Consider current session allocations before validation
+    Enhanced tray validation: Check if existing tray rejection can accommodate remaining pieces
     """
     tray_id = request.GET.get('tray_id', '')
     current_lot_id = request.GET.get('lot_id', '')
@@ -1374,50 +1374,64 @@ def reject_check_tray_id_simple(request):
                 'status_message': 'Invalid State'
             })
 
-        # ✅ NEW: Apply current session allocations to get updated available quantities
-        available_tray_quantities, true_free_space = get_available_quantities_with_session_allocations(
+        # ✅ ENHANCED: Apply current session allocations to get updated available quantities
+        available_tray_quantities, actual_free_space = get_available_quantities_with_session_allocations(
             current_lot_id, current_session_allocations
         )
 
         original_capacities = get_tray_capacities_for_lot(current_lot_id)
-        total_current_qty = sum(available_tray_quantities)  # ✅ Now this works
-        total_capacity = sum(original_capacities)
-
+        total_current_qty = sum(available_tray_quantities)
+        
         print(f"[Simple Validation] Available tray quantities (with session): {available_tray_quantities}")
         print(f"[Simple Validation] Total current qty: {total_current_qty}")
-        print(f"[Simple Validation] Total capacity: {total_capacity}")
-        print(f"[Simple Validation] True free space: {true_free_space}")
+        print(f"[Simple Validation] ACTUAL free space: {actual_free_space}")
         print(f"[Simple Validation] Rejection qty: {rejection_qty}")
 
         # Check if rejection is possible with existing trays
         if rejection_qty <= total_current_qty:
-            # Check if there's enough free space to rearrange OR exact match exists
-            if true_free_space > 0 or rejection_qty in available_tray_quantities:
-                # Either there's free space for rearrangement OR exact match exists
-                if rejection_qty in available_tray_quantities:
-                    status_msg = f'Exact match ({rejection_qty})'
-                else:
-                    status_msg = f'Available (can rearrange, {true_free_space} true free space)'
-                
+            # ✅ ENHANCED: Check if specific tray can be used for rejection
+            can_use_existing_tray = False
+            valid_tray_info = []
+            
+            for i, tray_qty in enumerate(available_tray_quantities):
+                if tray_qty >= rejection_qty:
+                    # This tray has enough quantity
+                    remaining_after_rejection = tray_qty - rejection_qty
+                    
+                    # Calculate free space in OTHER trays
+                    free_space_in_other_trays = 0
+                    for j, other_qty in enumerate(available_tray_quantities):
+                        if i != j and j < len(original_capacities):
+                            capacity = original_capacities[j] if j < len(original_capacities) else 12
+                            free_space_in_other_trays += max(0, capacity - other_qty)
+                    
+                    print(f"[Simple Validation] Tray {i+1}: qty={tray_qty}, remaining_after={remaining_after_rejection}, free_space_in_others={free_space_in_other_trays}")
+                    
+                    if remaining_after_rejection <= free_space_in_other_trays:
+                        can_use_existing_tray = True
+                        valid_tray_info.append(f"Tray{i+1}({tray_qty})")
+                        
+            if can_use_existing_tray:
                 return JsonResponse({
                     'exists': True,
                     'valid_for_rejection': True,
-                    'status_message': status_msg,
+                    'status_message': f'Available (can rearrange)',
                     'validation_type': 'existing_rearrangeable',
                     'available_quantities': available_tray_quantities,
                     'total_current': total_current_qty,
-                    'true_free_space': true_free_space  # ✅ Use true free space
+                    'actual_free_space': actual_free_space,
+                    'valid_trays': valid_tray_info
                 })
             else:
-                # No free space and no exact match - only NEW tray allowed
+                # No existing tray can accommodate the remaining pieces
                 return JsonResponse({
                     'exists': False,
                     'valid_for_rejection': False,
-                    'error': 'No free space for rearrangement',
-                    'status_message': f'Need NEW tray (all trays full: {available_tray_quantities})',
+                    'error': 'Insufficient free space for rearrangement',
+                    'status_message': f'Need NEW tray (insufficient rearrange space)',
                     'validation_type': 'existing_no_space',
                     'available_quantities': available_tray_quantities,
-                    'true_free_space': true_free_space
+                    'actual_free_space': actual_free_space
                 })
         else:
             # Rejection quantity exceeds total available
@@ -1445,7 +1459,7 @@ def reject_check_tray_id_simple(request):
 
 def get_available_quantities_with_session_allocations(lot_id, current_session_allocations):
     """
-    Calculate available tray quantities and TRUE free space
+    Calculate available tray quantities and ACTUAL free space
     """
     try:
         # Get original distribution and track free space separately
@@ -1453,7 +1467,7 @@ def get_available_quantities_with_session_allocations(lot_id, current_session_al
         original_capacities = get_tray_capacities_for_lot(lot_id)
         
         available_quantities = original_distribution.copy()
-        true_free_space = 0  # ✅ Track actual free space created by NEW trays
+        new_tray_usage_count = 0  # Track NEW tray usage for free space calculation
         
         print(f"[Session Validation] Starting with: {available_quantities}")
         
@@ -1470,13 +1484,13 @@ def get_available_quantities_with_session_allocations(lot_id, current_session_al
                 
             if tray_id and is_new_tray_by_id(tray_id):
                 # NEW tray creates actual free space
-                true_free_space += rejected_qty
-                available_quantities = reduce_quantities_optimally(available_quantities, rejected_qty)
-                print(f"[Session Validation] NEW tray saved rejection: +{rejected_qty} free space")
+                new_tray_usage_count += 1
+                available_quantities = reduce_quantities_optimally(available_quantities, rejected_qty, is_new_tray=True)
+                print(f"[Session Validation] NEW tray saved rejection: used NEW tray")
             else:
                 # EXISTING tray just consumes available quantities
-                available_quantities = reduce_quantities_optimally(available_quantities, rejected_qty)
-                print(f"[Session Validation] EXISTING tray saved rejection: -{rejected_qty} consumed")
+                available_quantities = reduce_quantities_optimally(available_quantities, rejected_qty, is_new_tray=False)
+                print(f"[Session Validation] EXISTING tray saved rejection: removed tray")
         
         # Then, apply current session allocations
         for allocation in current_session_allocations:
@@ -1489,58 +1503,103 @@ def get_available_quantities_with_session_allocations(lot_id, current_session_al
                     continue
                 
                 if is_new_tray:
-                    # NEW tray creates actual free space
-                    true_free_space += qty
-                    available_quantities = reduce_quantities_optimally(available_quantities, qty)
-                    print(f"[Session Validation] NEW tray session: +{qty} free space, result: {available_quantities}")
+                    new_tray_usage_count += 1
+                    available_quantities = reduce_quantities_optimally(available_quantities, qty, is_new_tray=True)
+                    print(f"[Session Validation] NEW tray session: used NEW tray")
                 else:
-                    # EXISTING tray just consumes available quantities
-                    available_quantities = reduce_quantities_optimally(available_quantities, qty)
-                    print(f"[Session Validation] EXISTING tray session: -{qty} consumed, result: {available_quantities}")
-                    
+                    available_quantities = reduce_quantities_optimally(available_quantities, qty, is_new_tray=False)
+                    print(f"[Session Validation] EXISTING tray session: removed tray")
             except Exception as e:
                 print(f"[Session Validation] Error processing allocation: {e}")
                 continue
         
+        # ✅ FIXED: Calculate ACTUAL current free space
+        actual_free_space = 0
+        if len(available_quantities) <= len(original_capacities):
+            for i, qty in enumerate(available_quantities):
+                if i < len(original_capacities):
+                    capacity = original_capacities[i]
+                    actual_free_space += max(0, capacity - qty)
+        
         # Calculate totals
         total_available = sum(available_quantities)
-        total_capacity = sum(original_capacities)
+        total_capacity = sum(original_capacities[:len(available_quantities)])  # Only count current trays
         
         print(f"[Session Validation] FINAL:")
         print(f"  Available quantities: {available_quantities}")
         print(f"  Total available: {total_available}")
-        print(f"  Total capacity: {total_capacity}")
-        print(f"  True free space (from NEW trays): {true_free_space}")
-        print(f"  Misleading 'free space': {total_capacity - total_available}")
+        print(f"  Total capacity of current trays: {total_capacity}")
+        print(f"  ACTUAL free space in current trays: {actual_free_space}")
+        print(f"  NEW tray usage count: {new_tray_usage_count}")
         
-        return available_quantities, true_free_space
+        return available_quantities, actual_free_space
         
     except Exception as e:
         print(f"[Session Validation] Error: {e}")
         return get_original_tray_distribution(lot_id), 0
 
 
-def reduce_quantities_optimally(available_quantities, qty_to_reduce):
-    """
-    Reduce available quantities optimally (largest first for NEW, smallest first for EXISTING)
-    """
+
+def reduce_quantities_optimally(available_quantities, qty_to_reduce, is_new_tray=True):
     quantities = available_quantities.copy()
     remaining = qty_to_reduce
-    
-    # Use largest first (more efficient for freeing space)
-    for i in range(len(quantities)):
-        if remaining <= 0:
-            break
-            
-        current_qty = quantities[i]
-        if current_qty >= remaining:
-            quantities[i] = current_qty - remaining
-            remaining = 0
-        elif current_qty > 0:
-            remaining -= current_qty
-            quantities[i] = 0
-    
-    return quantities
+
+    if is_new_tray:
+        # NEW tray: free up space from smallest trays first
+        sorted_indices = sorted(range(len(quantities)), key=lambda i: quantities[i])
+        for i in sorted_indices:
+            if remaining <= 0:
+                break
+            current_qty = quantities[i]
+            if current_qty >= remaining:
+                quantities[i] = current_qty - remaining
+                remaining = 0
+            elif current_qty > 0:
+                remaining -= current_qty
+                quantities[i] = 0
+        return quantities
+    else:
+        # EXISTING tray: consume rejection quantity AND remove one tray entirely
+        total_available = sum(quantities)
+        if total_available < qty_to_reduce:
+            return None  # Not enough quantity available
+        
+        # Step 1: First try to find exact match (if a tray has exactly the rejection qty)
+        for i, qty in enumerate(quantities):
+            if qty == qty_to_reduce:
+                result = quantities.copy()
+                del result[i]  # Remove the exact match tray
+                return result
+        
+        # Step 2: If no exact match, consume qty_to_reduce from available quantities
+        temp_quantities = quantities.copy()
+        remaining_to_consume = qty_to_reduce
+        
+        # Consume from trays in order
+        for i in range(len(temp_quantities)):
+            if remaining_to_consume <= 0:
+                break
+            current_qty = temp_quantities[i]
+            consume_from_this_tray = min(remaining_to_consume, current_qty)
+            temp_quantities[i] -= consume_from_this_tray
+            remaining_to_consume -= consume_from_this_tray
+        
+        # Step 3: Remove one tray entirely (prefer empty ones first, then smallest)
+        # Remove empty tray first (if any)
+        for i in range(len(temp_quantities)):
+            if temp_quantities[i] == 0:
+                del temp_quantities[i]
+                return temp_quantities
+        
+        # If no empty tray, remove the smallest quantity tray
+        if temp_quantities:
+            min_qty = min(temp_quantities)
+            for i in range(len(temp_quantities)):
+                if temp_quantities[i] == min_qty:
+                    del temp_quantities[i]
+                    return temp_quantities
+        
+        return temp_quantities
 # ==========================================
 # KEY HELPER FUNCTION
 # ==========================================
@@ -1630,6 +1689,7 @@ def get_available_tray_quantities_for_lot(lot_id):
     except Exception as e:
         print(f"[Available Quantities] Error: {e}")
         return []
+
 def get_original_tray_distribution(lot_id):
     """
     Get original tray quantity distribution for the lot
@@ -1697,33 +1757,26 @@ def get_original_tray_distribution(lot_id):
 
 def is_new_tray_by_id(tray_id):
     """
-    Check if a tray ID represents a NEW tray
+    Check if a tray ID represents a NEW tray.
+    Returns True if TrayId.new_tray is True or lot_id is None/empty.
     """
     if not tray_id:
         return False
-    
+
     try:
         from modelmasterapp.models import TrayId
         tray_obj = TrayId.objects.filter(tray_id=tray_id).first()
-        
+
         if tray_obj:
-            # Check if marked as new_tray or has no lot_id
+            # Use only the DB fields for logic
             return getattr(tray_obj, 'new_tray', False) or not tray_obj.lot_id
-        
-        # Heuristic: Check tray number pattern for new trays
-        import re
-        tray_match = re.search(r'(\d+)$', tray_id)
-        if tray_match:
-            tray_number = int(tray_match.group(1))
-            # Numbers > 30 are likely new trays (adjust based on your system)
-            return tray_number > 30
-        
+
+        # If tray not found, treat as not new
         return False
-        
+
     except Exception as e:
         print(f"[is_new_tray_by_id] Error: {e}")
         return False
-
 
 def get_total_quantity_for_lot(total_stock):
     """Get total quantity for a lot"""
@@ -3089,7 +3142,13 @@ class IS_RejectTable(APIView):
         # MANUAL APPROACH: Add rejection quantities manually
         # Since the subquery approach isn't working, let's add it manually
         # In the IS_RejectTable class, update the data processing section:
-
+        for row in master_data:
+            stock_lot_id = row.get('stock_lot_id')
+            # Check if there are any REJECTED trays for this lot_id
+            row['tray_id_in_trayid'] = TrayId.objects.filter(
+                lot_id=stock_lot_id, 
+                rejected_tray=True
+            ).exists() if stock_lot_id else False
         for data in master_data:
             stock_lot_id = data.get('stock_lot_id')
             rejection_letters = []
@@ -3356,42 +3415,28 @@ def get_rejection_draft(request):
 def get_delink_tray_data(request):
     """
     Get delink tray data based on empty trays after all rejections are applied.
-    NEW tray usage frees up existing tray space.
-    Existing tray usage consumes existing tray space.
-    Number of delink rows = number of trays with 0 quantity.
+    
+    CORRECTED LOGIC:
+    - Only create delink rows for trays that have 0 quantity after rejections
+    - SHORTAGE rejections don't need separate delink rows
+    - The empty tray logic already handles cases where shortage creates empty trays
     """
     try:
-        # 1. Get lot_id from request
         lot_id = request.GET.get('lot_id')
         if not lot_id:
-            print("No lot_id provided in request")
             return Response({'success': False, 'error': 'No lot_id provided'}, status=400)
         
-        print(f"DEBUG: Received lot_id: {lot_id}")
-        
-        # 2. Get TotalStockModel
         stock = TotalStockModel.objects.filter(lot_id=lot_id).first()
         if not stock:
-            print(f"No TotalStockModel found for lot_id: {lot_id}")
             return Response({'success': False, 'error': 'No stock record found for this lot'}, status=404)
         
-        # 3. Get original tray distribution
         original_distribution = get_actual_tray_distribution_for_delink(lot_id, stock)
-        print(f"DEBUG: Original distribution: {original_distribution}")
-        
-        # 4. Calculate current distribution after all rejections
         current_distribution = calculate_distribution_after_rejections(lot_id, original_distribution)
-        print(f"DEBUG: Current distribution after rejections: {current_distribution}")
         
-        # 5. Count empty trays (quantity = 0)
+        # ✅ FIXED: Only create delink rows for empty trays (quantity = 0)
         empty_trays = [i for i, qty in enumerate(current_distribution) if qty == 0]
-        num_empty_trays = len(empty_trays)
-        
-        print(f"DEBUG: Empty trays indices: {empty_trays}")
-        print(f"DEBUG: Number of empty trays (delink needed): {num_empty_trays}")
-        
-        # 6. Create delink data for empty trays
         delink_data = []
+        
         for i, tray_index in enumerate(empty_trays):
             original_qty = original_distribution[tray_index] if tray_index < len(original_distribution) else 0
             delink_data.append({
@@ -3401,9 +3446,10 @@ def get_delink_tray_data(request):
                 'tray_index': tray_index,
                 'source': 'empty_tray'
             })
-        
-        print(f"DEBUG: Generated {len(delink_data)} delink rows")
-        
+
+        # ✅ REMOVED: No longer adding automatic delink rows for SHORTAGE
+        # The empty tray logic above already handles cases where shortage creates empty trays
+
         return Response({
             'success': True,
             'delink_trays': delink_data,
@@ -3411,25 +3457,30 @@ def get_delink_tray_data(request):
             'lot_id': lot_id,
             'original_distribution': original_distribution,
             'current_distribution': current_distribution,
-            'empty_trays_count': num_empty_trays,
+            'empty_trays_count': len(empty_trays),
             'debug_info': {
                 'empty_tray_indices': empty_trays,
-                'reasoning': 'NEW tray usage creates empty trays (delink needed). Existing tray usage removes trays entirely (no delink).',
-                'logic': 'Delink rows = trays with 0 quantity after all rejections'
+                'reasoning': 'Only trays with 0 quantity after rejections need delink',
+                'logic': 'Delink rows = trays with 0 quantity after all rejections',
+                'examples': {
+                    'case1': '[14,16] → shortage 4 → [10,16] → no empty trays → no delink',
+                    'case2': '[14,16] → shortage 14 → [0,16] → 1 empty tray → 1 delink'
+                }
             }
         })
-        
     except Exception as e:
         import traceback
         traceback.print_exc()
-        return Response({'success': False, 'error': str(e)}, status=500)
-
+        return Response({'success': False, 'error': str(e)}, status=500) 
 
 def calculate_distribution_after_rejections(lot_id, original_distribution):
     """
     Calculate the current tray distribution after applying all rejections.
-    NEW tray usage frees up existing tray space (creates empty trays).
-    Existing tray usage removes that tray entirely from distribution.
+    
+    CORRECTED LOGIC:
+    - NEW tray usage frees up existing tray space (creates empty trays)
+    - Existing tray usage removes that tray entirely from distribution  
+    - SHORTAGE rejections consume quantities from existing trays (can create empty trays)
     """
     current_distribution = original_distribution.copy()
     
@@ -3450,16 +3501,18 @@ def calculate_distribution_after_rejections(lot_id, original_distribution):
         
         print(f"DEBUG: Processing rejection - Reason: {reason}, Qty: {rejected_qty}, Tray ID: '{tray_id}'")
         
-        # Enhanced debugging for tray type identification
+        # ✅ FIXED: Handle SHORTAGE rejections properly
         if not tray_id or tray_id.strip() == '':
-            print(f"DEBUG: Empty tray_id - treating as SHORTAGE (no distribution change)")
-            # SHORTAGE rejections don't affect tray distribution
+            print(f"DEBUG: SHORTAGE rejection - consuming {rejected_qty} from existing trays")
+            # SHORTAGE rejections consume quantities from existing trays
+            current_distribution = consume_shortage_from_distribution(current_distribution, rejected_qty)
+            print(f"DEBUG: Distribution after SHORTAGE: {current_distribution}")
             continue
         
+        # Check if NEW tray was used for non-SHORTAGE rejections
         is_new_tray = is_new_tray_by_id(tray_id)
         print(f"DEBUG: is_new_tray_by_id('{tray_id}') = {is_new_tray}")
         
-        # Check if NEW tray was used
         if is_new_tray:
             print(f"DEBUG: ✅ NEW tray used - freeing up {rejected_qty} space in existing trays")
             current_distribution = free_up_space_optimally(current_distribution, rejected_qty)
@@ -3473,36 +3526,87 @@ def calculate_distribution_after_rejections(lot_id, original_distribution):
     return current_distribution
 
 
+def consume_shortage_from_distribution(distribution, shortage_qty):
+    """
+    ✅ NEW FUNCTION: Handle SHORTAGE rejections by consuming from existing trays
+    This will consume from smallest trays first to maximize chance of creating empty trays
+    
+    Example: [6, 12, 12] with shortage 6 → [0, 12, 12]
+    """
+    result = distribution.copy()
+    remaining_shortage = shortage_qty
+    
+    print(f"   SHORTAGE: consuming {shortage_qty} from distribution {distribution}")
+    
+    # Consume from smallest trays first (to create empty trays for delink)
+    sorted_indices = sorted(range(len(result)), key=lambda i: result[i])
+    
+    for i in sorted_indices:
+        if remaining_shortage <= 0:
+            break
+            
+        current_qty = result[i]
+        if current_qty >= remaining_shortage:
+            # This tray can handle all remaining shortage
+            result[i] = current_qty - remaining_shortage
+            print(f"   SHORTAGE: consumed {remaining_shortage} from tray {i}, remaining: {result[i]}")
+            remaining_shortage = 0
+        elif current_qty > 0:
+            # Consume entire tray and continue
+            remaining_shortage -= current_qty
+            print(f"   SHORTAGE: consumed entire tray {i}: {current_qty}")
+            result[i] = 0
+    
+    if remaining_shortage > 0:
+        print(f"   ⚠️ WARNING: Could not consume all shortage qty, remaining: {remaining_shortage}")
+    
+    print(f"   SHORTAGE result: {result}")
+    return result
 
 def remove_rejected_tray_from_distribution(distribution, rejected_qty):
     """
-    Remove rejected tray entirely from distribution when existing tray is used.
-    Find the tray that matches the rejected quantity and remove it completely.
-    If no exact match, remove the best matching tray.
+    EXISTING tray rejection: consume rejection quantity AND remove one tray entirely
+    This matches the user's requirement where existing tray usage removes a physical tray
     """
     result = distribution.copy()
-    # Remove tray with exact qty
+    total_available = sum(result)
+    
+    if total_available < rejected_qty:
+        return result  # Not enough quantity, return unchanged
+    
+    # Step 1: Try to find exact match first
     for i, qty in enumerate(result):
         if qty == rejected_qty:
+            result.pop(i)  # Remove the tray with exact quantity
+            return result
+    
+    # Step 2: No exact match - consume rejected_qty and remove one tray
+    remaining_to_consume = rejected_qty
+    
+    # Consume the rejection quantity from available trays
+    for i in range(len(result)):
+        if remaining_to_consume <= 0:
+            break
+        current_qty = result[i]
+        consume_from_this_tray = min(remaining_to_consume, current_qty)
+        result[i] -= consume_from_this_tray
+        remaining_to_consume -= consume_from_this_tray
+    
+    # Step 3: Remove one tray entirely (prefer empty ones first)
+    # Remove empty tray first
+    for i in range(len(result)):
+        if result[i] == 0:
             result.pop(i)
             return result
-    # If no exact match, remove the smallest tray that can fit
-    best_match_index = -1
-    best_match_qty = float('inf')
-    for i, qty in enumerate(result):
-        if qty >= rejected_qty and qty < best_match_qty:
-            best_match_index = i
-            best_match_qty = qty
-    if best_match_index != -1:
-        result.pop(best_match_index)
-        return result
-    # Fallback: remove from largest tray
+    
+    # If no empty tray, remove the smallest quantity tray
     if result:
-        max_index = result.index(max(result))
-        if result[max_index] >= rejected_qty:
-            result[max_index] -= rejected_qty
-            if result[max_index] == 0:
-                result.pop(max_index)
+        min_qty = min(result)
+        for i in range(len(result)):
+            if result[i] == min_qty:
+                result.pop(i)
+                return result
+    
     return result
 
 def free_up_space_optimally(distribution, qty_to_free):
@@ -3918,6 +4022,20 @@ class TrayIdList_Complete_APIView(APIView):
         def create_tray_data(tray_obj, tray_id, is_top=False, is_missing=False):
             nonlocal row_counter
             
+            # ✅ FIX: Check delink_tray status separately if tray_obj is None
+            delink_tray_status = False
+            if tray_obj:
+                delink_tray_status = getattr(tray_obj, 'delink_tray', False)
+            elif is_missing and tray_id:
+                # For missing trays, check TrayId table directly for delink status
+                try:
+                    actual_tray = TrayId.objects.filter(tray_id=tray_id).first()
+                    if actual_tray:
+                        delink_tray_status = getattr(actual_tray, 'delink_tray', False)
+                        print(f"Found missing tray {tray_id} with delink_tray={delink_tray_status}")
+                except Exception as e:
+                    print(f"Error checking delink status for {tray_id}: {e}")
+            
             if is_batch_rejection:
                 is_rejected = True
                 rejection_details = [{
@@ -3931,13 +4049,10 @@ class TrayIdList_Complete_APIView(APIView):
                 rejection_details = rejected_tray_data.get(tray_id, []) if is_rejected else []
                 
                 if is_rejected and is_missing:
-                    # For missing rejected trays, use quantity from rejection record
                     tray_qty = rejected_tray_quantities.get(tray_id, 0)
                 elif is_rejected and tray_obj:
-                    # For existing rejected trays, use quantity from rejection record
                     tray_qty = rejected_tray_quantities.get(tray_id, tray_obj.tray_quantity)
                 else:
-                    # For accepted trays, use original quantity
                     tray_qty = tray_obj.tray_quantity if tray_obj else 0
             
             return {
@@ -3947,13 +4062,13 @@ class TrayIdList_Complete_APIView(APIView):
                 'position': row_counter - 1,
                 'is_top_tray': is_top,
                 'rejected_tray': is_rejected,
+                'delink_tray': delink_tray_status,  # ✅ FIXED: Use separately checked status
                 'rejection_details': rejection_details,
                 'ip_top_tray': getattr(tray_obj, 'ip_top_tray', False) if tray_obj else False,
                 'ip_top_tray_qty': getattr(tray_obj, 'ip_top_tray_qty', None) if tray_obj else None,
                 'top_tray': getattr(tray_obj, 'top_tray', False) if tray_obj else False,
-                'is_missing_from_trayid': is_missing  # Flag to indicate this tray is missing from TrayId table
+                'is_missing_from_trayid': is_missing
             }
-
         # Add top tray first if it exists
         if top_tray:
             tray_data = create_tray_data(top_tray, top_tray.tray_id, is_top=True)
@@ -4028,3 +4143,85 @@ class GetShortageRejectionsView(APIView):
             'success': True,
             'shortage_rejections': shortage_data
         })
+
+@csrf_exempt
+def delink_selected_trays(request):
+    if request.method == "POST":
+        import json
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            
+            # Check if we received stock_lot_ids or tray_ids
+            stock_lot_ids = data.get('stock_lot_ids', [])
+            tray_ids = data.get('tray_ids', [])  # Keep backward compatibility
+            
+            updated = 0
+            lots_processed = 0
+            not_found = []
+            
+            if stock_lot_ids:
+                # New logic: Delink only REJECTED trays for the given lot IDs
+                for stock_lot_id in stock_lot_ids:
+                    # Find only REJECTED tray IDs associated with this lot
+                    rejected_tray_ids = TrayId.objects.filter(
+                        lot_id=stock_lot_id, 
+                        rejected_tray=True
+                    ).values_list('tray_id', flat=True)
+                    
+                    if rejected_tray_ids:
+                        # Update only rejected trays for this lot
+                        updated_count = TrayId.objects.filter(
+                            lot_id=stock_lot_id,
+                            rejected_tray=True
+                        ).update(
+                            delink_tray=True,
+                            lot_id=None,
+                            batch_id=None,
+                            scanned=False,
+                            IP_tray_verified=False,
+                            rejected_tray=False,  # ✅ ADD THIS - Reset rejected_tray to False
+                            top_tray=False
+                        )
+                        updated += updated_count
+                        lots_processed += 1
+                        print(f"Delinked {updated_count} REJECTED trays for lot {stock_lot_id}: {list(rejected_tray_ids)}")
+                    else:
+                        not_found.append(stock_lot_id)
+                        print(f"No REJECTED trays found for lot {stock_lot_id}")
+                
+                return JsonResponse({
+                    'success': True, 
+                    'updated': updated, 
+                    'lots_processed': lots_processed,
+                    'not_found': not_found
+                })
+            
+            elif tray_ids:
+                # Original logic: Delink specific tray IDs (keep for backward compatibility)
+                for tray_id in tray_ids:
+                    delink_tray_obj = TrayId.objects.filter(tray_id=tray_id).first()
+                    if delink_tray_obj:
+                        delink_tray_obj.delink_tray = True
+                        delink_tray_obj.lot_id = None
+                        delink_tray_obj.batch_id = None
+                        delink_tray_obj.scanned = False
+                        delink_tray_obj.IP_tray_verified = False
+                        delink_tray_obj.rejected_tray = False  # Reset rejected_tray to False
+                        delink_tray_obj.top_tray = False
+                        delink_tray_obj.save(update_fields=[
+                            'delink_tray', 'lot_id', 'batch_id', 'scanned', 'IP_tray_verified', 'top_tray', 'rejected_tray'
+                        ])
+                        updated += 1
+                    else:
+                        not_found.append(tray_id)
+                
+                return JsonResponse({'success': True, 'updated': updated, 'not_found': not_found})
+            
+            else:
+                return JsonResponse({'success': False, 'error': 'No stock_lot_ids or tray_ids provided'})
+                
+        except Exception as e:
+            print(f"Error in delink_selected_trays: {str(e)}")
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
