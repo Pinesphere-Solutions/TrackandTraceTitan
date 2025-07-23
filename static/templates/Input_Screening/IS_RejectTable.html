@@ -1,6 +1,5 @@
 {% extends "base.html" %} {% load static %} {% block content %}
 
-
 <div class="content-wrapper">
   <div class="row">
     <div class="col-12 grid-margin stretch-card">
@@ -88,21 +87,25 @@
 
                     </td>                 
                       <td>{{ data.last_process_date_time|date:"Y-m-d" }}<br>
-                        <span style="display:inline-block; margin-top:4px;">{{ data.last_process_date_time|date:"h:i A" }}</span>                     
-                        <td>
+                    <!-- Plating Stk No - Mouse Hover Image -->
+                      <td>
                         <span class="model-hover-trigger" style="cursor: pointer; word-break: break-all;">
                           {{ data.plating_stk_no }}
-                        <div class="model-image-tooltip" style="position: absolute; left: 50%; top: 110%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 9999; display: flex; align-items: center; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s;">
-                          <button class="img-scroll-left" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8592;</button>
-                          <div class="img-gallery" style="display: flex; gap: 6px; overflow: hidden; width: 180px;">
-                            {% for img_url in data.model_images %}
-                              <img src="{{ img_url }}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px;" />
-                            {% endfor %}
+                          <div class="model-image-tooltip" style="position: absolute; left: 50%; top: 90%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 9999; display: flex; align-items: center; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s;">
+                            <button class="info-btn">Info</button>
+                            <button class="close-btn">Close</button>
+                            <button class="img-scroll-left" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8592;</button>
+                            <div class="img-gallery" style="display: flex; gap: 6px; overflow: hidden; width: 180px;">
+                              {% for img_url in data.model_images %}
+                                <img src="{{ img_url }}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px;" />
+                              {% endfor %}
+                            </div>
+                            <button class="img-scroll-right" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8594;</button>
                           </div>
-                          <button class="img-scroll-right" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8594;</button>
-                        </div>
-                      </span>
-                    </td>
+                        </span>
+                      </td>
+                     
+
                     <td>{{ data.plating_color }}</td>
                     <td>{{ data.category }}</td>
                     <td>{{data.polish_finish}}</td>
@@ -972,137 +975,7 @@ function buildTableHTML(showValidationColumn = false) {
     });
   });
   </script>
-<!-- Script for Model / Stock No - Image Mouse Hover -->
-<script nonce="{{ csp_nonce }}">
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('.model-hover-trigger').forEach(function(trigger) {
-    const tooltip = trigger.querySelector('.model-image-tooltip');
-    let currentIndex = 0;
-    let tooltipPinned = false;
-    const images = Array.from(tooltip.querySelectorAll('.img-gallery img'));
 
-    function showImages(start) {
-      images.forEach((img, i) => {
-        img.style.display = (i >= start && i < start + 3) ? 'block' : 'none';
-      });
-    }
-    showImages(currentIndex);
-
-    trigger.addEventListener('mouseenter', function() {
-      if (!tooltipPinned) {
-        tooltip.style.opacity = '1';
-        tooltip.style.pointerEvents = 'auto';
-      }
-    });
-    trigger.addEventListener('mouseleave', function() {
-      if (!tooltipPinned) {
-        tooltip.style.opacity = '0';
-        tooltip.style.pointerEvents = 'none';
-      }
-    });
-    tooltip.addEventListener('mouseenter', function() {
-      if (!tooltipPinned) {
-        tooltip.style.opacity = '1';
-        tooltip.style.pointerEvents = 'auto';
-      }
-    });
-    tooltip.addEventListener('mouseleave', function() {
-      if (!tooltipPinned) {
-        tooltip.style.opacity = '0';
-        tooltip.style.pointerEvents = 'none';
-      }
-    });
-
-    // Pin tooltip on click
-    trigger.addEventListener('click', function(e) {
-      e.preventDefault();
-      tooltipPinned = true;
-      tooltip.style.opacity = '1';
-      tooltip.style.pointerEvents = 'auto';
-    });
-
-    // Unpin tooltip if user clicks outside
-    document.addEventListener('mousedown', function(e) {
-      if (!trigger.contains(e.target) && !tooltip.contains(e.target)) {
-        tooltipPinned = false;
-        tooltip.style.opacity = '0';
-        tooltip.style.pointerEvents = 'none';
-      }
-    });
-
-    tooltip.querySelector('.img-scroll-left').addEventListener('click', function(e) {
-      e.stopPropagation();
-      if (currentIndex > 0) {
-        currentIndex--;
-        showImages(currentIndex);
-      }
-    });
-    tooltip.querySelector('.img-scroll-right').addEventListener('click', function(e) {
-      e.stopPropagation();
-      if (currentIndex < images.length - 3) {
-        currentIndex++;
-        showImages(currentIndex);
-      }
-    });
-
-    // Add click event to images for modal slider
-    images.forEach(function(img, idx) {
-      img.style.cursor = 'pointer';
-      img.addEventListener('click', function(e) {
-        e.stopPropagation();
-        openImageSlider(images.map(i => i.src), idx);
-      });
-    });
-  });
-
-  // Modal slider functions
-  const modal = document.getElementById("imageSliderModal");
-  const closeModal = document.getElementById("closeImageSliderModal");
-  const slidesContainer = modal.querySelector(".slides");
-  let sliderImages = [];
-  let currentSlide = 0;
-
-  function openImageSlider(srcArray, startIdx) {
-    sliderImages = srcArray;
-    slidesContainer.innerHTML = '';
-    sliderImages.forEach(src => {
-      const slide = document.createElement('div');
-      slide.className = 'slide';
-      const img = document.createElement('img');
-      img.src = src;
-      slide.appendChild(img);
-      slidesContainer.appendChild(slide);
-    });
-    currentSlide = startIdx;
-    showSlide(currentSlide);
-    modal.classList.add('open');
-  }
-
-  function showSlide(n) {
-    const slides = slidesContainer.querySelectorAll('.slide');
-    if (!slides.length) return;
-    currentSlide = (n + slides.length) % slides.length;
-    slides.forEach((slide, idx) => {
-      slide.classList.toggle('active', idx === currentSlide);
-    });
-  }
-
-  modal.querySelector("#prevBtn").addEventListener("click", function(e) {
-    e.stopPropagation();
-    showSlide(currentSlide - 1);
-  });
-  modal.querySelector("#nextBtn").addEventListener("click", function(e) {
-    e.stopPropagation();
-    showSlide(currentSlide + 1);
-  });
-  closeModal.addEventListener("click", function() {
-    modal.classList.remove("open");
-  });
-  modal.addEventListener("click", function(e) {
-    if (e.target === modal) modal.classList.remove("open");
-  });
-});
-</script>
 <script nonce="{{ csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function () {
   const selectAll = document.getElementById("select-all-checkbox");

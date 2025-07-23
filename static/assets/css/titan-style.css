@@ -1,29 +1,8 @@
 /* Common styles */
-/* Make the bottom horizontal scrollbar always visible for .table-responsive */
-.table-responsive {
-  overflow-x: auto !important;
-  scrollbar-width: thin !important; /* For Firefox */
-  -webkit-overflow-scrolling: touch !important;
-}
 
-/* Show and style the horizontal scrollbar for Webkit browsers */
-.table-responsive::-webkit-scrollbar {
-  height: 8px !important; /* Slightly larger for visibility */
-  background: #eee !important;
-  display: block !important;
-}
 
-.table-responsive::-webkit-scrollbar-thumb {
-  background: #bababa !important;
-  border-radius: 4px !important;
-}
 
-/* Ensure the table stretches fully so the scrollbar is always at the bottom */
-.table-responsive {
-  width: 100% !important;
-  max-width: 100vw !important;
-  box-sizing: border-box !important;
-}
+
 /* Hide the extra bottom scrollbar that appears when the menu panel is minimized */
 body.sidebar-icon-only .main-panel {
   overflow-x: hidden !important;
@@ -215,12 +194,7 @@ html.pick-table-only {
   height: 100vh !important;
 }
 
-body.pick-table-only .table-responsive {
-  /*  max-height: 75vh !important; */
-  overflow-y: auto !important;
-  overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch;
-}
+
 /* Hide left/right arrows in model-image-tooltip */
 .model-image-tooltip .img-scroll-left,
 .model-image-tooltip .img-scroll-right {
@@ -281,11 +255,16 @@ body.pick-table-only .table-responsive {
 
 .table-responsive {
   min-height: 0 !important;
-  max-height: 360px !important;
+   max-height: 430px !important;
   height: auto !important;
   margin-bottom: 0 !important;
   box-sizing: border-box !important;
   overflow: scroll !important;
+  scrollbar-width: thin !important; /* For Firefox */
+  -webkit-overflow-scrolling: touch !important;
+  width: 100% !important;
+  max-width: 100vw !important;
+  -webkit-overflow-scrolling: touch;
 }
 /* Tablet landscape (768px–1024px): increase height for tabs */
 @media (min-width: 766px) and (max-width: 1024px) {
@@ -293,15 +272,27 @@ body.pick-table-only .table-responsive {
     max-height: 550px !important;
   }
 }
-
-/* Large screens (1440px and above): use more space */
+/* --- Table Responsive Height: Only these breakpoints, no duplicates --- */
+@media (max-width: 900px) {
+  .table-responsive {
+    max-height: 300px !important;
+  }
+}
+@media (min-width: 1245px) { /* HP Laptop */
+  .table-responsive {
+    max-height: 400px !important;
+  }
+}
+@media (min-width: 1366px) {
+  .table-responsive{
+    max-height: 430px !important;
+  }
+}
 @media (min-width: 1440px) {
   .table-responsive {
     max-height: 500px !important;
   }
 }
-
-/* Optionally, for very large screens (e.g., 1800px+) */
 @media (min-width: 1800px) {
   .table-responsive {
     max-height: 600px !important;
@@ -322,7 +313,6 @@ body.pick-table-only .table-responsive {
 /* Remove all overflow-x: hidden and overflow: hidden from containers and html/body */
 html,
 .main-panel,
-.table-responsive,
 #order-listing {
   overflow: visible !important;
 }
@@ -331,17 +321,13 @@ html,
   .content-wrapper {
     padding-bottom: 0 !important;
   }
-  /*   .table-responsive {
-    max-height: none !important;
-  } */
+
 }
 @media (max-width: 600px) {
   .content-wrapper {
     padding-bottom: 0 !important;
   }
-  /*   .table-responsive {
-    max-height: none !important;
-  } */
+
 }
 /* Ensure row highlight is visible for sticky S.No and Date/Time columns */
 tr.dp-row-action-highlight > td:nth-child(1),
@@ -370,36 +356,19 @@ tr.dp-row-action-highlight > td:nth-child(2) {
     margin-left: 0 !important;
     margin-right: 0 !important;
   }
-  /*  .table-responsive {
-    min-height: 420px !important;
-    height: 60vh !important;
-    max-height: 520px !important;
-    overflow-x: auto !important; /* <-- Add this line
-    overflow-y: auto !important;
-  } */
+
   .content-wrapper > h5,
   .card-body > h5.text-left.mt-0.mb-4 {
     margin-top: 0 !important;
   }
 }
 
-/* Disable horizontal scroll for table on tablets, but allow on desktop */
-@media (min-width: 600px) and (max-width: 1024px) {
-  .table-responsive {
-    overflow-x: scroll !important;
-  }
-}
-@media (min-width: 1025px) {
-  .table-responsive {
-    overflow-x: scroll !important;
-  }
-}
 
 body.sidebar-icon-only .main-panel,
 body.sidebar-icon-only .content-wrapper,
 body.sidebar-icon-only .card,
 body.sidebar-icon-only .card-body,
-body.sidebar-icon-only .table-responsive {
+body.sidebar-icon-only {
   margin-left: 5px !important;
   padding-left: 0 !important;
   width: 100% !important;
@@ -413,8 +382,7 @@ body.sidebar-icon-only .table-responsive {
 
 .content-wrapper,
 .card,
-.card-body,
-.table-responsive {
+.card-body {
   width: 100% !important;
   max-width: 100% !important;
   margin-right: 0 !important;
@@ -429,7 +397,6 @@ body.sidebar-icon-only .table-responsive {
   .stretch-card,
   .card,
   .card-body,
-  .table-responsive,
   #order-listing {
     max-width: 1400px !important;
     margin-left: auto !important;
@@ -467,7 +434,6 @@ body.sidebar-icon-only .table-responsive {
 .stretch-card,
 .card,
 .card-body,
-.table-responsive,
 #order-listing {
   margin-right: 0 !important;
   padding-right: 0 !important;
@@ -1413,18 +1379,6 @@ footer {
   height: 40px;
 }
 
-/* Reduce table height for web view (desktop only) */
-/* @media (min-width: 1025px) {
-  .table-responsive {
-    max-height: 300px; /* reduced height for large screens 
-  }
-}
-
-@media (min-width: 768px) and (max-width: 1024px) {
-  .table-responsive {
-    max-height: 600px; /* Increased height for tablets 
-  }
-} */
 
 /* Make the table header sticky */
 thead th {
@@ -1568,11 +1522,7 @@ thead th {
   white-space: nowrap;
 }
 
-/* Responsive horizontal scroll for table */
-.table-responsive {
-  overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch;
-}
+
 
 /*  Module - Day Planning Pick Table End */
 /* Day Planning Complete Table Start */
@@ -2972,7 +2922,7 @@ html {
 /* Title spacing */
 .card-body > h5.text-left.mt-0.mb-4 {
   margin-bottom: 10px !important;
-  margin-top: 15px !important;
+  margin-top: 0 !important;
   padding-bottom: 0 !important;
   margin-left: 5px !important;
 }
@@ -3231,16 +3181,6 @@ html {
   }
 }
 
-.table-responsive {
-  max-height: 100%;
-  overflow-y: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.table-responsive::-webkit-scrollbar {
-  display: none;
-}
 
 html,
 body {

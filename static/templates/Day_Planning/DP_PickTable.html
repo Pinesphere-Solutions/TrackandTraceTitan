@@ -4,745 +4,762 @@
 {% block content %}
 
 <div class="content-wrapper">
-      <div class="col-12 grid-margin stretch-card">
-        <div class="card">
-          <div class="card-body" style="padding-bottom:12px;">
-            <h5 class="text-left mt-0 mb-4" style="font-weight:700;">Day Planning Pick Table</h5>
-              <!-- Table Section -->
-              <div class="table-responsive" style="overflow: scroll !important">
-                <table id="order-listing" class="table">
-                  <thead>
-                      <tr>
-                        <th>
-                          S.No
-                          <i class="fa fa-filter" aria-hidden="true"></i>
-                        </th>
-                        <th>
-                          Last <br> Updated
-                          <i class="fa fa-filter" aria-hidden="true"></i>
-                        </th>
-                        <th>
-                          Plating <br> Stk No
-                          <i class="fa fa-filter" aria-hidden="true"></i>
-                        </th>
-                        <th>
-                          Polishing <br>  Stk No
-                          <i class="fa fa-filter" aria-hidden="true"></i>
-                        </th>
-                        <th>
-                          Plating <br> Color
-                          <i class="fa fa-filter" aria-hidden="true"></i>
-                        </th>
-                        <th>
-                          Category
-                          <i class="fa fa-filter" aria-hidden="true"></i>
-                        </th>
-                        <th>
-                          Polish Finish
-                          <i class="fa fa-filter" aria-hidden="true"></i>
-                        </th>
-                        <th>
-                          Version
-                          <i class="fa fa-filter" aria-hidden="true"></i>
-                        </th>
-                        <th>
-                          Tray Cate-Capacity
-                          <i class="fa fa-filter" aria-hidden="true"></i>
-                        </th>
-                        <th>
-                          Source
-                          <i class="fa fa-filter" aria-hidden="true"></i>
-                        </th>
-                        <th>
-                          No of <br> Trays
-                          <i class="fa fa-filter" aria-hidden="true"></i>
-                        </th>
-                        <th>
-                          Input <br> Qty
-                          <i class="fa fa-filter" aria-hidden="true"></i>
-                        </th>
-                        <th>
-                          Process Status
-                          <i class="fa fa-filter" aria-hidden="true"></i>
-                        </th>
-                        <th>
-                          Action
-                          <i class="fa fa-filter" aria-hidden="true"></i>
-                        </th>
-                        <th>
-                          Lot Status
-                          <i class="fa fa-filter" aria-hidden="true"></i>
-                        </th>
-                        <th>
-                          Current Stage
-                          <i class="fa fa-filter" aria-hidden="true"></i>
-                        </th>
-                        <th>
-                          Remarks
-                          <i class="fa fa-filter" aria-hidden="true"></i>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-      {% for data in master_data %}
-        <tr
-          {% if data.hold_lot %}
-            class="row-inactive"
-          {% endif %}
-        >                 
-    <!-- S.No Column - Only show toggle for Admin users -->
+  <!-- <h5 class="text-left mt-0 mb-3">Day Planning Pick Table</h5> -->
+  
+    <div class="col-12 grid-margin stretch-card">
+      <div class="card">
+                <div class="card-body">
+              <h5 class="text-left mt-0 mb-4" style="font-weight:700;">Day Planning Pick Table</h5>
 
-    <!-- Updated S.No Column - Replace the existing S.No td section with this -->
-    <td>
-      <span style="display:flex; align-items:center; gap:3px;">
-        {% if is_admin %}
-          <!-- Admin users: Show toggle switch -->
-          <label class="hold-toggle-switch" style="margin-bottom:0;">
-            {% if not data.hold_lot %}
-              <input type="checkbox" class="hold-toggle-btn" checked />
-              <span class="hold-slider"></span>
-            {% else %}
-              <input type="checkbox" class="hold-toggle-btn" />
-              <span class="hold-slider"></span>
-            {% endif %}
-          </label>
-          
-          <!-- Hold remark icon -->
-          <span class="hold-remark-icon" 
-                style="display:{% if data.hold_lot or data.release_lot %}inline-block{% else %}none{% endif %}; cursor:pointer;" 
-                title="{% if data.holding_reason %}Holding Reason: {{ data.holding_reason }}{% endif %}{% if data.holding_reason and data.release_reason %}&#10;{% endif %}{% if data.release_reason %}Release Reason: {{ data.release_reason }}{% endif %}">
-            {% if data.hold_lot or data.release_lot %}
-              <img src="{% static 'assets/icons/view2.png' %}" alt="Remark" style="width:12px; height:12px;" />
-            {% endif %}
-          </span>
+            <!-- Table Section -->
+            <div class="table-responsive" style="overflow: scroll !important">
+<table id="order-listing" class="table">
+               <thead>
+                  <tr>
+                    <th>
+                      S.No
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Last <br> Updated
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Plating <br> Stk No
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Polishing <br>  Stk No
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Plating <br> Color
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Category
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Polish Finish
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Version
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Tray Cate-Capacity
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Source
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      No of <br> Trays
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Input <br> Qty
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Process Status
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Action
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Lot Status
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Current Stage
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                    <th>
+                      Remarks
+                      <i class="fa fa-filter" aria-hidden="true"></i>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+  {% for data in master_data %}
+    <tr
+      {% if data.hold_lot %}
+        class="row-inactive"
+      {% endif %}
+    >                 
+<!-- S.No Column - Only show toggle for Admin users -->
+
+<!-- Updated S.No Column - Replace the existing S.No td section with this -->
+<td>
+  <span style="display:flex; align-items:center; gap:3px;">
+    {% if is_admin %}
+      <!-- Admin users: Show toggle switch -->
+      <label class="hold-toggle-switch" style="margin-bottom:0;">
+        {% if not data.hold_lot %}
+          <input type="checkbox" class="hold-toggle-btn" checked />
+          <span class="hold-slider"></span>
         {% else %}
-          <!-- Normal users: Show only view icon if there's a holding/release reason -->
-          {% if data.hold_lot or data.release_lot or data.holding_reason or data.release_reason %}
-            <span class="hold-remark-icon" 
-                  style="display:inline-block; cursor:pointer;" 
-                  title="{% if data.holding_reason %}Holding Reason: {{ data.holding_reason }}{% endif %}{% if data.holding_reason and data.release_reason %}&#10;{% endif %}{% if data.release_reason %}Release Reason: {{ data.release_reason }}{% endif %}">
-              <img src="{% static 'assets/icons/view2.png' %}" alt="View Reason" style="width:18px; height:18px;" />
-            </span>
-          {% endif %}
+          <input type="checkbox" class="hold-toggle-btn" />
+          <span class="hold-slider"></span>
         {% endif %}
-        
-        <span class="sno-value">{{ page_obj.start_index|add:forloop.counter0 }}</span>
+      </label>
+      
+      <!-- Hold remark icon -->
+      <span class="hold-remark-icon" 
+            style="display:{% if data.hold_lot or data.release_lot %}inline-block{% else %}none{% endif %}; cursor:pointer;" 
+            title="{% if data.holding_reason %}Holding Reason: {{ data.holding_reason }}{% endif %}{% if data.holding_reason and data.release_reason %}&#10;{% endif %}{% if data.release_reason %}Release Reason: {{ data.release_reason }}{% endif %}">
+        {% if data.hold_lot or data.release_lot %}
+          <img src="{% static 'assets/icons/view2.png' %}" alt="Remark" style="width:12px; height:12px;" />
+        {% endif %}
       </span>
-    </td>
+    {% else %}
+      <!-- Normal users: Show only view icon if there's a holding/release reason -->
+      {% if data.hold_lot or data.release_lot or data.holding_reason or data.release_reason %}
+        <span class="hold-remark-icon" 
+              style="display:inline-block; cursor:pointer;" 
+              title="{% if data.holding_reason %}Holding Reason: {{ data.holding_reason }}{% endif %}{% if data.holding_reason and data.release_reason %}&#10;{% endif %}{% if data.release_reason %}Release Reason: {{ data.release_reason }}{% endif %}">
+          <img src="{% static 'assets/icons/view2.png' %}" alt="View Reason" style="width:12px; height:12px;" />
+        </span>
+      {% endif %}
+    {% endif %}
+    
+    <span class="sno-value">{{ page_obj.start_index|add:forloop.counter0 }}</span>
+  </span>
+</td>
 
-        <!-- Last Updated Column -->
-        <td
-          {% if data.hold_lot %}
-            class="row-inactive-blur"
-          {% endif %}
-        >
-          {{ data.date_time|date:"d-M-y" }}<br>
-          <span style="display:inline-block; margin-top:4px;">{{ data.date_time|date:"H:i" }}</span>
-        </td>
-
-        <!-- Plating Stk No Column -->
-    <!-- Plating Stk No Column -->
-    <td {% if data.hold_lot %}class="row-inactive-blur"{% endif %} style="white-space:normal;word-break:break-all;">
-      <span class="model-hover-trigger" style="cursor: pointer; word-break: break-all;">
-        {{ data.plating_stk_no|highlight_plating_color|safe_html }}
-
-        <div class="model-image-tooltip"
-           >          
-          <button class="img-scroll-left" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8592;</button>
-          <div class="img-gallery" style="display: flex; gap: 6px; overflow: hidden; width: 180px;">
-            {% for img_url in data.model_images %}
-              <img src="{{ img_url }}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px;" />
-            {% endfor %}
-          </div>
-          <button class="img-scroll-right" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8594;</button>
-        </div>
-      </span>
-    </td>
-
-        <!-- Polishing Stk No Column -->
-    <td {% if data.hold_lot %}class="row-inactive-blur"{% endif %}>
-                          {{ data.polishing_stk_no|default:"N/A"|highlight_polish_finish|safe_html }}
-                        </td>
-
-
-        <!-- Plating Color Column -->
-        <td
-          {% if data.hold_lot %}
-            class="row-inactive-blur"
-          {% endif %}
-        >
-          {{ data.plating_color|default:"N/A" }}
-        </td>
-
-        <!-- Category Column -->
-        <td
-          {% if data.hold_lot %}
-            class="row-inactive-blur"
-          {% endif %}
-        >
-          {{ data.category|default:"N/A" }}
-        </td>
-
-        <!-- Polish Finish Column -->
-        <td
-          {% if data.hold_lot %}
-            class="row-inactive-blur"
-          {% endif %}
-        >
-          {{ data.polish_finish|default:"N/A" }}
-        </td>
-
-        <!-- Version Column -->
-        <td
-          {% if data.hold_lot %}
-            class="row-inactive-blur"
-          {% endif %}
-        >
-          {{ data.version__version_internal|default:"N/A" }}
-        </td>
-
-        <!-- Tray Type and Capacity Column -->
-        <td
-          {% if data.hold_lot %}
-            class="row-inactive-blur"
-          {% endif %}
-        >
-          {{ data.tray_type|default:"N/A" }}-{{ data.tray_capacity|default:"0" }}
-        </td>
-
-        <!-- Source Column -->
-        <td
-          {% if data.hold_lot %}
-            class="row-inactive-blur"
-          {% endif %}
-        >
-          {{ data.location__location_name|default:"N/A" }}
-        </td>
-
-        <!-- No of Trays Column -->
-        <td
-          {% if data.hold_lot %}
-            class="row-inactive-blur"
-          {% endif %}
-        >
-          {{ data.no_of_trays|default:"0" }}
-        </td>
-
-        <!-- Input Qty Column -->
-        <td
-          {% if data.hold_lot %}
-            class="row-inactive-blur"
-          {% endif %}
-        >
-          {{ data.total_batch_quantity|default:"0" }}
-        </td>
-
-        <!-- Process Status Column -->
-        <td
-          {% if data.hold_lot %}
-            class="row-inactive-blur"
-          {% endif %}
-        >
-          <!-- Dynamic Process Status based on conditions -->
-          {% if data.Moved_to_D_Picker %}
-            <div
-              title="Tray Scan"
-              class="d-flex align-items-center justify-content-center rounded-circle ms-1"
-              style="
-                width: 28px;
-                height: 28px;
-                background-color: #0c8249;
-                color: white;
-                font-weight: bold;
-              "
-            >
-              T
-            </div>
-          {% elif data.Draft_Saved %}
-            <div
-            title="Tray Scan"
-            class="d-flex align-items-center justify-content-center rounded-circle ms-1"
-            style="
-              width: 28px;
-              height: 28px;
-            background: linear-gradient(
-                to right,
-                green 50%,
-                #bfbfbf 50%
-              );
-              color: white;
-              font-weight: bold;
-              line-height: 20px;
-              text-align: center;
-              padding-top: 1px;
-              padding-right: 1px;"
-          >
-              T
-            </div>
-          
-          {% else %}
-            <div
-              title="Tray Scan"
-              class="d-flex align-items-center justify-content-center rounded-circle ms-1"
-              style="
-                width: 28px;
-                height: 28px;
-                background-color: #d3d2d2;
-                color: white;
-                font-weight: bold;
-              "
-            >
-              T
-            </div>
-          {% endif %}
-        </td>
-
-    <!-- Action Column - Only show Edit and Delete for Admin users -->
-        <td {% if data.hold_lot %}class="row-inactive-blur"{% endif %}>
-          {% if is_admin %}
-            <!-- Admin users see Edit and Delete buttons -->
-            {% if not data.Moved_to_D_Picker %}
-              <a href="#" class="edit-qty-btn" data-batch-id="{{ data.batch_id }}">
-                <img src="{% static 'assets/icons/edit1.png' %}" alt="Edit" style="width: 24px; margin-right: 8px; height: auto"/>
-              </a>
-            {% else %}
-              <span style="opacity:0.5; pointer-events:none; display:inline-block;">
-                <img src="{% static 'assets/icons/edit1.png' %}" alt="Edit Disabled" style="width: 24px; margin-right: 8px; height: auto; filter: grayscale(1) opacity(0.5);"/>
-              </span>
-            {% endif %}
-            
-            {% if not data.Moved_to_D_Picker %}
-              <a href="#" title="Delete">
-                <img src="{% static 'assets/icons/bin.png' %}" alt="Delete" style="width: 24px; margin-right: 8px; height: auto; cursor:pointer;" />
-              </a>
-            {% else %}
-              <span title="Cannot delete after moved" style="opacity:0.5; pointer-events:none; display:inline-block;">
-                <img src="{% static 'assets/icons/bin.png' %}" alt="Delete Disabled" style="width: 24px; margin-right: 8px; height: auto; filter: grayscale(1) opacity(0.5); cursor:not-allowed;" />
-              </span>
-            {% endif %}
-          {% endif %}
-          <!-- Normal users: Edit and Delete icons are completely hidden -->
-          
-          <!-- Tray Scan button is visible for all users -->
-          {% if not data.Moved_to_D_Picker %}
-            <a href="#" class="text-primary tray-scan-btn" style="text-decoration: underline"
-              data-batch-id="{{ data.batch_id }}" data-model-no="{{ data.model_stock_no__model_no }}"
-              data-no-of-trays="{{ data.no_of_trays }}" data-tray-capacity="{{ data.tray_capacity|default:'0' }}"
-              data-moved-to-d-picker="{{ data.Moved_to_D_Picker }}" data-tray-qty-list="{{ data.tray_qty_list|default:'[]'|safe }}"
-              data-top-tray-qty-verified="{{ data.top_tray_qty_verified }}" data-draft-saved="{{data.Draft_Saved}}"
-              data-total-batch-quantity="{{ data.total_batch_quantity|default:'0' }}"
-              data-model-image="{{ data.model_images.0|default:'' }}">Tray Scan</a>
-
-          {% endif %}
-        </td>
-
-    <!-- Lot Status Column - Updated with Hold Logic -->
+    <!-- Last Updated Column -->
     <td
       {% if data.hold_lot %}
         class="row-inactive-blur"
       {% endif %}
     >
-      <!-- Dynamic Lot Status based on conditions with Hold Logic -->
+      {{ data.date_time|date:"d-M-y" }}<br>
+      <span style="display:inline-block; margin-top:4px;">{{ data.date_time|date:"H:i" }}</span>
+    </td>
+
+    <!-- Plating Stk No Column -->
+<td {% if data.hold_lot %}class="row-inactive-blur"{% endif %} style="white-space:normal;word-break:break-all;">
+  <span class="model-hover-trigger" style="cursor: pointer; word-break: break-all;">
+    {{ data.plating_stk_no|highlight_plating_color|safe_html }}
+
+    
+ <div class="model-image-tooltip"
+         style="position: absolute; left: 238%; top: 0%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 10010; display: flex; align-items: center; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s;">          
+          <!-- Platign Stk No - Hover - Info & close btn -->
+        <button class="close-btn" style="position:absolute; top:8px; right:8px;">Close</button>
+        <button class="info-btn" style="position:absolute; top:8px; left:8px;">Info</button>
+         <button class="img-scroll-left" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8592;</button>
+      <div class="img-gallery" style="display: flex; gap: 6px; overflow: hidden; width: 180px;">
+        {% for img_url in data.model_images %}
+          <img src="{{ img_url }}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px;" />
+        {% endfor %}
+      </div>
+      <button class="img-scroll-right" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8594;</button>
+    </div>
+
+  </span>
+</td>
+
+    <!-- Polishing Stk No Column -->
+<td {% if data.hold_lot %}class="row-inactive-blur"{% endif %}>
+                      {{ data.polishing_stk_no|default:"N/A"|highlight_polish_finish|safe_html }}
+                    </td>
+
+
+    <!-- Plating Color Column -->
+    <td
       {% if data.hold_lot %}
-        <!-- When hold_lot is True, show "On Hold" status -->
+        class="row-inactive-blur"
+      {% endif %}
+    >
+      {{ data.plating_color|default:"N/A" }}
+    </td>
+
+    <!-- Category Column -->
+    <td
+      {% if data.hold_lot %}
+        class="row-inactive-blur"
+      {% endif %}
+    >
+      {{ data.category|default:"N/A" }}
+    </td>
+
+    <!-- Polish Finish Column -->
+    <td
+      {% if data.hold_lot %}
+        class="row-inactive-blur"
+      {% endif %}
+    >
+      {{ data.polish_finish|default:"N/A" }}
+    </td>
+
+    <!-- Version Column -->
+    <td
+      {% if data.hold_lot %}
+        class="row-inactive-blur"
+      {% endif %}
+    >
+      {{ data.version__version_internal|default:"N/A" }}
+    </td>
+
+    <!-- Tray Type and Capacity Column -->
+    <td
+      {% if data.hold_lot %}
+        class="row-inactive-blur"
+      {% endif %}
+    >
+      {{ data.tray_type|default:"N/A" }}-{{ data.tray_capacity|default:"0" }}
+    </td>
+
+    <!-- Source Column -->
+    <td
+      {% if data.hold_lot %}
+        class="row-inactive-blur"
+      {% endif %}
+    >
+      {{ data.location__location_name|default:"N/A" }}
+    </td>
+
+    <!-- No of Trays Column -->
+    <td
+      {% if data.hold_lot %}
+        class="row-inactive-blur"
+      {% endif %}
+    >
+      {{ data.no_of_trays|default:"0" }}
+    </td>
+
+    <!-- Input Qty Column -->
+    <td
+      {% if data.hold_lot %}
+        class="row-inactive-blur"
+      {% endif %}
+    >
+      {{ data.total_batch_quantity|default:"0" }}
+    </td>
+
+    <!-- Process Status Column -->
+    <td
+      {% if data.hold_lot %}
+        class="row-inactive-blur"
+      {% endif %}
+    >
+      <!-- Dynamic Process Status based on conditions -->
+      {% if data.Moved_to_D_Picker %}
         <div
-          class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+          title="Tray Scan"
+          class="d-flex align-items-center justify-content-center rounded-circle ms-1"
           style="
-            border: 2px solid #dc3545;
-            background-color: #f8d7da;
-            color: #721c24;
-            font-size: clamp(0.75rem, 2vw, 0.875rem);
-            white-space: nowrap;
-            padding-top: 0.5rem;
-            padding-bottom: 0.5rem;
+            width: 28px;
+            height: 28px;
+            background-color: #0c8249;
+            color: white;
+            font-weight: bold;
           "
         >
-          On Hold
-        </div>
-      {% elif data.Moved_to_D_Picker %}
-        <!-- Yet To Release Status -->
-        <div
-          class="d-inline-block px-3 fw-semibold text-center rounded-pill"
-          style="
-            border: 2px solid #0d5d17;
-            background-color: #c5f9c2;
-            color: #2f801b;
-            font-size: clamp(0.75rem, 2vw, 0.875rem);
-            white-space: nowrap;
-            padding-top: 0.5rem;
-            padding-bottom: 0.5rem;
-          "
-        >
-          Yet To Release
+          T
         </div>
       {% elif data.Draft_Saved %}
-        <!-- Draft Status -->
         <div
-          class="d-inline-block px-3 fw-semibold text-center rounded-pill"
-          style="
-            border: 1px solid #4997ac;
-            background-color: #d1f2f3;
-            color: #03425d;
-            font-size: 12px;
-            white-space: nowrap;
-            padding: 5px;
-          "
-        >
-          Draft
+        title="Tray Scan"
+        class="d-flex align-items-center justify-content-center rounded-circle ms-1"
+        style="
+          width: 28px;
+          height: 28px;
+         background: linear-gradient(
+            to right,
+            green 50%,
+            #bfbfbf 50%
+          );
+          color: white;
+          font-weight: bold;
+          line-height: 20px;
+          text-align: center;
+          padding-top: 1px;
+          padding-right: 1px;"
+      >
+          T
         </div>
       
       {% else %}
-        <!-- Yet to Start Status -->
         <div
-          class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+          title="Tray Scan"
+          class="d-flex align-items-center justify-content-center rounded-circle ms-1"
           style="
-            border: 1px solid #a6a6a6;
-            background-color: #dcdada;
-            color: #505050;
-            font-size: 12px;
-            white-space: nowrap;
-            padding: 5px;
+            width: 28px;
+            height: 28px;
+            background-color: #d3d2d2;
+            color: white;
+            font-weight: bold;
           "
         >
-          Yet to Start
+          T
         </div>
       {% endif %}
     </td>
 
-        <!-- Current Stage Column -->
-        <td
-          {% if data.hold_lot %}
-            class="row-inactive-blur"
-          {% endif %}
-        >
-          <div
-            class="d-inline-block px-3 fw-semibold text-center rounded-pill"
-            style="
-              border: 1px solid #9adeed;
-              background-color: #d1edf3;
-              color: #033b5d;
-              font-size: 12px;
-              padding: 5px;
-            "
-          >
-            {% if data.last_procees_module == "DayPlanning" %}
-              {{ data.last_procees_module }}
-            {% else %}
-              Day Planning
-            {% endif %}
-          </div>
-        </td>
+<!-- Action Column - Only show Edit and Delete for Admin users -->
+    <td {% if data.hold_lot %}class="row-inactive-blur"{% endif %}>
+      {% if is_admin %}
+        <!-- Admin users see Edit and Delete buttons -->
+        {% if not data.Moved_to_D_Picker %}
+          <a href="#" class="edit-qty-btn" data-batch-id="{{ data.batch_id }}">
+            <img src="{% static 'assets/icons/edit1.png' %}" alt="Edit" style="width: 24px; margin-right: 8px; height: auto"/>
+          </a>
+        {% else %}
+          <span style="opacity:0.5; pointer-events:none; display:inline-block;">
+            <img src="{% static 'assets/icons/edit1.png' %}" alt="Edit Disabled" style="width: 24px; margin-right: 8px; height: auto; filter: grayscale(1) opacity(0.5);"/>
+          </span>
+        {% endif %}
+        
+        {% if not data.Moved_to_D_Picker %}
+          <a href="#" title="Delete">
+            <img src="{% static 'assets/icons/bin.png' %}" alt="Delete" style="width: 24px; margin-right: 8px; height: auto; cursor:pointer;" />
+          </a>
+        {% else %}
+          <span title="Cannot delete after moved" style="opacity:0.5; pointer-events:none; display:inline-block;">
+            <img src="{% static 'assets/icons/bin.png' %}" alt="Delete Disabled" style="width: 24px; margin-right: 8px; height: auto; filter: grayscale(1) opacity(0.5); cursor:not-allowed;" />
+          </span>
+        {% endif %}
+      {% endif %}
+      <!-- Normal users: Edit and Delete icons are completely hidden -->
+      
+      <!-- Tray Scan button is visible for all users -->
+      {% if not data.Moved_to_D_Picker %}
+        <a href="#" class="text-primary tray-scan-btn" style="text-decoration: underline"
+           data-batch-id="{{ data.batch_id }}" data-model-no="{{ data.model_stock_no__model_no }}"
+           data-no-of-trays="{{ data.no_of_trays }}" data-tray-capacity="{{ data.tray_capacity|default:'0' }}"
+           data-moved-to-d-picker="{{ data.Moved_to_D_Picker }}" data-tray-qty-list="{{ data.tray_qty_list|default:'[]'|safe }}"
+           data-top-tray-qty-verified="{{ data.top_tray_qty_verified }}" data-draft-saved="{{data.Draft_Saved}}"
+           data-total-batch-quantity="{{ data.total_batch_quantity|default:'0' }}"
+          data-model-image="{{ data.model_images.0|default:'' }}">Tray Scan</a>
 
-    <!-- Updated Remarks Column - Replace the existing Remarks td section with this -->
+      {% endif %}
+    </td>
+
+<!-- Lot Status Column - Updated with Hold Logic -->
+<td
+  {% if data.hold_lot %}
+    class="row-inactive-blur"
+  {% endif %}
+>
+  <!-- Dynamic Lot Status based on conditions with Hold Logic -->
+  {% if data.hold_lot %}
+    <!-- When hold_lot is True, show "On Hold" status -->
+    <div
+      class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+      style="
+        border: 2px solid #dc3545;
+        background-color: #f8d7da;
+        color: #721c24;
+        font-size: clamp(0.75rem, 2vw, 0.875rem);
+        white-space: nowrap;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+      "
+    >
+      On Hold
+    </div>
+  {% elif data.Moved_to_D_Picker %}
+    <!-- Yet To Release Status -->
+    <div
+      class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+      style="
+        border: 2px solid #0d5d17;
+        background-color: #c5f9c2;
+        color: #2f801b;
+        font-size: clamp(0.75rem, 2vw, 0.875rem);
+        white-space: nowrap;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+      "
+    >
+      Yet To Release
+    </div>
+  {% elif data.Draft_Saved %}
+    <!-- Draft Status -->
+    <div
+      class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+      style="
+        border: 2px solid #4997ac;
+        background-color: #d1f2f3;
+        color: #03425d;
+        font-size: clamp(0.75rem, 2vw, 0.875rem);
+        white-space: nowrap;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+      "
+    >
+      Draft
+    </div>
+  
+  {% else %}
+    <!-- Yet to Start Status -->
+    <div
+      class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+      style="
+        border: 1px solid #a6a6a6;
+        background-color: #dcdada;
+        color: #505050;
+        font-size: 12px;
+        white-space: nowrap;
+        padding: 5px;
+      "
+    >
+      Yet to Start
+    </div>
+  {% endif %}
+</td>
+
+    <!-- Current Stage Column -->
     <td
       {% if data.hold_lot %}
         class="row-inactive-blur"
       {% endif %}
     >
-        <!-- Admin users: Show audio and remark icons if not moved -->
-        {% if not data.Moved_to_D_Picker %}
-          <!-- VoiceRec with tooltip (audio remark) -->
-          <a href="#" title="Add Audio Remark" class="remark-tooltip-trigger" style="display: inline-flex; align-items: center; height: 28px; margin-left: 0; position: relative; cursor: pointer;">
-            <img src="{% static 'assets/icons/rec.png' %}" alt="VoiceRec" style="width: 20px; height: 20px"/>
-            <div class="remark-tooltip" style="position: absolute; top: 110%; left: 50%; transform: translateX(-50%); width: 300px; background: #fff; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; padding: 15px; z-index: 1000;">
-              <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 10px solid #fff;"></div>
-              <!-- Audio recording UI placeholder -->
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <button type="button" style="background: #28a745; color: #fff; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; display: flex; align-items: center; justify-content: center;">
-                  <i class="fa fa-microphone"></i>
-                </button>
-                <span style="font-size: 14px; color: #333;">Hold to record audio</span>
-              </div>
-              <div style="text-align: right; margin-top: 10px;">
-                <button type="button" style="background-color: #007bff; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;">
-                  <i class="fa fa-send"></i>
-                </button>
-              </div>
-            </div>
-          </a>
-
-          <a
-          href="#"
-          title="Add Remark"
-          class="remark-tooltip-trigger"
-          style="display: inline-flex; align-items: center; height: 20px; margin-left: 5px; position: relative; cursor: pointer;"
-        >
-          <img
-            src="{% static 'assets/icons/chat1.png' %}"
-            alt="Chat"
-      style="width: 20px; height: 20px; {% if data.dp_pick_remarks %}filter: grayscale(0) brightness(1.1) sepia(1) hue-rotate(80deg) saturate(3) contrast(1.2); opacity: 1;{% else %}opacity: 0.7;{% endif %}">
-
-
-          <div
-            class="remark-tooltip"
-            style="position: absolute; top: 110%; left: 50%; transform: translateX(-50%); width: 300px; background: #fff; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; padding: 15px; z-index: 1000;"
-          >
-            <div
-              style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 10px solid #fff;"
-            ></div>
-            <textarea
-              placeholder="Type your remark..."
-              style="width: 85%; height: 40px; resize: vertical; border: 1px solid #ccc; padding: 5px; border-radius: 4px; font-family: Arial, sans-serif; font-size: 14px;"
-              {% if data.dp_pick_remarks %}readonly{% endif %}
-            >{{ data.dp_pick_remarks|default_if_none:"" }}</textarea>
-            <div style="text-align: right; margin-top: -35px">
-              {% if not data.dp_pick_remarks %}
-              <button
-                type="button"
-                style="background-color: #007bff; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;"
-              >
-                <i class="fa fa-send"></i>
-              </button>
-              {% else %}
-              <div style="margin-top: 40px; color: #31708f; background: #d9edf7; border: 1px solid #bce8f1; border-radius: 4px; padding: 8px 12px; font-size: 10px; text-align: left;">
-                <i class="fa fa-info-circle" style="margin-right: 6px;"></i>
-                Remark already saved and cannot be edited.
-              </div>
-              {% endif %}
-            </div>
-          </div>
-        </a>
+      <div
+        class="d-inline-block px-3 fw-semibold text-center rounded-pill"
+        style="
+          border: 1px solid #9adeed;
+          background-color: #d1edf3;
+          color: #033b5d;
+          font-size: 12px;
+          padding: 5px;
+        "
+      >
+        {% if data.last_procees_module == "DayPlanning" %}
+          {{ data.last_procees_module }}
         {% else %}
-          <!-- Audio Remark Icon (disabled) -->
-          <span title="Disabled after moved" style="display: inline-flex; align-items: center; height: 28px; margin-left: 0; opacity: 0.5; pointer-events: none;">
-            <img src="{% static 'assets/icons/rec.png' %}" alt="VoiceRec Disabled" style="width: 20px; height: 20px; filter: grayscale(1) opacity(0.5);" />
-          </span>
-          <!-- Chat Remark Icon (disabled) -->
-          <span title="Disabled after moved" style="display: inline-flex; align-items: center; height: 20px; margin-left: 5px; opacity: 0.5; pointer-events: none;">
-            <img src="{% static 'assets/icons/chat1.png' %}" alt="Chat Disabled" style="width: 20px; height: 20px; filter: grayscale(1) opacity(0.5);" />
-          </span>
-
+          Day Planning
         {% endif %}
+      </div>
     </td>
 
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="15" class="text-center">No data available</td>
-      </tr>
-      {% endfor %}
-                    </tbody>
-                </table>
-                <div
-                  id="trayScanModal"
-                  class="tray-scan-modal"
-                  id="trayScanModal"
+<!-- Updated Remarks Column - Replace the existing Remarks td section with this -->
+<td
+  {% if data.hold_lot %}
+    class="row-inactive-blur"
+  {% endif %}
+>
+    <!-- Admin users: Show audio and remark icons if not moved -->
+    {% if not data.Moved_to_D_Picker %}
+      <!-- VoiceRec with tooltip (audio remark) -->
+      <a href="#" title="Add Audio Remark" class="remark-tooltip-trigger" style="display: inline-flex; align-items: center; height: 28px; margin-left: 0; position: relative; cursor: pointer;">
+        <img src="{% static 'assets/icons/rec.png' %}" alt="VoiceRec" style="width: 20px; height: 20px"/>
+        <div class="remark-tooltip" style="position: absolute; top: 110%; left: 50%; transform: translateX(-50%); width: 300px; background: #fff; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; padding: 15px; z-index: 1000;">
+          <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 10px solid #fff;"></div>
+          <!-- Audio recording UI placeholder -->
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <button type="button" style="background: #28a745; color: #fff; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; display: flex; align-items: center; justify-content: center;">
+              <i class="fa fa-microphone"></i>
+            </button>
+            <span style="font-size: 14px; color: #333;">Hold to record audio</span>
+          </div>
+          <div style="text-align: right; margin-top: 10px;">
+            <button type="button" style="background-color: #007bff; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;">
+              <i class="fa fa-send"></i>
+            </button>
+          </div>
+        </div>
+      </a>
+
+      <a
+      href="#"
+      title="Add Remark"
+      class="remark-tooltip-trigger"
+      style="display: inline-flex; align-items: center; height: 20px; margin-left: 5px; position: relative; cursor: pointer;"
+    >
+      <img
+        src="{% static 'assets/icons/chat_icon.png' %}"
+        alt="Chat"
+  style="width: 20px; height: 20px; {% if data.dp_pick_remarks %}filter: grayscale(0) brightness(1.1) sepia(1) hue-rotate(80deg) saturate(3) contrast(1.2); opacity: 1;{% else %}opacity: 0.7;{% endif %}">
+
+
+      <div
+        class="remark-tooltip"
+        style="position: absolute; top: 110%; left: 50%; transform: translateX(-50%); width: 300px; background: #fff; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; padding: 15px; z-index: 1000;"
+      >
+        <div
+          style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 10px solid #fff;"
+        ></div>
+        <textarea
+          placeholder="Type your remark..."
+          style="width: 85%; height: 40px; resize: vertical; border: 1px solid #ccc; padding: 5px; border-radius: 4px; font-family: Arial, sans-serif; font-size: 14px;"
+          {% if data.dp_pick_remarks %}readonly{% endif %}
+        >{{ data.dp_pick_remarks|default_if_none:"" }}</textarea>
+        <div style="text-align: right; margin-top: -35px">
+          {% if not data.dp_pick_remarks %}
+          <button
+            type="button"
+            style="background-color: #007bff; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;"
+          >
+            <i class="fa fa-send"></i>
+          </button>
+          {% else %}
+          <div style="margin-top: 40px; color: #31708f; background: #d9edf7; border: 1px solid #bce8f1; border-radius: 4px; padding: 8px 12px; font-size: 10px; text-align: left;">
+            <i class="fa fa-info-circle" style="margin-right: 6px;"></i>
+            Remark already saved and cannot be edited.
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </a>
+    {% else %}
+      <!-- Audio Remark Icon (disabled) -->
+      <span title="Disabled after moved" style="display: inline-flex; align-items: center; height: 28px; margin-left: 0; opacity: 0.5; pointer-events: none;">
+        <img src="{% static 'assets/icons/rec.png' %}" alt="VoiceRec Disabled" style="width: 20px; height: 20px; filter: grayscale(1) opacity(0.5);" />
+      </span>
+      <!-- Chat Remark Icon (disabled) -->
+      <span title="Disabled after moved" style="display: inline-flex; align-items: center; height: 20px; margin-left: 5px; opacity: 0.5; pointer-events: none;">
+        <img src="{% static 'assets/icons/chat_icon.png' %}" alt="Chat Disabled" style="width: 20px; height: 20px; filter: grayscale(1) opacity(0.5);" />
+      </span>
+
+    {% endif %}
+</td>
+
+  </tr>
+  {% empty %}
+  <tr>
+    <td colspan="15" class="text-center">No data available</td>
+  </tr>
+  {% endfor %}
+</tbody>
+              </table>
+
+
+            <div
+            id="trayScanModal"
+            class="tray-scan-modal"
+            id="trayScanModal"
+          >
+            <div class="tray-scan-modal-content">
+              <span id="closeTrayScanModal" class="tray-scan-close"
+                >&times;</span
+              >
+
+              <!-- New top header container: title + user profile aligned left -->
+<!-- Header Section -->
+    <div class="modal-top-header" style="display: flex; align-items: center; gap: 24px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+      <img src="/static/assets/images/imagePlaceholder.png" alt="User Profile" style="border-radius: 50%; width: 44px; height: 44px; object-fit: cover;" />
+      
+      <div style="font-weight: 600; color: #222; font-size: 17px;">
+        Model No:
+        <span id="modalModelNo" style="color: #028084; font-weight: 700;">(Fetch Dynamically)</span>
+      </div>
+
+      <div style="font-weight: 600; color: #222; font-size: 17px;">
+        Input Qty:
+        <span id="modalTrayQty" style="color: #028084; font-weight: 700;">(Fetch Dynamically)</span>
+      </div>
+    </div>
+
+              
+                                <!-- Redo icon for clearing "tray ID" -->
+ <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <h5 style="margin: 0; font-weight: 600; color: #595959;">Day Planning - Tray Scan</h5>
+      <div style="display: flex; align-items: center; gap: 16px;">
+<div id="trayScanSummary" style="font-weight: 600; font-size: 15px; color: #028084; margin-bottom: 0; white-space: nowrap;">
+  Qty to Scan: 0/0
+</div>
+        <img src="{% static 'assets/icons/redo2.png' %}" alt="Redo" id="trayIDRedoBtn" title="Clear Tray IDs" style="width: 24px; height: 24px; cursor: pointer;" />
+      </div>
+    </div>
+
+              <!-- trayScanDetails will be a scrollable 3-column grid with headers and unlimited rows -->
+              <div id="trayScanDetails" class="table-grid">
+                <!-- Headers -->
+                <div>S.no</div>
+                <div>Tray ID</div>
+                <div>Tray Quantity</div>
+<div class="tray-validation-status-header">Tray Validation Status
+<span style="margin-left: 10px;">
+    <img src="{% static 'assets/icons/fail.png' %}" alt="Cross" title="Fail" style="width:18px; height:18px; margin-right:6px; vertical-align:middle;" />
+    <img src="{% static 'assets/icons/pass.png' %}" alt="Pass" title="Pass" style="width:18px; height:18px; vertical-align:middle;" />
+  </span>
+
+</div>
+
+                <!-- Example rows (replace with dynamic content) -->
+              </div>
+              <!-- âœ… NEW BUTTONS SECTION -->
+              
+              <div class="tray-scan-modal-buttons"
+                style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
+                <button id="trayScanDraftBtn" type="button" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 30px;">Draft</button>
+                <button id="trayScanSubmitBtn" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 30px;">Submit</button>
+                <button id="trayScanCancelBtn" style="padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 30px;">Cancel</button>
+              </div>
+              <div id="trayQtyErrorFooter" style="color: red; font-size: 14px; text-align: center; min-height: 22px; margin-top: 8px;"></div>
+              
+            </div>
+            <div
+              id="trayScanModal_DayPlanning"
+              class="tray-scan-modal-DayPlanning"
+            >
+              <div class="tray-scan-modal-DayPlanning-content">
+                <span id="closeTrayScanModal_DayPlanning" class="tray-scan-close-readonly"
+                  >&times;</span
                 >
-                  <div class="tray-scan-modal-content">
-                    <span id="closeTrayScanModal" class="tray-scan-close"
-                      >&times;</span
-                    >
-
-                    <!-- New top header container: title + user profile aligned left -->
-      <!-- Header Section -->
-          <div class="modal-top-header" style="display: flex; align-items: center; gap: 24px; margin-bottom: 0px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
-            <img src="/static/assets/images/imagePlaceholder.png" alt="User Profile" style="border-radius: 50%; width: 44px; height: 44px; object-fit: cover;" />
-            
-            <div style="font-weight: 600; color: #222; font-size: 17px;">
-              Model No:
-              <span id="modalModelNo" style="color: #028084; font-weight: 700;">(Fetch Dynamically)</span>
-            </div>
-
-            <div style="font-weight: 600; color: #222; font-size: 17px;">
-              Input Qty:
-              <span id="modalTrayQty" style="color: #028084; font-weight: 700;">(Fetch Dynamically)</span>
-            </div>
-          </div>
-
-                    
-                                      <!-- Redo icon for clearing "tray ID" -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h5 style="margin: 0; font-weight: 600; color: #595959;">Day Planning - Tray Scan</h5>
-            <div style="display: flex; align-items: center; gap: 16px;">
-      <div id="trayScanSummary" style="font-weight: 600; font-size: 15px; color: #028084; margin-bottom: 0; white-space: nowrap;">
-        Qty to Scan: 0/0
-      </div>
-              <img src="{% static 'assets/icons/redo2.png' %}" alt="Redo" id="trayIDRedoBtn" title="Clear Tray IDs" style="width: 24px; height: 24px; cursor: pointer;" />
-            </div>
-          </div>
-
-                    <!-- trayScanDetails will be a scrollable 3-column grid with headers and unlimited rows -->
-                    <div id="trayScanDetails" class="table-grid">
-                      <!-- Headers -->
-                      <div>S.no</div>
-                      <div>Tray ID</div>
-                      <div>Tray Quantity</div>
-      <div class="tray-validation-status-header">Tray Validation Status
-      <span style="margin-left: 10px;">
-          <img src="{% static 'assets/icons/fail.png' %}" alt="Cross" title="Fail" style="width:18px; height:18px; margin-right:6px; vertical-align:middle;" />
-          <img src="{% static 'assets/icons/pass.png' %}" alt="Pass" title="Pass" style="width:18px; height:18px; vertical-align:middle;" />
-        </span>
-
-      </div>
-
-                      <!-- Example rows (replace with dynamic content) -->
-                    </div>
-                    <!-- âœ… NEW BUTTONS SECTION -->
-                    
-                    <div class="tray-scan-modal-buttons"
-                      style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
-                      <button id="trayScanDraftBtn" type="button" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 30px;">Draft</button>
-                      <button id="trayScanSubmitBtn" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 30px;">Submit</button>
-                      <button id="trayScanCancelBtn" style="padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 30px;">Cancel</button>
-                    </div>
-                    <div id="trayQtyErrorFooter" style="color: red; font-size: 14px; text-align: center; min-height: 22px; margin-top: 8px;"></div>
-                    
-                  </div>
+                <!-- New top header container: title + user profile aligned left -->
+                <div
+                  class="modal-top-header"
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 20px;
+                    padding-bottom: 10px;
+                  "
+                >
                   <div
-                    id="trayScanModal_DayPlanning"
-                    class="tray-scan-modal-DayPlanning"
+                    class="user-profile"
+                    style="display: flex; align-items: center; gap: 8px"
                   >
-                    <div class="tray-scan-modal-DayPlanning-content">
-                      <span id="closeTrayScanModal_DayPlanning" class="tray-scan-close-readonly"
-                        >&times;</span
-                      >
-                      <!-- New top header container: title + user profile aligned left -->
-                      <div
-                        class="modal-top-header"
-                        style="
-                          display: flex;
-                          align-items: center;
-                          gap: 20px;
-                          padding-bottom: 10px;
-                        "
-                      >
-                        <div
-                          class="user-profile"
-                          style="display: flex; align-items: center; gap: 8px"
-                        >
-                          <img
-                            src="/static/assets/images/imagePlaceholder.png"
-                            alt="User Profile"
-                            style="
-                              border-radius: 50%;
-                              width: 50px;
-                              height: 50px;
-                              object-fit: cover;
-                            "
-                          />
-                          <span>Model No:</span>
-                          <h6 id="modalModelNo_DayPlanning">(Fetch Dynamically)</h6>
-                        </div>
-                      </div>
-                      <!-- Redo icon for clearing "tray ID" -->
-                      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-                        <h5 style="text-align: center; margin: 0; flex: 1; font-weight: 600; color:#595959">
-                          Day Planning - Tray Scan (Read Only)
-                        </h5>
-                        <button id="trayValidateBtn" type="button" style="display: flex; align-items: center; gap: 6px; background: #f5faff; border: 1px solid #023E4DCC; color: #023E4DCC; border-radius: 20px; padding: 4px 14px; font-size: 13px; font-weight: 500; cursor: pointer;">
-                            <img src="{% static 'assets/icons/validate.png' %}" alt="Validate" style="width: 20px; height: 20px; margin-right: 4px;" />
-                            Tray Validate
-                        </button>
-
-                        <!-- Hidden input field - completely invisible to users -->
-                        <input id="trayValidateInput" type="text" placeholder="Enter validation info..." style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" />
-
-                        <img
-                            src="{% static 'assets/icons/redo2.png' %}"
-                            alt="Redo"
-                            id="trayScanRedoBtn"
-                            style="width: 24px; height: 24px; cursor: pointer; margin-left: 8px;"
-                            title="Clear Tray IDs"
-                        />
-                      </div>
-                      
-                      <!-- Error message container - initially hidden -->
-                      <div id="trayErrorMessage" style="display: none; background-color: #ffebee; border: 1px solid #f44336; color: #c62828; padding: 8px 12px; border-radius: 4px; margin-bottom: 10px; font-size: 14px; text-align: center;">
-                        <span id="trayErrorText"></span>
-                      </div>
-                      
-                      <!-- trayScanDetails_DayPlanning will be a scrollable 3-column grid with headers and unlimited rows -->
-                      <div id="trayScanDetails_DayPlanning" class="table-grid">
-                        <!-- Headers -->
-                        <div>S.no</div>
-                        <div>Tray ID</div>
-                        <div>Tray Quantity</div>
-                        <div class="tray-validation-status-header">Tray Validation Status
-                          <span style="margin-left: 10px;">
-                  <img src="{% static 'assets/icons/fail.png' %}" alt="Cross" title="Fail" style="width:18px; height:18px; margin-right:6px; vertical-align:middle;" />
-                  <img src="{% static 'assets/icons/pass.png' %}" alt="Pass" title="Pass" style="width:18px; height:18px; vertical-align:middle;" />
-                  </span>
-                        </div>
-                        <!-- Example rows (replace with dynamic content) -->
-                      </div>
-                      <!-- No buttons for read-only modal -->
-                    </div>
+                    <img
+                      src="/static/assets/images/imagePlaceholder.png"
+                      alt="User Profile"
+                      style="
+                        border-radius: 50%;
+                        width: 50px;
+                        height: 50px;
+                        object-fit: cover;
+                      "
+                    />
+                    <span>Model No:</span>
+                    <h6 id="modalModelNo_DayPlanning">(Fetch Dynamically)</h6>
                   </div>
-                              <!-- End of Tray Scan Modal Window -->
+                </div>
+                <!-- Redo icon for clearing "tray ID" -->
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                  <h5 style="text-align: center; margin: 0; flex: 1; font-weight: 600; color:#595959">
+                    Day Planning - Tray Scan (Read Only)
+                  </h5>
+                  <button id="trayValidateBtn" type="button" style="display: flex; align-items: center; gap: 6px; background: #f5faff; border: 1px solid #023E4DCC; color: #023E4DCC; border-radius: 20px; padding: 4px 14px; font-size: 13px; font-weight: 500; cursor: pointer;">
+                      <img src="{% static 'assets/icons/validate.png' %}" alt="Validate" style="width: 20px; height: 20px; margin-right: 4px;" />
+                      Tray Validate
+                  </button>
 
-                </div> 
-                <div id="holdRemarkModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.18); z-index:20000; align-items:center; justify-content:center;">
-                  <div style="background:#fff; border-radius:10px; padding:28px 32px 18px 32px; min-width:320px; max-width:90vw; box-shadow:0 4px 24px rgba(0,0,0,0.18); position:relative;">
-                    <span id="closeHoldRemarkModal" style="position:absolute; top:8px; right:16px; font-size:22px; font-weight:bold; color:#d9534f; cursor:pointer;">&times;</span>
-                    <h5 style="margin-bottom:16px; color:#028084;">Row Hold Remark</h5>
-                    <textarea id="holdRemarkInput" maxlength="50" style="width:100%; height:60px; border:1px solid #ccc; border-radius:6px; padding:8px; font-size:15px; resize:none;" placeholder="Enter remark (max 50 chars)"></textarea>
-                    <div style="text-align:right; margin-top:10px;">
-                      <button id="saveHoldRemarkBtn" style="background:#007bff; color:#fff; border:none; border-radius:20px; padding:6px 18px; font-size:15px; cursor:pointer;">Save</button>
-                    </div>
-                    <div id="holdRemarkError" style="color:red; font-size:13px; min-height:18px; margin-top:6px;"></div>
+                  <!-- Hidden input field - completely invisible to users -->
+                  <input id="trayValidateInput" type="text" placeholder="Enter validation info..." style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" />
+
+                  <img
+                      src="{% static 'assets/icons/redo2.png' %}"
+                      alt="Redo"
+                      id="trayScanRedoBtn"
+                      style="width: 24px; height: 24px; cursor: pointer; margin-left: 8px;"
+                      title="Clear Tray IDs"
+                  />
+                </div>
+                
+                <!-- Error message container - initially hidden -->
+                <div id="trayErrorMessage" style="display: none; background-color: #ffebee; border: 1px solid #f44336; color: #c62828; padding: 8px 12px; border-radius: 4px; margin-bottom: 10px; font-size: 14px; text-align: center;">
+                  <span id="trayErrorText"></span>
+                </div>
+                
+                <!-- trayScanDetails_DayPlanning will be a scrollable 3-column grid with headers and unlimited rows -->
+                <div id="trayScanDetails_DayPlanning" class="table-grid">
+                  <!-- Headers -->
+                  <div>S.no</div>
+                  <div>Tray ID</div>
+                  <div>Tray Quantity</div>
+                  <div class="tray-validation-status-header">Tray Validation Status
+                    <span style="margin-left: 10px;">
+            <img src="{% static 'assets/icons/fail.png' %}" alt="Cross" title="Fail" style="width:18px; height:18px; margin-right:6px; vertical-align:middle;" />
+            <img src="{% static 'assets/icons/pass.png' %}" alt="Pass" title="Pass" style="width:18px; height:18px; vertical-align:middle;" />
+            </span>
                   </div>
+                  <!-- Example rows (replace with dynamic content) -->
+                </div>
+                <!-- No buttons for read-only modal -->
               </div>
-              </div>
+            </div>
+                        <!-- End of Tray Scan Modal Window -->
 
-              <!-- Pagination Section -->
-              <div class="pagination-wrapper">
-                <nav aria-label="Page navigation">
-                                  <ul class="pagination justify-content-end mb-0">
-                    {# Previous button #}
-                    {% if page_obj.has_previous %}
-                      <li>
-                        <a href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
-                          <span aria-hidden="true"><i class="fa fa-chevron-left"></i></span>
-                        </a>
-                      </li>
-                    {% else %}
-                      <li class="disabled">
+            </div> 
+
+                    <div id="holdRemarkModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.18); z-index:20000; align-items:center; justify-content:center;">
+            <div style="background:#fff; border-radius:10px; padding:28px 32px 18px 32px; min-width:320px; max-width:90vw; box-shadow:0 4px 24px rgba(0,0,0,0.18); position:relative;">
+              <span id="closeHoldRemarkModal" style="position:absolute; top:8px; right:16px; font-size:22px; font-weight:bold; color:#d9534f; cursor:pointer;">&times;</span>
+              <h5 style="margin-bottom:16px; color:#028084;">Row Hold Remark</h5>
+              <textarea id="holdRemarkInput" maxlength="50" style="width:100%; height:60px; border:1px solid #ccc; border-radius:6px; padding:8px; font-size:15px; resize:none;" placeholder="Enter remark (max 50 chars)"></textarea>
+              <div style="text-align:right; margin-top:10px;">
+                <button id="saveHoldRemarkBtn" style="background:#007bff; color:#fff; border:none; border-radius:20px; padding:6px 18px; font-size:15px; cursor:pointer;">Save</button>
+              </div>
+              <div id="holdRemarkError" style="color:red; font-size:13px; min-height:18px; margin-top:6px;"></div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+
+            <!-- Pagination Section -->
+
+ <div class="pagination-wrapper">
+              <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-end mb-0">
+                  {# Previous button #}
+                  {% if page_obj.has_previous %}
+                    <li>
+                      <a href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
                         <span aria-hidden="true"><i class="fa fa-chevron-left"></i></span>
-                      </li>
+                      </a>
+                    </li>
+                  {% else %}
+                    <li class="disabled">
+                      <span aria-hidden="true"><i class="fa fa-chevron-left"></i></span>
+                    </li>
+                  {% endif %}
+                
+                  {# Always show first page #}
+                  {% if page_obj.number > 3 %}
+                    <li><a href="?page=1">1</a></li>
+                    {% if page_obj.number > 4 %}
+                      <li class="disabled"><span>…</span></li>
                     {% endif %}
-                  
-                    {# Always show first page #}
-                    {% if page_obj.number > 3 %}
-                      <li><a href="?page=1">1</a></li>
-                      {% if page_obj.number > 4 %}
-                        <li class="disabled"><span>…</span></li>
+                  {% endif %}
+                
+                  {# Show pages around current page #}
+                  {% for num in page_obj.paginator.page_range %}
+                    {% if num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+                      {% if num == page_obj.number %}
+                        <li class="active"><span>{{ num }}</span></li>
+                      {% else %}
+                        <li><a href="?page={{ num }}">{{ num }}</a></li>
                       {% endif %}
                     {% endif %}
-                  
-                    {# Show pages around current page #}
-                    {% for num in page_obj.paginator.page_range %}
-                      {% if num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
-                        {% if num == page_obj.number %}
-                          <li class="active"><span>{{ num }}</span></li>
-                        {% else %}
-                          <li><a href="?page={{ num }}">{{ num }}</a></li>
-                        {% endif %}
-                      {% endif %}
-                    {% endfor %}
-                  
-                    {# Show ellipsis and last page if needed #}
-                    {% if page_obj.number < page_obj.paginator.num_pages|add:'-2' %}
-                      {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
-                        <li class="disabled"><span>…</span></li>
-                      {% endif %}
-                      <li><a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a></li>
+                  {% endfor %}
+                
+                  {# Show ellipsis and last page if needed #}
+                  {% if page_obj.number < page_obj.paginator.num_pages|add:'-2' %}
+                    {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                      <li class="disabled"><span>…</span></li>
                     {% endif %}
-                  
-                    {# Next button #}
-                    {% if page_obj.has_next %}
-                      <li>
-                        <a href="?page={{ page_obj.next_page_number }}" aria-label="Next">
-                          <span aria-hidden="true"><i class="fa fa-chevron-right"></i></span>
-                        </a>
-                      </li>
-                    {% else %}
-                      <li class="disabled">
+                    <li><a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a></li>
+                  {% endif %}
+                
+                  {# Next button #}
+                  {% if page_obj.has_next %}
+                    <li>
+                      <a href="?page={{ page_obj.next_page_number }}" aria-label="Next">
                         <span aria-hidden="true"><i class="fa fa-chevron-right"></i></span>
-                      </li>
-                    {% endif %}
-                  </ul>
-                </nav>
-              </div>
+                      </a>
+                    </li>
+                  {% else %}
+                    <li class="disabled">
+                      <span aria-hidden="true"><i class="fa fa-chevron-right"></i></span>
+                    </li>
+                  {% endif %}
+                </ul>
+              </nav>
+            </div>
           </div>
         </div>
       </div>
@@ -4237,7 +4254,9 @@ console.log('✅ Enhanced tray scan modal with dynamic row management loaded');
 
 console.log('🌐 Cross-Browser Tray Modal Auto-Save system loaded');
 </script>
- 
+
+    
+
 <!-- Active row to be highlighted & Restores the highlighted row to its original position and removes the highlight bg when the tray scan modal is closed. -->
 <script nonce="{{ csp_nonce }}">
 // Row highlight for Tray Scan (matches highlightWF.html logic) + Move active row to top and restore on close
@@ -4459,7 +4478,7 @@ document.addEventListener("DOMContentLoaded", function () {
           // Show and update the remark icon
           if (icon) {
             icon.style.display = 'inline-block';
-            icon.innerHTML = `<img src="{% static 'assets/icons/view2.png' %}" alt="Remark" style="width:18px; height:18px;" />`;
+            icon.innerHTML = `<img src="{% static 'assets/icons/view2.png' %}" alt="Remark" style="width:12px; height:12px;" />`;
             icon.setAttribute('title', 'Holding Reason: ' + remark);          }
         } else {
           // Unhold the row
@@ -4595,68 +4614,12 @@ document.addEventListener("DOMContentLoaded", function () {
 document.addEventListener("DOMContentLoaded", function () {
   let openTooltip = null;
 
-  // 👉 Directly add a second button next to the red "Close" button
-  const redCloseButtons = document.querySelectorAll("button");
-
-  redCloseButtons.forEach(function (btn) {
-    if (
-      btn.textContent.trim().toLowerCase() === "close" &&
-      !btn.classList.contains("second-button-added")
-    ) {
-      // ✅ Create new blue button
-      const blueBtn = document.createElement("button");
-      blueBtn.textContent = "Info"; // ➕ New button text
-      blueBtn.style.cssText =
-        "margin-left: 10px; color: white; background-color: blue; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;";
-      
-      // ✅ Insert next to red Close button
-      btn.insertAdjacentElement("afterend", blueBtn);
-      btn.classList.add("second-button-added");
-    }
-  });
-
-  // 👉 Add Info and Close buttons inside tooltip window
-  document.querySelectorAll(".model-image-tooltip").forEach(function (tooltip) {
-    // Only add if not already present
-    if (!tooltip.querySelector(".info-btn")) {
-      const infoBtn = document.createElement("button");
-      infoBtn.className = "info-btn";
-      infoBtn.textContent = "Info";
-      infoBtn.style.cssText =
-        "position: absolute; top: 32px; left: 32px; background: #007bff; color: #fff; border: none; border-radius: 8px; padding: 10px 24px; font-size: 18px; cursor: pointer; z-index: 100001;";
-      infoBtn.addEventListener("click", function () {
-        alert("Info button clicked!");
-      });
-      tooltip.appendChild(infoBtn);
-    }
-        
-    if (!tooltip.querySelector(".close-btn")) {
-      const closeBtn = document.createElement("button");
-      closeBtn.className = "close-btn";
-      closeBtn.textContent = "Close";
-      closeBtn.style.cssText =
-        "position: absolute; top: 32px; right: 32px; background: #dc3545; color: #fff; border: none; border-radius: 8px; padding: 10px 24px; font-size: 18px; cursor: pointer; z-index: 100001;";
-      closeBtn.addEventListener("click", function () {
-        tooltip.style.display = "none";
-        tooltip.classList.remove("pinned");
-        tooltip.setAttribute("data-force-closed", "true");
-        openTooltip = null;
-        // Also close the modal popup if present
-        var modal = document.getElementById("trayScanModal");
-        if (modal && modal.classList.contains("open")) {
-          modal.classList.remove("open");
-        }
-      });
-      tooltip.appendChild(closeBtn);
-    }
-  });
-
   // Tooltip show/hide logic
   document.querySelectorAll(".model-hover-trigger").forEach(function (trigger) {
     const tooltip = trigger.querySelector(".model-image-tooltip");
 
     trigger.addEventListener("mouseenter", function () {
-      if (tooltip && tooltip.getAttribute("data-force-closed") !== "true") tooltip.style.display = "block";
+      if (tooltip) tooltip.style.display = "block";
     });
 
     trigger.addEventListener("mouseleave", function () {
@@ -4668,7 +4631,7 @@ document.addEventListener("DOMContentLoaded", function () {
     trigger.addEventListener("click", function (e) {
       e.stopPropagation();
 
-      if (tooltip && tooltip.getAttribute("data-force-closed") !== "true") {
+      if (tooltip) {
         document.querySelectorAll(".model-image-tooltip.pinned").forEach((tt) => {
           tt.classList.remove("pinned");
           tt.style.display = "none";
@@ -4696,103 +4659,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 </script>
-
-
-<!-- Plating Stk - Image hover - Added Close & Info button -->
-<!-- <script nonce="{{ csp_nonce }}">
-document.addEventListener("DOMContentLoaded", function () {
-  // Step 1: Show hover section when clicking on "Plating Stk No"
-  document.querySelectorAll(".model-hover-trigger").forEach(function (trigger) {
-    trigger.addEventListener("click", function () {
-      const tooltip = trigger.querySelector(".model-image-tooltip");
-      if (tooltip) {
-        tooltip.style.opacity = "1";
-        tooltip.style.pointerEvents = "auto";
-        tooltip.style.display = "flex";
-      }
-    });
-  });
-
-  // Step 2: Open clicked image in a modal for larger view
-  document.querySelectorAll(".model-image-tooltip img").forEach(function (img) {
-    img.addEventListener("click", function (event) {
-      event.stopPropagation(); // Prevent triggering parent click events
-
-      // Dynamically create a modal for viewing the clicked image
-      const modal = document.createElement("div");
-      modal.style.position = "fixed";
-      modal.style.top = "0";
-      modal.style.left = "0";
-      modal.style.width = "100vw";
-      modal.style.height = "100vh";
-      modal.style.background = "rgba(0, 0, 0, 0.8)";
-      modal.style.display = "flex";
-      modal.style.alignItems = "center";
-      modal.style.justifyContent = "center";
-      modal.style.zIndex = "10000";
-
-      // Add the clicked image to the modal
-      const largeImg = document.createElement("img");
-      largeImg.src = img.src; // Use the clicked image's source
-      largeImg.style.maxWidth = "90%";
-      largeImg.style.maxHeight = "90%";
-      largeImg.style.borderRadius = "8px";
-      modal.appendChild(largeImg);
-
-      // Add a close button
-      const closeBtn = document.createElement("button");
-      closeBtn.textContent = "Close";
-      closeBtn.style.position = "absolute";
-      closeBtn.style.top = "20px";
-      closeBtn.style.right = "20px";
-      closeBtn.style.padding = "10px 20px";
-      closeBtn.style.background = "#dc3545";
-      closeBtn.style.color = "#fff";
-      closeBtn.style.border = "none";
-      closeBtn.style.borderRadius = "4px";
-      closeBtn.style.cursor = "pointer";
-      closeBtn.style.fontSize = "16px";
-      closeBtn.addEventListener("click", function () {
-        modal.remove();
-      });
-      modal.appendChild(closeBtn);
-
-      // Add Info button next to Close
-const infoBtn = document.createElement("button");
-infoBtn.textContent = "Info";
-infoBtn.style.position = "absolute";
-infoBtn.style.top = "20px";
-infoBtn.style.right = "120px"; // Place it left of Close
-infoBtn.style.padding = "10px 20px";
-infoBtn.style.background = "#007bff";
-infoBtn.style.color = "#fff";
-infoBtn.style.border = "none";
-infoBtn.style.borderRadius = "4px";
-infoBtn.style.cursor = "pointer";
-infoBtn.style.fontSize = "16px";
-infoBtn.addEventListener("click", function () {
-  alert("Info button clicked!");
-});
-modal.appendChild(infoBtn);
-
-      // Append the modal to the body
-      document.body.appendChild(modal);
-    });
-  });
-
-  // Step 3: Hide hover section when clicking outside
-  document.addEventListener("click", function (event) {
-    document.querySelectorAll(".model-image-tooltip").forEach(function (tooltip) {
-      if (!tooltip.contains(event.target)) {
-        tooltip.style.opacity = "0";
-        tooltip.style.pointerEvents = "none";
-        tooltip.style.display = "none";
-      }
-    });
-  });
-});
-</script> -->
-
 
 <!-- Script for restrict multiple actions when any modal is open -->
 <script nonce="{{ csp_nonce }}">
@@ -4898,5 +4764,5 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
-{% endblock %} {% endblock content %}
+  {% endblock %} {% endblock content %}
 </div>
