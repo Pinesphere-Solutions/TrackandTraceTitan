@@ -45,9 +45,7 @@ urlpatterns = [
     path('visualaid/', TemplateView.as_view(template_name="VisualAid.html"), name='VisualAid'),
     path('recovery_dp/',include('Recovery_DP.urls')),
     
- 
-    
-    path('dayplanning/', include('DayPlanning.urls')),
+
 
 
 

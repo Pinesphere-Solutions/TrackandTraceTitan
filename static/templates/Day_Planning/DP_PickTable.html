@@ -134,13 +134,13 @@
 </td>
 
     <!-- Last Updated Column -->
-    <td
+     <td
       {% if data.hold_lot %}
         class="row-inactive-blur"
       {% endif %}
     >
       {{ data.date_time|date:"d-M-y" }}<br>
-      <span style="display:inline-block; margin-top:4px;">{{ data.date_time|date:"H:i" }}</span>
+      <span style="display:inline-block; margin-top:4px;">{{ data.date_time|date:"h:i A"  }}</span>
     </td>
 
     <!-- Plating Stk No Column -->
@@ -148,8 +148,7 @@
   <span class="model-hover-trigger" style="cursor: pointer; word-break: break-all;">
     {{ data.plating_stk_no|highlight_plating_color|safe_html }}
 
-    
- <div class="model-image-tooltip"
+    <div class="model-image-tooltip"
          style="position: absolute; left: 238%; top: 0%; transform: translateX(-50%); background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 18px; z-index: 10010; display: flex; align-items: center; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s;">          
           <!-- Platign Stk No - Hover - Info & close btn -->
         <button class="close-btn" style="position:absolute; top:8px; right:8px;">Close</button>
@@ -162,7 +161,6 @@
       </div>
       <button class="img-scroll-right" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#8594;</button>
     </div>
-
   </span>
 </td>
 
@@ -355,13 +353,13 @@
     <div
       class="d-inline-block px-3 fw-semibold text-center rounded-pill"
       style="
-        border: 2px solid #dc3545;
+        border: 1px solid #dc3545;
         background-color: #f8d7da;
         color: #721c24;
-        font-size: clamp(0.75rem, 2vw, 0.875rem);
+        font-size: 13px;
         white-space: nowrap;
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
+        padding: 5px;
+        
       "
     >
       On Hold
@@ -371,13 +369,13 @@
     <div
       class="d-inline-block px-3 fw-semibold text-center rounded-pill"
       style="
-        border: 2px solid #0d5d17;
+        border: 1px solid #0d5d17;
         background-color: #c5f9c2;
         color: #2f801b;
-        font-size: clamp(0.75rem, 2vw, 0.875rem);
+        font-size: 13px;
         white-space: nowrap;
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
+        padding: 5px;
+        
       "
     >
       Yet To Release
@@ -387,13 +385,13 @@
     <div
       class="d-inline-block px-3 fw-semibold text-center rounded-pill"
       style="
-        border: 2px solid #4997ac;
+        border: 1px solid #4997ac;
         background-color: #d1f2f3;
         color: #03425d;
-        font-size: clamp(0.75rem, 2vw, 0.875rem);
+        font-size: 13px;
         white-space: nowrap;
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
+        padding: 5px;
+        
       "
     >
       Draft
@@ -2784,13 +2782,13 @@ function updateRowAfterTrayScan(batchId, needsTopTrayScan = true, isDraft = true
                 <div
                   class="d-inline-block px-3 fw-semibold text-center rounded-pill"
                   style="
-                    border: 2px solid #4997ac;
+                    border: 1px solid #4997ac;
                     background-color: #d1f2f3;
                     color: #03425d;
-                    font-size: clamp(0.75rem, 2vw, 0.875rem);
+                    font-size: 13px;
                     white-space: nowrap;
-                    padding-top: 0.5rem;
-                    padding-bottom: 0.5rem;
+                    padding: 5px;
+                    
                   "
                 >
                   Draft
@@ -2876,13 +2874,13 @@ function updateRowAfterTopTrayScan(batchId) {
             <div
               class="d-inline-block px-3 fw-semibold text-center rounded-pill"
               style="
-                border: 2px solid #0d5d17;
+                border: 1px solid #0d5d17;
                 background-color: #c5f9c2;
                 color: #2f801b;
-                font-size: clamp(0.75rem, 2vw, 0.875rem);
+                font-size: 13px;
                 white-space: nowrap;
-                padding-top: 0.5rem;
-                padding-bottom: 0.5rem;
+                padding: 5px;
+                
               "
             >
               Yet To Release
@@ -4019,7 +4017,7 @@ trayScanLinks.forEach((link) => {
             }
             
             const topTrayScanHTML = `
-                <div id="topTrayScanSection" style="margin-top: 20px; padding: 20px; border: 2px solid #28a745; border-radius: 8px; background: #f0fff4;">
+                <div id="topTrayScanSection" style="margin-top: 20px; padding: 20px; border: 1px solid #28a745; border-radius: 8px; background: #f0fff4;">
                     <h6 style="color: #28a745; font-weight: 600; margin-bottom: 15px; text-align: center;">
                         🔝 Top Tray Scan Required
                     </h6>
@@ -4031,7 +4029,7 @@ trayScanLinks.forEach((link) => {
                             type="text" 
                             id="topTrayIdInput" 
                             placeholder="Scan or enter top tray ID..." 
-                            style="width: 250px; padding: 10px; border: 2px solid #28a745; border-radius: 4px; font-size: 14px; text-align: center;"
+                            style="width: 250px; padding: 10px; border: 1px solid #28a745; border-radius: 4px; font-size: 14px; text-align: center;"
                         />
                         <button 
                             id="topTrayScanBtn" 

@@ -1,5 +1,13 @@
 /* Common styles */
-
+/* Make the first column sticky and opaque */
+#order-listing td:first-child,
+#order-listing th:first-child {
+  position: sticky;
+  left: 0;
+  background: #fff;      /* Or match your table background */
+  z-index: 2;            /* Above blurred rows */
+  box-shadow: 2px 0 4px rgba(0,0,0,0.03); /* Optional: subtle shadow */
+}
 
 
 
@@ -174,9 +182,10 @@ h5.text-left.mt-0.mb-3 {
   box-sizing: border-box;
 }
 .tray-scan-modal-content {
-  max-height: 80vh !important;
-  overflow-y: auto !important;
-  box-sizing: border-box;
+    max-height: 80vh !important;
+    /* overflow: auto !important; */
+    box-sizing: border-box;
+    padding: 28px !important;
 }
 @media (max-width: 600px) {
   .tray-scan-modal.open,
@@ -502,9 +511,11 @@ td:first-child * {
   pointer-events: auto !important;
   color: inherit !important;
 }
+/* Make S.No cell always have a solid background when row is on hold */
 .row-inactive td:first-child {
-  background: none !important;
-  background-color: transparent !important;
+  background: #f7fafd !important;   /* Match your sticky column bg */
+  background-color: #f7fafd !important;
+  z-index: 9 !important;
 }
 .row-inactive,
 .row-inactive td {
@@ -1332,10 +1343,6 @@ h6 {
   right: 0; /* Slide in */
 }
 
-.tray-scan-modal-content {
-  position: relative;
-  height: 100%;
-}
 
 .tray-scan-close {
   position: absolute;
@@ -1346,9 +1353,11 @@ h6 {
   cursor: pointer;
   color: #d9534f;
 }
+/* style for hol/unhold row - blurred bg */
 #order-listing tr:last-child td {
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
+  background: #f4f3f3 !important;
 }
 /* Gird line color combination */
 #order-listing th,
@@ -1498,8 +1507,8 @@ thead th {
   left: 175px; /* 100px (1st) + 90px (2nd) */
   z-index: 12;
   background: #f7fafd;
-  min-width: 100px !important; /* Increased width */
-  max-width: 110px !important; /* Increased width */
+  min-width: 130px !important; /* Increased width 100 - old value*/
+  max-width: 130px !important; /* Increased width  110 - old value*/
 }
 
 /* ...existing code... */
@@ -2674,12 +2683,6 @@ thead th {
   text-align: center;
 }
 
-/* Increase the width of the new-popup-modal when open */
-.new-popup-modal.open {
-  width: 500px; /* Set the desired width */
-  right: 0; /* Ensure it slides in from the right */
-  transition: width 0.3s ease, right 0.3s ease; /* Smooth transition */
-}
 
 /* Style for toggle switch and whole row inactive */
 @media (max-width: 426px) {
@@ -2706,9 +2709,11 @@ td:first-child * {
   background-color: #ededed !important;
 }
 
+/* Make S.No cell always have a solid background when row is on hold */
 .row-inactive td:first-child {
-  background: none !important;
-  background-color: transparent !important;
+  background: #f7fafd !important;   /* Match your sticky column bg */
+  background-color: #f7fafd !important;
+  z-index: 9 !important;
 }
 
 .row-inactive-blur {
@@ -2977,6 +2982,10 @@ html {
 .new-popup-modal.open {
   display: block;
   animation: slideInFromRight 0.3s;
+  left: 270px;
+  max-height: 500px !important;
+  margin-top: 0 !important;
+  border-radius: 15px;
 }
 @keyframes slideInFromRight {
   from { transform: translateX(100%); opacity: 0; }

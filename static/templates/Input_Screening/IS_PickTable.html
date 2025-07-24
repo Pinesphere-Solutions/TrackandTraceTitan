@@ -606,23 +606,7 @@
                       padding-bottom: 10px;
                     "
                   >
-                    <div
-                      class="user-profile"
-                      style="display: flex; align-items: center; gap: 8px"
-                    >
-                      <img
-                        src="{% static 'assets/images/imagePlaceholder.png' %}"
-                        alt="User Profile"
-                        style="
-                          border-radius: 50%;
-                          width: 50px;
-                          height: 50px;
-                          object-fit: cover;
-                        "
-                      />
-                      <span>Model No:</span>
-                      <h6>(Fetch Dynamically) / Accepted Tray Rescan</h6>
-                    </div>
+                    
                   </div>
 
 
@@ -2526,7 +2510,7 @@ function showRejectionModalFlow(batchId, stockLotId, isOnProceed, row) {
         detailsDiv.innerHTML = `
           ${draftAlert}
           <div class="d-flex justify-content-between align-items-center mb-2" style="padding: 10px 0;">
-            <h6 class="mb-0">Rejection Reason List${draftIndicator}</h6>
+            <h4 class="mb-0">Rejection Reason List${draftIndicator}</h4>
             
             <div class="form-check d-flex align-items-center">
                 <input class="form-check-input" type="checkbox" id="batchRejection" 
@@ -2536,45 +2520,44 @@ function showRejectionModalFlow(batchId, stockLotId, isOnProceed, row) {
           </div>
          
           <!-- ✅ UPDATED: Rejection form with dynamic tray ID generation -->
-<div class="table-responsive" style="border: 1px solid black; max-width: 650px; margin: 0 auto;">
-  <table class="table table-bordered text-center" style="width:100%; margin-bottom:0; border-collapse: collapse; font-size: 13px;">
-        <thead style="background-color: ${headerColor}; color: #000;">
-      <tr>
-        <th style="padding: 8px; border: 1px solid #000;">S.No</th>
-        <th style="padding: 8px; border: 1px solid #000;">Reason ID</th>
-        <th style="padding: 8px; border: 1px solid #000;">Rejection Reason</th>
-        <th style="padding: 8px; border: 1px solid #000;">Quantity</th>
-        <th style="padding: 8px; min-width: 120px; border: 1px solid #000;">Tray ID(s)</th>
+<div class="table-responsive" style="border: solid 1px black;">
+  <table class="table table-bordered text-center" style="border: solid 1px black; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    <thead style="border: solid 2px black; background-color: ${headerColor}; color: #000;">
+      <tr style="border: solid 1px black; color: #000;">
+        <th style="padding: 12px;">S.No</th>
+        <th style="padding: 12px;">Reason ID</th>
+        <th style="padding: 12px;">Rejection Reason</th>
+        <th style="padding: 12px;">Quantity</th>
+        <th style="padding: 12px; min-width: 180px;">Tray ID(s)</th> 
       </tr>
     </thead>
-        <tbody id="rejection-table-body">
+    <tbody id="rejection-table-body">
       {% for reason in ip_rejection_reasons %}
-      <tr data-batch-id="${batchId}" data-stock-lot-id="${stockLotId}" style="border-bottom: 1.5px solid #000;">
-        <td style="border: 1px solid #000;">{{ forloop.counter }}</td>
-        <td style="color: {{ reason.row_color }};border: 1px solid #000;">{{ reason.rejection_reason_id }}</td>
-        <td style="color: {{ reason.row_color }};border: 1px solid #000;">{{ reason.rejection_reason }}</td>
-        <td style="border: 1px solid #000;">
+      <tr data-batch-id="${batchId}" data-stock-lot-id="${stockLotId}">
+        <td>{{ forloop.counter }}</td>
+        <td style="color: {{ reason.row_color }};">{{ reason.rejection_reason_id }}</td>
+        <td style="color: {{ reason.row_color }};">{{ reason.rejection_reason }}</td>
+        <td>
           <input type="number" 
                  min="0" 
                  class="form-control rejection-qty-input" 
                  name="quantity_{{ forloop.counter }}" 
-                 style="width: 60px; ${inputStyle}" 
+                 style="width: 80px; ${inputStyle}" 
                  data-reason-id="{{ reason.rejection_reason_id }}"
                  value="" />
         </td>
-        <td style="border: 1px solid #000; vertical-align: top; padding: 6px 4px; min-width: 120px; max-width: 140px;">
+        <td style="vertical-align: top; padding: 8px 6px; min-width: 180px; max-width: 200px;">
           <!-- ✅ NEW: Dynamic tray ID container will be populated by JavaScript -->
           <span style="color: #999; font-style: italic;">Enter quantity first</span>
         </td>
       </tr>
       {% endfor %}
-      <tr style="border: 1px solid #000;">
+      <tr>
         <td colspan="4" style="text-align: right; font-weight: bold;">Total Qty</td>
         <td id="rejection-total-qty" style="font-weight: bold;">0</td>
       </tr>
     </tbody>
   </table>
-</div>
 </div>
 
           
@@ -2615,10 +2598,11 @@ function showRejectionModalFlow(batchId, stockLotId, isOnProceed, row) {
 
 
       
-      // ✅ NEW: Load draft data into form
-      // ✅ UPDATED: Load draft data into form (EXCLUDE SHORTAGE from tray scan)
+// ✅ FIXED: Load draft data into form with proper timing
 function loadDraftDataIntoForm(draftData) {
-  // Load rejection quantities
+  console.log('Loading draft data:', draftData);
+  
+  // Load rejection quantities first
   if (draftData.rejection_data) {
     draftData.rejection_data.forEach(item => {
       const input = document.querySelector(`input[data-reason-id="${item.reason_id}"]`);
@@ -2627,23 +2611,77 @@ function loadDraftDataIntoForm(draftData) {
         input.style.backgroundColor = '#fff3cd';
         input.style.borderColor = '#f39c12';
         input.style.borderWidth = '2px';
-      }
-    });
-    
-    // Update total
-    const totalQty = draftData.total_rejection_qty || 0;
-    document.getElementById('rejection-total-qty').textContent = totalQty;
-    
-    // ✅ UPDATED: Calculate non-SHORTAGE quantity for tray scan
-    let nonShortageQty = 0;
-    draftData.rejection_data.forEach(item => {
-      // Only count non-SHORTAGE quantities for tray scan
-      if (item.reason && item.reason.toUpperCase() !== 'SHORTAGE') {
-        nonShortageQuantity += parseInt(item.qty) || 0;
+        // Trigger input event to generate tray ID fields
+        input.dispatchEvent(new Event('input'));
       }
     });
 
+    // Update total
+    const totalQty = draftData.total_rejection_qty || 0;
+    document.getElementById('rejection-total-qty').textContent = totalQty;
   }
+
+  // ✅ FIXED: Wait for tray inputs to be generated, then load tray IDs
+  setTimeout(() => {
+    if (draftData.tray_scans && draftData.tray_scans.length > 0) {
+      console.log('Loading tray scans:', draftData.tray_scans);
+      
+      draftData.tray_scans.forEach(scan => {
+        console.log('Processing scan:', scan);
+        
+        // Find the row for this reason
+        const qtyInput = document.querySelector(`input[data-reason-id="${scan.reason_id}"]`);
+        if (qtyInput) {
+          const row = qtyInput.closest('tr');
+          const trayIdCell = row.querySelector('td:last-child');
+          
+          if (trayIdCell) {
+            const trayInputs = trayIdCell.querySelectorAll('.rejection-tray-id-input');
+            console.log(`Found ${trayInputs.length} tray inputs for reason ${scan.reason_id}`);
+            
+            if (trayInputs.length > 0) {
+              // ✅ FIXED: For single tray input, use the first one
+              if (trayInputs.length === 1) {
+                trayInputs[0].value = scan.tray_id;
+                console.log(`Set tray ID ${scan.tray_id} to first input`);
+              } else {
+                // ✅ FIXED: For multiple inputs, find the right one based on quantity
+                let trayQtyAssigned = 0;
+                let targetInputIndex = 0;
+                
+                for (let i = 0; i < trayInputs.length; i++) {
+                  const inputTrayQty = parseInt(trayInputs[i].getAttribute('data-tray-qty')) || 0;
+                  if (trayQtyAssigned + inputTrayQty >= scan.tray_qty) {
+                    targetInputIndex = i;
+                    break;
+                  }
+                  trayQtyAssigned += inputTrayQty;
+                }
+                
+                if (trayInputs[targetInputIndex]) {
+                  trayInputs[targetInputIndex].value = scan.tray_id;
+                  console.log(`Set tray ID ${scan.tray_id} to input ${targetInputIndex}`);
+                }
+              }
+              
+              // ✅ Update styling for loaded tray inputs
+              trayInputs.forEach(input => {
+                if (input.value.trim()) {
+                  input.style.backgroundColor = '#fff3cd';
+                  input.style.borderColor = '#f39c12';
+                  input.style.borderWidth = '2px';
+                }
+              });
+            } else {
+              console.log('No tray inputs found for reason:', scan.reason_id);
+            }
+          }
+        } else {
+          console.log('No quantity input found for reason:', scan.reason_id);
+        }
+      });
+    }
+  }, 500); // ✅ Wait 500ms for tray inputs to be generated
 
   // Load batch rejection state
   if (draftData.is_batch_rejection) {
@@ -2659,7 +2697,7 @@ function loadDraftDataIntoForm(draftData) {
 }
 
 
-      // ✅ UPDATED: Function to add event listeners WITH draft functionality
+// ✅ UPDATED: Function to add event listeners WITH draft functionality
       function addEditableFormEventListeners(row, batchId, stockLotId) {
         // Get tray capacity from the row data
         const trayCapacity = parseInt(row.getAttribute('data-tray-capacity')) || 10;
@@ -2880,7 +2918,7 @@ function generateDynamicTrayIdInputs(row, quantity, trayIdCell) {
   trayIdContainer.className = 'tray-id-container';
   trayIdContainer.style.cssText = `
     display: flex; flex-direction: column; gap: 6px; padding: 8px;
-    background-color: #f8f9fa; border: 1px solid #007bff; border-radius: 8px;
+    background-color: #f8f9fa; border: 2px solid #007bff; border-radius: 8px;
   `;
   
   // Add header for tray container
@@ -2919,7 +2957,7 @@ function generateDynamicTrayIdInputs(row, quantity, trayIdCell) {
     trayInput.className = 'form-control rejection-tray-id-input';
     trayInput.style.cssText = `
       flex: 1; font-size: 12px; padding: 6px 10px;
-      border: 1px solid #ced4da; border-radius: 6px;
+      border: 2px solid #ced4da; border-radius: 6px;
       transition: all 0.2s ease; text-align: center; font-weight: 500;
     `;
     trayInput.placeholder = `Scan Tray ID ${i + 1}`;
@@ -3161,8 +3199,16 @@ function addMultipleTrayIdValidationWithDynamic(trayIdCell) {
             if (data.exists && data.valid_for_rejection) {
               this._hasError = false;
               
-              let successMessage = `✅ ${data.status_message}`;
-              
+              // Show available tray quantities and tray count if present
+              let availableMsg = '';
+              if (Array.isArray(data.available_quantities)) {
+                availableMsg = `<br><span style="color:#007bff;font-weight:normal;font-size:11px;">
+                </span>`;
+              }
+
+              let successMessage = `✅ ${data.status_message}${availableMsg}`;
+
+                          
               errorSpan.innerHTML = successMessage;
               errorSpan.style.display = 'block';
               errorSpan.style.color = '#155724';
@@ -3304,21 +3350,7 @@ function collectCurrentSessionAllocationsWithNewTrayTracking(excludeInput) {
                 
 // ✅ NEW: Helper function to identify NEW tray IDs (frontend version)
 function isNewTrayId(trayId) {
-  if (!trayId) return false;
-  
-  // Simple heuristic: Check tray number pattern
-  // Example: JB-A00031 (new) vs JB-A00001-JB-A00010 (existing)
-  const trayMatch = trayId.match(/(\d+)$/);
-  if (trayMatch) {
-    const trayNumber = parseInt(trayMatch[1]);
-    // Numbers > 30 are likely new trays (adjust based on your system)
-    if (trayNumber > 30) {
-      console.log(`[isNewTrayId] ${trayId} appears to be NEW tray (number=${trayNumber})`);
-      return true;
-    }
-  }
-  
-  console.log(`[isNewTrayId] ${trayId} appears to be EXISTING tray`);
+  // Always return false; let backend decide if a tray is "new"
   return false;
 }
 
@@ -3430,7 +3462,7 @@ function isNewTrayId(trayId) {
             // Close modal and refresh 
             setTimeout(() => {
               document.getElementById("trayScanModal").classList.remove("open");
-              refreshTableData();
+              window.location.reload();
 
             }, 1500);
           } else {
@@ -3802,8 +3834,8 @@ function handleTrayWiseRejectionWithFormData(batchId, stockLotId, formData) {
         if (lotStatusCell) {
           lotStatusCell.innerHTML = `
             <div class="d-inline-block px-3 fw-semibold text-center rounded-pill"
-              style="border: 1px solid #4997ac; background-color: #d1f2f3; color: #03425d;
-              font-size: 12px; white-space: nowrap;
+              style="border: 2px solid #4997ac; background-color: #d1f2f3; color: #03425d;
+              font-size: clamp(0.75rem, 2vw, 0.875rem); white-space: nowrap;
               padding-top: 0.5rem; padding-bottom: 0.5rem;">
               Draft
             </div>
@@ -4167,13 +4199,7 @@ function showAcceptedTrayModal(rescanData, lotId, isDraft) {
 
   // ✅ UPDATED: Use actual backend data
   let html = `
-    <div class="modal-top-header" style="display: flex; align-items: center; gap: 20px; padding-bottom: 10px; margin: 0px !important; border-bottom: 1px solid #ddd;">
-      <div class="user-profile" style="display: flex; align-items: center; gap: 8px">
-        <img src="/static/assets/images/imagePlaceholder.png" alt="User Profile" style="border-radius: 50%; width: 50px; height: 50px; object-fit: cover;" />
-        <span>Model No:</span>
-        <h6>${modelNo} / Accepted Tray Rescan${draftIndicator}</h6>
-      </div>
-    </div>
+
     ${draftAlert}
     
     <!-- Delink Table -->
@@ -4188,11 +4214,11 @@ function showAcceptedTrayModal(rescanData, lotId, isDraft) {
     </div>
 
     <div class="table-responsive" style="margin-bottom: 20px; border: solid 1px black;">
-      <table class="table table-bordered text-center" style="border: solid 2px black; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+      <table class="table table-bordered text-center" style="border: solid 1px black; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
         <thead style="background-color: #007bff; color: #fff;">
           <tr>
-            <th style="padding: 12px;">S.No</th>
-            <th style="padding: 12px;">De-Link Tray ID</th>
+            <th style="padding: 12px; border-bottom: 1px solid #000;color: #000;">S.No</th>
+            <th style="padding: 12px; border-bottom: 1px solid #000;color: #000;">De-Link Tray ID</th>
           </tr>
         </thead>
         <tbody id="delinkTableBody">
@@ -4208,7 +4234,7 @@ function showAcceptedTrayModal(rescanData, lotId, isDraft) {
     
     <!-- ✅ UPDATED: Simplified Top Tray Scan Section - No "Set Top Tray" Button -->
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-      <h5 style="margin: 0; font-weight: 600; color:#595959">
+      <h5 style="margin-top: 10px; font-weight: 600; color:#595959">
         Accepted - Top Tray Scan${isDraft ? ' (Draft Mode)' : ''}
       </h5>
       <div style="display: flex; align-items: center; gap: 15px;">
@@ -4223,14 +4249,14 @@ function showAcceptedTrayModal(rescanData, lotId, isDraft) {
       <i class="fa fa-info-circle"></i> <strong>Top Tray Scan Required</strong><br>
     </div>
     
-    <div style="display: flex; align-items: center; gap: 15px; padding: 15px; border: 1px solid #e0e0e0; border-radius: 8px; background: #f9f9f9;">
+    <div style="display: flex; align-items: center; gap: 15px; padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; background: #f9f9f9;">
       <div style="flex: 1;">
         <label style="font-weight: bold; margin-bottom: 5px; display: block;">Scan or enter top tray ID:</label>
         <input type="text" 
                id="topTrayIdInput" 
                placeholder="Scan Tray ID..." 
                value="${draftTrayId}"
-               style="width: 300px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; ${draftTrayId ? 'background-color: #d4edda; border-color: #28a745;' : ''}" 
+               style="width: 245px; padding: 8px 12px; border: 2px solid #ddd; border-radius: 4px; font-size: 16px; ${draftTrayId ? 'background-color: #d4edda; border-color: #28a745;' : ''}" 
                class="top-tray-id-input" 
                ${(!isDraft && draftTrayId) } />
                <div id="topTrayError" style="color: #dc3545; font-size: 12px; margin-top: 4px; display: none;"></div>
@@ -4346,7 +4372,7 @@ function showAcceptedTrayModal(rescanData, lotId, isDraft) {
                            style="width: 120px;" 
                            data-row="${tray.sno}"
                            data-expected-qty="${tray.tray_quantity}" />
-                    <span class="delink-tray-error" style="color: #d32f2f; font-size: 12px; display: none; margin-left: 4px;"></span>
+                    <span class="delink-tray-error" style="color: #d32f2f; font-size: 12px; margin-left: 4px;"></span>
                   </td>
             
                 `;
@@ -5546,7 +5572,7 @@ function checkForDuplicateTrayId() {
         
         /* Enhanced styling for single top tray scan */
         .top-tray-input-section {
-          border: 1px solid #e0e0e0;
+          border: 2px solid #e0e0e0;
           border-radius: 8px;
           background: #f9f9f9;
           padding: 15px;
@@ -5636,7 +5662,7 @@ function checkForDuplicateTrayId() {
           display: inline-block;
           width: 16px;
           height: 16px;
-          border: 1px solid #f3f3f3;
+          border: 2px solid #f3f3f3;
           border-top: 2px solid #007bff;
           border-radius: 50%;
           animation: spin 1s linear infinite;
@@ -5668,6 +5694,8 @@ function checkForDuplicateTrayId() {
     
     document.head.insertAdjacentHTML('beforeend', draftModeCSS);
   </script>
+
+
 
 
 

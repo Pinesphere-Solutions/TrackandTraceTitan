@@ -398,93 +398,7 @@ footer.footer {
   }
 }
 
-.barcode-modal {
-  display: none;
-  position: fixed;
-  z-index: 1050;
-  right: 0;
-  top: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.3);
-  align-items: flex-start;
-  justify-content: flex-end;
-}
 
-.barcode-modal-content {
-  background: #fff;
-  width: 90vw; /* Increased responsive width */
-  max-width: 600px; /* Increased max width for laptop/desktop */
-  height: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
-
-  margin: 40px 10px 0 20px;
-  padding: 24px 18px;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  position: relative;
-  animation: slideInRight 0.3s;
-
-  padding-top: 44px !important; /* Ensures space for close icon */
-  margin-top: 20px !important; /* Move modal content up */
-}
-.barcode-modal-content::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
-}
-
-@media (min-width: 576px) {
-  .barcode-modal-close {
-    top: 18px;
-    left: 40px;
-  }
-}
-@media (max-width: 575.98px) {
-  .barcode-modal-close {
-    left: 30px;
-    font-size: 1.3rem;
-    top: 10px;
-  }
-}
-@media (max-width: 991.98px) {
-  .barcode-modal-close {
-    left: 32px;
-  }
-}
-@media (max-width: 991.98px) {
-  .barcode-modal-content {
-    border-radius: 30px !important;
-  }
-}
-@media (max-width: 575.98px) {
-  .barcode-modal-content {
-    border-radius: 30px !important;
-  }
-}
-
-@media (max-width: 991.98px) {
-  .barcode-modal-content {
-    margin: 32px auto 0 auto !important; /* Center align and add space at top for tablet */
-    width: 70vw;
-    max-width: 80vw;
-    max-height: 98vh; /* Increased height for tablet */
-    margin: 32px auto 0 auto !important;
-    left: 0;
-    right: 0;
-  }
-}
-@media (max-width: 575.98px) {
-  .barcode-modal-content {
-    margin: 24px auto 0 auto !important; /* Center align and add space at top for mobile */
-    left: 0;
-    width: 100vw;
-    max-width: 100vw;
-    max-height: 100vh; /* Increased height for mobile */
-    margin: 24px auto 0 auto !important;
-    left: 0;
-    right: 0;
-  }
-}
 
 /* Optional spacing between form rows */
 .barcode-modal-content table td,
@@ -499,23 +413,12 @@ footer.footer {
   padding: 4px 8px;
 }
 
-@media (max-width: 576px) {
-  .barcode-modal-content {
-    width: 95vw;
-    margin: 30px auto 0 auto;
-    padding: 16px 12px;
-  }
 
-  .barcode-modal-content input.form-control {
-    height: 30px;
-    font-size: 13px;
-  }
-}
 
 .barcode-modal-close {
   position: absolute;
-  top: -7px;
   left: 18px;
+  padding-top: 25px;
   font-size: 1.5rem;
   color: #888;
   cursor: pointer;
@@ -541,22 +444,8 @@ footer.footer {
   }
 }
 
-@media (max-width: 991.98px) {
-  .barcode-modal-content {
-    max-width: 95vw;
-    padding: 14px 8px 8px 8px; /* ✅ Reduced padding */
-    border-radius: 0;
-  }
-}
 
-@media (max-width: 575.98px) {
-  .barcode-modal-content {
-    max-width: 100vw;
-    padding: 10px 2vw 10px 2vw; /* ✅ Reduced padding */
-    border-radius: 0;
-    min-height: 120px;
-  }
-}
+
 
 @keyframes slideInRight {
   from {
@@ -567,25 +456,8 @@ footer.footer {
   }
 }
 
-/* Responsive fixes */
-@media (max-width: 991.98px) {
-  .barcode-modal-content {
-    max-width: 90vw;
-    min-width: 0;
-    border-radius: 0;
-    margin-top: 0;
-    padding: 18px 8px 8px 8px;
-  }
-}
-@media (max-width: 575.98px) {
-  .barcode-modal-content {
-    max-width: 100vw;
-    min-width: 0;
-    min-height: 120px;
-    border-radius: 0;
-    padding: 12px 2vw 12px 2vw;
-  }
-}
+
+
 
 .barcode-img-preview {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -650,39 +522,17 @@ body {
   overflow: auto;
 }
 
-/* For modal content, allow scrolling if content overflows */
-.barcode-modal-content {
-  overflow: auto;
-  max-width: 100vw;
-  max-height: 100vh;
-}
-@media (max-width: 991.98px) {
-  .barcode-banner-img {
-    max-width: 40vw;
-    height: 120px;
-  }
-  .barcode-modal-content .row.align-items-center {
-    margin-top: -35px !important; /* Move title and close up in tablet */
-  }
-}
 
-@media (max-width: 575.98px) {
-  .barcode-banner-img {
-    max-width: 90vw;
-    height: 80px;
-  }
-  .barcode-modal-content .row.align-items-center {
-    margin-top: -36px !important; /* Move title and close up more on mobile */
-  }
-}
+
+
 .module-highlight.last-module {
   background: #cef7c9;
   color: #128329;
   border: 0.5px solid #128329;
   border-radius: 30px;
   font-weight: 600;
-  font-size: 1rem;
-  padding: 8px 22px;
+  font-size: 13px !important;
+  padding:5px;
   display: inline-block;
   text-align: center;
   letter-spacing: 0.5px;
@@ -694,8 +544,8 @@ body {
   border: 0.5px solid #b34500;
   border-radius: 30px;
   font-weight: 600;
-  font-size: 1rem;
-  padding: 8px 22px;
+  font-size: 13px;
+  padding: 5px;
   display: inline-block;
   text-align: center;
   letter-spacing: 0.5px;
@@ -767,86 +617,13 @@ body {
   justify-content: flex-end;
 }
 
-.barcode-modal-content {
-  background: #fff;
-  width: 90vw; /* Increased responsive width */
-  max-width: 600px; /* Increased max width for laptop/desktop */
-  height: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
-
-  margin: 40px 10px 0 20px;
-  padding: 24px 18px;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  position: relative;
-  animation: slideInRight 0.3s;
-
-  padding-top: 44px !important; /* Ensures space for close icon */
-  margin-top: 20px !important; /* Move modal content up */
-}
-.barcode-modal-content::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
-}
-
-@media (min-width: 576px) {
-  .barcode-modal-close {
-    top: 18px;
-    left: 40px;
-  }
-}
-@media (max-width: 575.98px) {
-  .barcode-modal-close {
-    left: 30px;
-    font-size: 1.3rem;
-    top: 10px;
-  }
-}
-@media (max-width: 991.98px) {
-  .barcode-modal-close {
-    left: 32px;
-  }
-}
-@media (max-width: 991.98px) {
-  .barcode-modal-content {
-    border-radius: 30px !important;
-  }
-}
-@media (max-width: 575.98px) {
-  .barcode-modal-content {
-    border-radius: 30px !important;
-  }
-}
-
-@media (max-width: 991.98px) {
-  .barcode-modal-content {
-    margin: 32px auto 0 auto !important; /* Center align and add space at top for tablet */
-    width: 70vw;
-    max-width: 80vw;
-    max-height: 98vh; /* Increased height for tablet */
-    margin: 32px auto 0 auto !important;
-    left: 0;
-    right: 0;
-  }
-}
-@media (max-width: 575.98px) {
-  .barcode-modal-content {
-    margin: 24px auto 0 auto !important; /* Center align and add space at top for mobile */
-    left: 0;
-    width: 100vw;
-    max-width: 100vw;
-    max-height: 100vh; /* Increased height for mobile */
-    margin: 24px auto 0 auto !important;
-    left: 0;
-    right: 0;
-  }
-}
 
 /* Optional spacing between form rows */
 .barcode-modal-content table td,
 .barcode-modal-content table th {
-  padding: 8px 10px; /* Give cells some space */
+  padding: 3px 12px; /* Give cells some space */
   vertical-align: middle;
+  font-size: 13px;
 }
 
 .barcode-modal-content input.form-control {
@@ -855,28 +632,7 @@ body {
   padding: 4px 8px;
 }
 
-@media (max-width: 576px) {
-  .barcode-modal-content {
-    width: 95vw;
-    margin: 30px auto 0 auto;
-    padding: 16px 12px;
-  }
 
-  .barcode-modal-content input.form-control {
-    height: 30px;
-    font-size: 13px;
-  }
-}
-
-.barcode-modal-close {
-  position: absolute;
-  top: -7px;
-  left: 18px;
-  font-size: 1.5rem;
-  color: #888;
-  cursor: pointer;
-  z-index: 2;
-}
 /* Move close icon further right in tablet */
 @media (max-width: 991.98px) {
   .barcode-modal .col-2 {
@@ -897,22 +653,7 @@ body {
   }
 }
 
-@media (max-width: 991.98px) {
-  .barcode-modal-content {
-    max-width: 95vw;
-    padding: 14px 8px 8px 8px; /* ✅ Reduced padding */
-    border-radius: 0;
-  }
-}
 
-@media (max-width: 575.98px) {
-  .barcode-modal-content {
-    max-width: 100vw;
-    padding: 10px 2vw 10px 2vw; /* ✅ Reduced padding */
-    border-radius: 0;
-    min-height: 120px;
-  }
-}
 
 @keyframes slideInRight {
   from {
@@ -922,24 +663,32 @@ body {
     transform: translateX(0);
   }
 }
-
-/* Responsive fixes */
-@media (max-width: 991.98px) {
-  .barcode-modal-content {
-    max-width: 90vw;
-    min-width: 0;
-    border-radius: 0;
-    margin-top: 0;
-    padding: 18px 8px 8px 8px;
-  }
+.barcode-modal-content {
+  width: 80vw !important;
+  max-width: 400px !important;
+  min-width: 260px !important;
+  max-height: 90vh !important;
+  min-height: 320px !important;
+  margin-top: 70px !important;
+  margin-bottom: 5vh !important;
+  background: #fff !important;
+  overflow-y: auto !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  position: relative;
+  left: -30px;
+  padding: 10px !important;
+  /* Let modal flow, not stick to top/bottom */
 }
 @media (max-width: 575.98px) {
   .barcode-modal-content {
-    max-width: 100vw;
-    min-width: 0;
-    min-height: 120px;
-    border-radius: 0;
-    padding: 12px 2vw 12px 2vw;
+    width: 98vw !important;
+    max-width: 98vw !important;
+    min-width: 0 !important;
+    max-height: 96vh !important;
+    min-height: 0 !important;
+    margin-top: 2vh !important;
+    margin-bottom: 2vh !important;
   }
 }
 
@@ -1271,7 +1020,7 @@ tr.dp-row-action-highlight > td:nth-child(2) {
 <!-- Module - Input Screening -->
  <li class="nav-item">
 <a class="nav-link" data-bs-toggle="collapse" href="#ui-advanced" aria-expanded="false" aria-controls="ui-advanced">
-<i class="icon-watch menu-icon"></i>
+<i class="ti-bar-chart menu-icon"></i>
 <span class="menu-title">Input Screening</span>
 <i class="menu-arrow"></i>
 </a>
@@ -1334,7 +1083,7 @@ tr.dp-row-action-highlight > td:nth-child(2) {
           <div class="col-8 text-center">
             <h4
               class="mb-0 fw-bold"
-              style="font-size: 1.25rem; line-height: 1.1"
+              style="font-size: 1.25rem; line-height: 1.1; padding-top: 24px;"
             >
               Tray Identification
             </h4>
@@ -1344,17 +1093,7 @@ tr.dp-row-action-highlight > td:nth-child(2) {
           <div class="col-2"></div>
         </div>
 
-        <!-- Banner Image -->
-        <div class="barcode-banner-img-wrapper text-center mb-4">
-          <img
-            src="{% static 'assets/images/banner2.jpg' %}"
-            alt="Banner"
-            class="barcode-banner-img"
-            style="max-width: 100%; border-radius: 10px"
-          />
-        </div>
-
-        <!-- Tray Identification Table -->
+      <!-- Tray Identification Table -->
         <form id="barcodeScannerForm" autocomplete="off">
           <table class="table table-bordered align-middle mb-3">
             <tbody>

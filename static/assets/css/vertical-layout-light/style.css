@@ -31125,6 +31125,7 @@ dl li {
 .table.table-bordered,
 .jsgrid .table-bordered.jsgrid-table {
   border-top: 1px solid #ced4da;
+  
 }
 .table.dataTable tbody > tr.selected,
 .jsgrid .dataTable.jsgrid-table tbody > tr.selected {
