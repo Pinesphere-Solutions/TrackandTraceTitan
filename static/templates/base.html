@@ -1045,7 +1045,33 @@ tr.dp-row-action-highlight > td:nth-child(2) {
 </div>
 </li>
 
- 
+ <!-- Brass Qc Menu -->
+<li class="nav-item">
+<a class="nav-link" data-bs-toggle="collapse" href="#editors" aria-expanded="false" aria-controls="ui-advanced">
+<i class="fa fa-industry menu-icon"></i>
+<span class="menu-title">Brass QC</span>
+<i class="menu-arrow"></i>
+</a>
+<div class="collapse" id="editors">
+<ul class="nav flex-column sub-menu">
+<li class="nav-item"> 
+<a class="nav-link" href="{% url 'BrassPickTableView' %}">Brass Qc Pick Table</a>
+</li>
+<li class="nav-item"> 
+<a class="nav-link" href="{% url 'BrassCompletedView' %}">Brass Qc Completed Table</a>
+</li>
+<li class="nav-item"> 
+<a class="nav-link" href="{% url 'iqf_picktable' %}">IQF Pick Table</a>
+</li>
+<li class="nav-item"> 
+<a class="nav-link" href="{% url 'iqf_completed_table' %}">IQF Completed Table</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="{% url 'iqf_rejection_table' %}">IQF Reject Table</a>
+</li>
+</ul>
+</div>
+</li>
  
         </ul>
 </nav>

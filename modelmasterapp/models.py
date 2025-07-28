@@ -188,6 +188,8 @@ class TrayId(models.Model):
     IP_tray_verified= models.BooleanField(default=False, help_text="Is tray verified in IP")
     
     rejected_tray= models.BooleanField(default=False, help_text="Is tray rejected")
+    brass_rejected_tray= models.BooleanField(default=False, help_text="Is brass tray rejected")
+
     new_tray=models.BooleanField(default=True, help_text="Is tray new")
     
     # Tray configuration fields (filled by admin)
@@ -293,7 +295,6 @@ class TotalStockModel(models.Model):
     location = models.ManyToManyField(Location, blank=True, help_text="Multiple Locations")
     lot_id = models.CharField(max_length=50, unique=True, null=True, blank=True, help_text="Lot ID")
     created_at = models.DateTimeField(default=now, help_text="Timestamp of the record")
-    brass_saved_time = models.DateTimeField(default=now)
     # day planning missing qty in day planning pick table
     dp_missing_qty = models.IntegerField(default=0, help_text="Missing quantity in day planning")
     dp_physical_qty = models.IntegerField(help_text="Original physical quantity", default=0)  # New field
@@ -316,6 +317,8 @@ class TotalStockModel(models.Model):
     last_process_date_time = models.DateTimeField(null=True, blank=True, help_text="Last Process Date/Time")
     last_process_module = models.CharField(max_length=255, null=True, blank=True, help_text="Last Process Module")
     next_process_module = models.CharField(max_length=255, null=True, blank=True, help_text="Next Process Module")
+
+    bq_last_process_date_time = models.DateTimeField(null=True, blank=True, help_text="Last Process Date/Time")
 
     #IP Module accept and rejection
     total_IP_accpeted_quantity = models.IntegerField(default=0, help_text="Total accepted quantity")
@@ -363,7 +366,7 @@ class TotalStockModel(models.Model):
     iqf_rejection_tray_scan_status=models.BooleanField(default=False)
     iqf_accepted_tray_scan_status=models.BooleanField(default=False)
     iqf_onhold_picking=models.BooleanField(default=False, help_text="IQF On Hold Picking")
-    
+    tray_verify=models.BooleanField(default=False, help_text="Tray Verify")
     #Module is IQF - Acceptance - Send to Brass QC 
     send_brass_qc=models.BooleanField(default=False, help_text="Send to Brass QC")
     
@@ -379,9 +382,15 @@ class TotalStockModel(models.Model):
     ip_hold_lot = models.BooleanField(default=False, help_text="Indicates if the lot is on hold n IP")
     ip_release_lot =models.BooleanField(default=False)
     
+    brass_holding_reason = models.CharField(max_length=255, null=True, blank=True, help_text="Brass Reason for holding the batch")  
+    brass_release_reason= models.CharField(max_length=255, null=True, blank=True, help_text="Brass Reason for releasing the batch")
+    brass_hold_lot = models.BooleanField(default=False, help_text="Indicates if the lot is on hold n Brass")
+    brass_release_lot =models.BooleanField(default=False)
+    
     ip_top_tray_qty_verified = models.BooleanField(default=False, help_text="IP-On Hold Picking")
     ip_verified_tray_qty=models.IntegerField(default=0, help_text="IP-Verified Tray Quantity")
     ip_top_tray_qty_modify=models.IntegerField(default=0, help_text="IP-Top Tray Quantity Modified")
+    
     
     def __str__(self):
         return f"{self.model_stock_no.model_no} - {self.version.version_name} - {self.lot_id}"
@@ -463,7 +472,8 @@ class IP_Rejection_Draft(models.Model):
     draft_data = models.JSONField(help_text="JSON data containing rejection details")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+    lot_rejection_remarks = models.CharField(max_length=255, null=True, blank=True, help_text="Lot rejection remarks for batch rejection")
+
     class Meta:
         unique_together = ['lot_id', 'user']
     
@@ -471,7 +481,6 @@ class IP_Rejection_Draft(models.Model):
         return f"Draft: {self.lot_id} - {self.user.username}"
      
 class Brass_QC_Rejection_Table(models.Model):
-    group = models.ForeignKey(IP_RejectionGroup, on_delete=models.SET_NULL, null=True, blank=True, related_name='brass_qc_rejection_reasons')
     rejection_reason_id = models.CharField(max_length=10, null=True, blank=True, editable=False)
     rejection_reason = models.TextField(help_text="Reason for rejection")
     rejection_count = models.PositiveIntegerField(help_text="Count of rejected items")
@@ -517,7 +526,8 @@ class IP_Rejection_ReasonStore(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     total_rejection_quantity = models.PositiveIntegerField(help_text="Total Rejection Quantity")
     batch_rejection=models.BooleanField(default=False)
-    
+    lot_rejected_comment = models.CharField(max_length=255,null=True,blank=True)
+
     def __str__(self):
         return f"{self.user} - {self.total_rejection_quantity} - {self.lot_id}"
     
@@ -530,9 +540,44 @@ class Brass_QC_Rejection_ReasonStore(models.Model):
     total_rejection_quantity = models.PositiveIntegerField(help_text="Total Rejection Quantity")
     batch_rejection=models.BooleanField(default=False)
     created_at = models.DateTimeField(default=now, help_text="Timestamp of the record")
-    
+    lot_rejected_comment = models.CharField(max_length=255,null=True,blank=True)
+
     def __str__(self):
         return f"{self.user} - {self.total_rejection_quantity} - {self.lot_id}"
+    
+# Add these new models to your models.py (if not already exist)
+class Brass_QC_Draft_Store(models.Model):
+    lot_id = models.CharField(max_length=255)
+    batch_id = models.CharField(max_length=255)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    draft_type = models.CharField(max_length=50)  # 'batch_rejection' or 'tray_rejection'
+    draft_data = models.JSONField()  # Store all draft data as JSON
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ['lot_id', 'draft_type']
+
+# Add this to your existing Brass_QC_Draft_Store model or create new model
+# If using existing model, just add this draft_type: 'top_tray_scan'
+
+# Or create a specific model for top tray scan drafts
+class Brass_TopTray_Draft_Store(models.Model):
+    lot_id = models.CharField(max_length=255)
+    batch_id = models.CharField(max_length=255)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    tray_id = models.CharField(max_length=255)  # The scanned tray ID
+    tray_qty = models.IntegerField()  # The tray quantity
+    delink_data = models.JSONField(default=list, blank=True)  # Store delink tray data
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ['lot_id']  # Only one draft per lot
+        
+    def __str__(self):
+        return f"Top Tray Draft - {self.lot_id} - {self.tray_id}"
+
 
 class IQF_Rejection_ReasonStore(models.Model):
     rejection_reason = models.ManyToManyField(IQF_Rejection_Table, blank=True)
@@ -540,7 +585,8 @@ class IQF_Rejection_ReasonStore(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     total_rejection_quantity = models.PositiveIntegerField(help_text="Total Rejection Quantity")
     batch_rejection=models.BooleanField(default=False)
-    
+    lot_rejected_comment = models.CharField(max_length=255,null=True,blank=True)
+
     def __str__(self):
         return f"{self.user} - {self.total_rejection_quantity} - {self.lot_id}"
     

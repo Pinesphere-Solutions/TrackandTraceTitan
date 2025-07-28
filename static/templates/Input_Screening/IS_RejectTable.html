@@ -86,7 +86,8 @@
                      <td>{{ page_obj.start_index|add:forloop.counter0 }}
 
                     </td>                 
-                      <td>{{ data.last_process_date_time|date:"Y-m-d" }}<br>
+<td>{{ data.last_process_date_time|date:"Y-m-d" }}<br>
+                        <span style="display:inline-block; margin-top:4px;">{{ data.last_process_date_time|date:"h:i A" }}</span>
                     <!-- Plating Stk No - Mouse Hover Image -->
                       <td>
                         <span class="model-hover-trigger" style="cursor: pointer; word-break: break-all;">
@@ -128,7 +129,9 @@
       data-accepted-ip-stock="{{ data.accepted_Ip_stock|yesno:'true,false' }}"
       data-rejected-ip-stock="{{ data.rejected_ip_stock|yesno:'true,false' }}"
       data-model-image="{{ data.model_images.0|default:'' }}"
-      data-few-cases-accepted-ip-stock="{{ data.few_cases_accepted_Ip_stock|yesno:'true,false' }}">
+      data-few-cases-accepted-ip-stock="{{ data.few_cases_accepted_Ip_stock|yesno:'true,false' }}"
+        data-total-batch-quantity="{{ data.ip_rejection_total_qty }}">
+
       <img src="{% static 'assets/icons/view.png' %}"
           alt="View"
           style="width: 20px; margin-right: 8px; height: auto; cursor:pointer;" />
@@ -171,11 +174,23 @@
 >
   <div class="tray-scan-modal-DayPlanning-content">
     <span id="closeTrayScanModal_DayPlanning" class="tray-scan-close-readonly">&times;</span>
+    
     <div class="modal-top-header" style="display: flex; align-items: center; gap: 20px; padding-bottom: 10px;">
       <div class="user-profile" style="display: flex; align-items: center; gap: 8px">
         <img src="/static/assets/images/imagePlaceholder.png" alt="User Profile" style="border-radius: 50%; width: 50px; height: 50px; object-fit: cover;" />
-        <span>Model No:</span>
-        <h6 id="modalModelNo_DayPlanning">(Fetch Dynamically)</h6>
+        <!-- Model No and Lot Qty in same line -->
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-weight: bold; color: #666;">Model No:</span>
+              <h6 id="modalModelNo_DayPlanning" style="margin: 0; color: #028084; font-weight: bold;">(Fetch Dynamically)</h6>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-weight: bold; color: #666;">Rejected Qty:</span>
+              <h6 id="modalLotQty_DayPlanning" style="margin: 0; color: #e67e22; font-weight: bold;">(Fetch Dynamically)</h6>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
@@ -320,6 +335,8 @@
       <button class="next" id="nextBtn">&#8594;</button>
     </div>
   </div>
+  </div>
+</div>
   {% block script %}
 
     
@@ -455,12 +472,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <!-- Script for Tray Validate Status column -- enable/disable of table column -->
 <script nonce="{{ csp_nonce }}">
-// Updated Tray Validation Script with Stock Status Support
+// Enhanced Input Screening Tray Validation Script with Better Error Handling
 document.addEventListener("DOMContentLoaded", function () {
   const validateInput = document.getElementById("trayValidateInput");
   const detailsDiv = document.getElementById("trayScanDetails_DayPlanning");
   const errorMessage = document.getElementById("trayErrorMessage");
   const errorText = document.getElementById("trayErrorText");
+
+  console.log("🔍 Input Screening tray validation script loaded");
+  console.log("📋 Elements found:", {
+    validateInput: !!validateInput,
+    detailsDiv: !!detailsDiv,
+    errorMessage: !!errorMessage,
+    errorText: !!errorText
+  });
 
   function getCurrentBatchId() {
     const modal = document.getElementById("trayScanModal_DayPlanning");
@@ -487,35 +512,99 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function showError(message) {
+    console.log("🚨 Showing Input Screening error:", message);
     if (errorMessage && errorText) {
       errorText.textContent = message;
-      errorMessage.style.display = "block";
-      // Auto-hide after 5 seconds
+      
+      // Force display with important styles
+      errorMessage.style.setProperty('display', 'block', 'important');
+      errorMessage.style.setProperty('visibility', 'visible', 'important');
+      errorMessage.style.setProperty('opacity', '1', 'important');
+      errorMessage.style.setProperty('z-index', '99999', 'important');
+      errorMessage.style.setProperty('position', 'relative', 'important');
+      errorMessage.style.setProperty('background-color', '#ffebee', 'important');
+      errorMessage.style.setProperty('border', '1px solid #f44336', 'important');
+      errorMessage.style.setProperty('color', '#c62828', 'important');
+      errorMessage.style.setProperty('padding', '8px 12px', 'important');
+      errorMessage.style.setProperty('border-radius', '4px', 'important');
+      errorMessage.style.setProperty('margin-bottom', '10px', 'important');
+      errorMessage.style.setProperty('font-size', '12px', 'important');
+      errorMessage.style.setProperty('text-align', 'center', 'important');
+      errorMessage.style.setProperty('width', '100%', 'important');
+      
+      console.log("✅ Input Screening error message styled");
+      
+      // Scroll to error message if it exists
+      errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      
+      // Flash the background to make it more noticeable
+      let flashCount = 0;
+      const flashInterval = setInterval(() => {
+        if (flashCount < 6) {
+          errorMessage.style.backgroundColor = flashCount % 2 === 0 ? '#ffcdd2' : '#ffebee';
+          flashCount++;
+        } else {
+          clearInterval(flashInterval);
+          errorMessage.style.backgroundColor = '#ffebee';
+        }
+      }, 200);
+      
+      console.log("✅ Input Screening error message displayed");
+      
+      // Auto-hide after 8 seconds
       setTimeout(() => {
         errorMessage.style.display = "none";
-      }, 5000);
+        console.log("⏰ Auto-hiding Input Screening error message after 8 seconds");
+      }, 8000);
+    } else {
+      console.log("❌ Input Screening error message elements not found!");
+      // Fallback: show alert if error div not found
+      alert(message);
     }
   }
 
   function hideError() {
+    console.log("🫥 Hiding Input Screening error message");
     if (errorMessage) {
       errorMessage.style.display = "none";
     }
   }
 
   if (validateInput && detailsDiv) {
+    console.log("🎯 Setting up Input Screening tray validation event listener");
+    
+    // Add input event listener for real-time feedback
+    validateInput.addEventListener("input", function(e) {
+      console.log("⌨️ Input Screening - User typing:", e.target.value);
+    });
+    
     validateInput.addEventListener("keydown", function (e) {
+      console.log("🔑 Input Screening - Key pressed:", e.key, "Value:", validateInput.value.trim());
+      
       if (e.key === "Enter") {
         const trayId = validateInput.value.trim();
-        if (!trayId) return;
+        console.log("🎯 Input Screening - Enter pressed with tray ID:", trayId);
+        
+        if (!trayId) {
+          console.log("⚠️ Empty tray ID, returning");
+          return;
+        }
         
         const batchId = getCurrentBatchId();
-        if (!batchId) return;
+        console.log("📦 Input Screening - Current batch ID:", batchId);
+        
+        if (!batchId) {
+          console.log("❌ No batch ID found");
+          showError("Batch ID not found. Please refresh and try again.");
+          return;
+        }
 
         const stockStatus = getCurrentStockStatus();
+        console.log("📊 Input Screening - Stock status:", stockStatus);
 
         // Hide any existing error message
         hideError();
+        console.log("🔄 Making Input Screening API call to validate tray...");
 
         // Include stock status in the validation request
         const requestData = {
@@ -532,61 +621,81 @@ document.addEventListener("DOMContentLoaded", function () {
           },
           body: JSON.stringify(requestData)
         })
-        .then(res => res.json())
+        .then(res => {
+          console.log("📡 Input Screening API Response status:", res.status);
+          return res.json();
+        })
         .then(data => {
+          console.log("📊 Input Screening API Response data:", data);
+          
           // Find the row in the table with this Tray ID
           const rows = detailsDiv.querySelectorAll("tbody tr");
+          console.log("📋 Found", rows.length, "rows in Input Screening modal table");
+          
           let found = false;
           
-          rows.forEach(row => {
+          rows.forEach((row, index) => {
             const trayIdInput = row.querySelector('input[type="text"]');
-            if (trayIdInput && trayIdInput.value.trim() === trayId) {
-              found = true;
-              const statusCell = row.querySelector("td:last-child");
-              if (statusCell) {
-                if (data.success && data.exists) {
-                  // Pass validation - show tick as active, cross as inactive
-                  statusCell.innerHTML = `
-                    <div class="validation-status">
-                      <div class="status-icon fail inactive">
-                        <img src="/static/assets/icons/fail.png" alt="Fail" title="Fail" style="width:18px; height:18px;" />
+            if (trayIdInput) {
+              const rowTrayId = trayIdInput.value.trim();
+              console.log(`🔎 Input Screening Row ${index + 1}: checking "${rowTrayId}" vs "${trayId}"`);
+              
+              if (rowTrayId === trayId) {
+                found = true;
+                console.log(`✅ Found matching tray in Input Screening row ${index + 1}`);
+                
+                const statusCell = row.querySelector("td:last-child");
+                if (statusCell) {
+                  if (data.success && data.exists) {
+                    // Pass validation - show tick as active, cross as inactive
+                    statusCell.innerHTML = `
+                      <div class="validation-status">
+                        <div class="status-icon fail inactive">
+                          <img src="/static/assets/icons/fail.png" alt="Fail" title="Fail" style="width:18px; height:18px;" />
+                        </div>
+                        <div class="status-icon pass active">
+                          <img src="/static/assets/icons/pass.png" alt="Pass" title="Pass" style="width:18px; height:18px;" />
+                        </div>
                       </div>
-                      <div class="status-icon pass active">
-                        <img src="/static/assets/icons/pass.png" alt="Pass" title="Pass" style="width:18px; height:18px;" />
+                    `;
+                    
+                    // Add visual feedback for successful validation
+                    row.style.backgroundColor = '#e8f5e8';
+                    setTimeout(() => {
+                      row.style.backgroundColor = '';
+                    }, 2000);
+                    
+                    console.log("✅ Updated Input Screening status cell to PASS");
+                    
+                  } else {
+                    // Fail validation - show cross as active, tick as inactive
+                    statusCell.innerHTML = `
+                      <div class="validation-status">
+                        <div class="status-icon fail active">
+                          <img src="/static/assets/icons/fail.png" alt="Fail" title="Fail" style="width:18px; height:18px;" />
+                        </div>
+                        <div class="status-icon pass inactive">
+                          <img src="/static/assets/icons/pass.png" alt="Pass" title="Pass" style="width:18px; height:18px;" />
+                        </div>
                       </div>
-                    </div>
-                  `;
-                  
-                  // Add visual feedback for successful validation
-                  row.style.backgroundColor = '#e8f5e8';
-                  setTimeout(() => {
-                    row.style.backgroundColor = '';
-                  }, 2000);
-                  
-                } else {
-                  // Fail validation - show cross as active, tick as inactive
-                  statusCell.innerHTML = `
-                    <div class="validation-status">
-                      <div class="status-icon fail active">
-                        <img src="/static/assets/icons/fail.png" alt="Fail" title="Fail" style="width:18px; height:18px;" />
-                      </div>
-                      <div class="status-icon pass inactive">
-                        <img src="/static/assets/icons/pass.png" alt="Pass" title="Pass" style="width:18px; height:18px;" />
-                      </div>
-                    </div>
-                  `;
-                  
-                  // Add visual feedback for failed validation
-                  row.style.backgroundColor = '#ffebee';
-                  setTimeout(() => {
-                    row.style.backgroundColor = '';
-                  }, 2000);
+                    `;
+                    
+                    // Add visual feedback for failed validation
+                    row.style.backgroundColor = '#ffebee';
+                    setTimeout(() => {
+                      row.style.backgroundColor = '';
+                    }, 2000);
+                    
+                    console.log("❌ Updated Input Screening status cell to FAIL");
+                  }
                 }
               }
             }
           });
           
           if (!found) {
+            console.log("❌ Input Screening tray not found in table");
+            
             // Enhanced error message with stock status context
             let filterContext = '';
             if (stockStatus.accepted_ip_stock && !stockStatus.few_cases_accepted_ip_stock) {
@@ -598,6 +707,8 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             
             showError(`Tray ID "${trayId}" not found in table${filterContext}.`);
+          } else {
+            console.log("🎉 Input Screening validation successful!");
           }
           
           // Always clear and focus input for next scan
@@ -605,12 +716,23 @@ document.addEventListener("DOMContentLoaded", function () {
           validateInput.focus();
         })
         .catch(error => {
-          console.error('Error:', error);
-          showError('An error occurred while validating the tray ID.');
+          console.error('❌ Input Screening Network error:', error);
+          showError('Network error occurred while validating the tray ID.');
           validateInput.value = "";
           validateInput.focus();
         });
       }
+    });
+    
+    // Also add focus event to ensure input is ready
+    validateInput.addEventListener("focus", function() {
+      console.log("🎯 Input Screening validate input focused and ready");
+    });
+    
+  } else {
+    console.log("❌ Input Screening required elements not found:", {
+      validateInput: !!validateInput,
+      detailsDiv: !!detailsDiv
     });
   }
   
@@ -629,6 +751,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     return cookieValue;
   }
+  
+  console.log("🎯 Input Screening tray validation script setup complete");
 });
 </script>
 
@@ -645,6 +769,8 @@ document.addEventListener("DOMContentLoaded", function () {
       const modal = document.getElementById("trayScanModal_DayPlanning");
       const detailsDiv = document.getElementById("trayScanDetails_DayPlanning");
       const modalModelNo = document.getElementById("modalModelNo_DayPlanning");
+      const modalLotQty = document.getElementById("modalLotQty_DayPlanning"); // ✅ NEW
+
       modal.dataset.batchId = link.getAttribute('data-batch-id');
 
       // Get data attributes
@@ -653,7 +779,8 @@ document.addEventListener("DOMContentLoaded", function () {
       const stockLotId = link.getAttribute('data-stock-lot-id');
       const noOfTrays = parseInt(link.getAttribute('data-no-of-trays')) || 0;
       const trayCapacity = link.getAttribute('data-tray-capacity') || "";
-      
+      const totalBatchQuantity = link.getAttribute('data-total-batch-quantity') || "0";
+
       // Get stock status data
       const acceptedIpStock = link.getAttribute('data-accepted-ip-stock') === 'true';
       const rejectedIpStock = link.getAttribute('data-rejected-ip-stock') === 'true';
@@ -662,6 +789,11 @@ document.addEventListener("DOMContentLoaded", function () {
       // Set model number in modal
       if (modalModelNo && modelNo) {
         modalModelNo.textContent = modelNo;
+      }
+
+      if (modalLotQty) {
+        modalLotQty.textContent = totalBatchQuantity;
+        console.log("✅ Set Lot Qty to:", totalBatchQuantity);
       }
 
       // Set model image
@@ -1200,6 +1332,221 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
+<!-- Plating Stk - Image hover - fixed position while hitting the Plating Stk No -->
+<script nonce="{{ csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function () {
+  let openTooltip = null;
+
+  // Helper function to completely close a tooltip
+  function closeTooltip(tooltip, trigger) {
+    if (tooltip) {
+      console.log('🔴 Closing tooltip completely');
+      
+      // Remove pinned class
+      tooltip.classList.remove("pinned");
+      
+      // Hide the entire tooltip completely
+      tooltip.style.opacity = "0";
+      tooltip.style.pointerEvents = "none";
+      tooltip.style.visibility = "hidden";
+      tooltip.style.display = "none"; // ✅ ADDED: Force display none
+      
+      // Hide buttons
+      const infoBtn = tooltip.querySelector('.info-btn');
+      const closeBtn = tooltip.querySelector('.close-btn');
+      if (infoBtn) infoBtn.style.display = 'none';
+      if (closeBtn) closeBtn.style.display = 'none';
+      
+      // Remove visual indicator from trigger
+      if (trigger) {
+        trigger.style.backgroundColor = '';
+        trigger.style.borderRadius = '';
+      }
+      
+      // Clear global reference
+      openTooltip = null;
+      
+      console.log('✅ Tooltip completely closed');
+    }
+  }
+
+  // Tooltip show/hide logic
+  document.querySelectorAll(".model-hover-trigger").forEach(function (trigger) {
+    const tooltip = trigger.querySelector(".model-image-tooltip");
+
+    trigger.addEventListener("mouseenter", function () {
+      if (tooltip && !tooltip.classList.contains("pinned")) {
+        tooltip.style.display = "flex"; // ✅ ADDED: Reset display
+        tooltip.style.visibility = "visible"; // ✅ ADDED: Reset visibility
+        tooltip.style.opacity = "1";
+        tooltip.style.pointerEvents = "auto";
+        
+        // Show Info and Close buttons on hover
+        const infoBtn = tooltip.querySelector('.info-btn');
+        const closeBtn = tooltip.querySelector('.close-btn');
+        if (infoBtn) infoBtn.style.display = 'block';
+        if (closeBtn) closeBtn.style.display = 'block';
+      }
+    });
+
+    trigger.addEventListener("mouseleave", function () {
+      if (tooltip && !tooltip.classList.contains("pinned")) {
+        tooltip.style.opacity = "0";
+        tooltip.style.pointerEvents = "none";
+        
+        // Hide Info and Close buttons when not hovering and not pinned
+        const infoBtn = tooltip.querySelector('.info-btn');
+        const closeBtn = tooltip.querySelector('.close-btn');
+        if (infoBtn) infoBtn.style.display = 'none';
+        if (closeBtn) closeBtn.style.display = 'none';
+      }
+    });
+
+    // Keep tooltip visible when hovering over it
+    if (tooltip) {
+      tooltip.addEventListener("mouseenter", function () {
+        if (!tooltip.classList.contains("pinned")) {
+          tooltip.style.display = "flex"; // ✅ ADDED: Reset display
+          tooltip.style.visibility = "visible"; // ✅ ADDED: Reset visibility
+        }
+        tooltip.style.opacity = "1";
+        tooltip.style.pointerEvents = "auto";
+        
+        // Keep buttons visible when hovering over tooltip
+        const infoBtn = tooltip.querySelector('.info-btn');
+        const closeBtn = tooltip.querySelector('.close-btn');
+        if (infoBtn) infoBtn.style.display = 'block';
+        if (closeBtn) closeBtn.style.display = 'block';
+      });
+
+      tooltip.addEventListener("mouseleave", function () {
+        if (!tooltip.classList.contains("pinned")) {
+          tooltip.style.opacity = "0";
+          tooltip.style.pointerEvents = "none";
+          
+          // Hide buttons when leaving tooltip and not pinned
+          const infoBtn = tooltip.querySelector('.info-btn');
+          const closeBtn = tooltip.querySelector('.close-btn');
+          if (infoBtn) infoBtn.style.display = 'none';
+          if (closeBtn) closeBtn.style.display = 'none';
+        }
+      });
+    }
+
+    trigger.addEventListener("click", function (e) {
+      e.stopPropagation();
+
+      if (tooltip) {
+        // Close any previously opened tooltip
+        if (openTooltip && openTooltip !== tooltip) {
+          const prevTrigger = openTooltip.closest('.model-hover-trigger');
+          closeTooltip(openTooltip, prevTrigger);
+        }
+
+        tooltip.classList.add("pinned");
+        tooltip.style.display = "flex"; // ✅ ADDED: Ensure display
+        tooltip.style.visibility = "visible"; // ✅ ADDED: Ensure visibility
+        tooltip.style.opacity = "1";
+        tooltip.style.pointerEvents = "auto";
+        openTooltip = tooltip;
+        
+        // Keep buttons visible when pinned
+        const infoBtn = tooltip.querySelector('.info-btn');
+        const closeBtn = tooltip.querySelector('.close-btn');
+        if (infoBtn) infoBtn.style.display = 'block';
+        if (closeBtn) closeBtn.style.display = 'block';
+
+        // Add visual indicator that tooltip is pinned
+        trigger.style.backgroundColor = '#e3f2fd';
+        trigger.style.borderRadius = '4px';
+      }
+    });
+
+    // ✅ Handle Info button click
+    const infoBtn = tooltip?.querySelector('.info-btn');
+    if (infoBtn) {
+      // Initially hide the button
+      infoBtn.style.display = 'none';
+      
+      infoBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const modelNo = trigger.textContent.trim();
+        
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Model Information',
+            html: `<strong>Plating Stk No:</strong> ${modelNo}`,
+            icon: 'info',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#007bff'
+          });
+        } else {
+          alert('Model Information:\nPlating Stk No: ' + modelNo);
+        }
+      });
+    }
+
+    // ✅ FIXED: Handle Close button click - Complete tooltip closure
+    const closeBtn = tooltip?.querySelector('.close-btn');
+    if (closeBtn) {
+      // Initially hide the button
+      closeBtn.style.display = 'none';
+      
+      closeBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        console.log('🔴 Close button clicked');
+        
+        // Use the helper function to completely close tooltip
+        closeTooltip(tooltip, trigger);
+        
+        // Feedback animation for close button
+        closeBtn.style.transform = 'scale(0.9)';
+        setTimeout(() => {
+          if (closeBtn.style) {
+            closeBtn.style.transform = 'scale(1)';
+          }
+        }, 150);
+      });
+      
+      // ✅ Add hover effect for close button
+      closeBtn.addEventListener('mouseenter', function() {
+        closeBtn.style.backgroundColor = '#c82333';
+        closeBtn.style.transform = 'scale(1.05)';
+      });
+      
+      closeBtn.addEventListener('mouseleave', function() {
+        closeBtn.style.backgroundColor = '#dc3545';
+        closeBtn.style.transform = 'scale(1)';
+      });
+    }
+  });
+
+  // ✅ ENHANCED: Close tooltip when clicking outside
+  document.addEventListener("click", function (e) {
+    if (openTooltip && !e.target.closest('.model-image-tooltip') && !e.target.closest('.model-hover-trigger')) {
+      const openTrigger = openTooltip.closest('.model-hover-trigger');
+      closeTooltip(openTooltip, openTrigger);
+    }
+  });
+
+  // ✅ Close tooltip with ESC key
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && openTooltip) {
+      const openTrigger = openTooltip.closest('.model-hover-trigger');
+      closeTooltip(openTooltip, openTrigger);
+      console.log('✅ Tooltip closed with ESC key');
+    }
+  });
+
+  // Prevent tooltip from closing when clicking inside it
+  document.querySelectorAll(".model-image-tooltip").forEach(function (tooltip) {
+    tooltip.addEventListener("click", function (e) {
+      e.stopPropagation();
+    });
+  });
+});
+</script>
+
+
 
 {% endblock %} {% endblock content %}
-</div>

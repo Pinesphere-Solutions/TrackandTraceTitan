@@ -35,7 +35,7 @@ urlpatterns = [
     path('jigunloading/', include('Jig_Unloading.urls')),
     path('nickelaudit/', include('Nickel_Audit.urls')),
     path('spiderspindle/', include('Spider_Spindle.urls')),
-    path('brass_qc/',include('Brass_Qc.urls')),
+    path('brass_qc/',include('Brass_QC.urls')),
     path('inputscreening/',include('InputScreening.urls')),
     
     path('nickel_inspection/', include('Nickel_Inspection.urls')),

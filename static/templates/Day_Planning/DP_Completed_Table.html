@@ -58,7 +58,7 @@
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
-                      Plating <br> Stk No
+                      Plating Stk No
                       <i class="fa fa-filter" aria-hidden="true"></i>
                     </th>
                     <th>
@@ -191,6 +191,7 @@
                       data-moved-to-d-picker="{{ row.Moved_to_D_Picker }}"
                       data-tray-qty-list="{{ row.tray_qty_list|default:'[]'|safe }}"
                       data-model-image="{{ row.model_images.0|default:'' }}"
+                      data-total-batch-quantity="{{ row.total_batch_quantity }}"
 
                     >
                       <img
@@ -297,6 +298,7 @@
                 <span id="closeTrayScanModal_DayPlanning" class="tray-scan-close-readonly"
                   >&times;</span
                 >
+               
                 <!-- New top header container: title + user profile aligned left -->
                 <div
                   class="modal-top-header"
@@ -321,8 +323,19 @@
                         object-fit: cover;
                       "
                     />
-                    <span>Model No:</span>
-                    <h6 id="modalModelNo_DayPlanning">(Fetch Dynamically)</h6>
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                      <!-- Model No and Input Qty in same line -->
+                      <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <span style="font-weight: bold; color: #666;">Model No:</span>
+                          <h6 id="modalModelNo_DayPlanning" style="margin: 0; color: #028084; font-weight: 600;">(Fetch Dynamically)</h6>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                         <span style="font-weight: bold; color: #666;">Lot Qty:</span>
+                          <h6 id="modalInputQty_DayPlanning" style="margin: 0; color: #e67e22; font-weight: 600;">(Fetch Dynamically)</h6>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <!-- Redo icon for clearing "tray ID" -->
@@ -563,38 +576,218 @@
 
 <script nonce="{{ csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function () {
-  let hoverTimeout;
+  let openTooltip = null;
 
+  // Helper function to completely close a tooltip
+  function closeTooltip(tooltip, trigger) {
+    if (tooltip) {
+      console.log('🔴 Closing tooltip completely');
+      
+      // Remove pinned class
+      tooltip.classList.remove("pinned");
+      
+      // Hide the entire tooltip completely
+      tooltip.style.opacity = "0";
+      tooltip.style.pointerEvents = "none";
+      tooltip.style.visibility = "hidden";
+      tooltip.style.display = "none"; // ✅ ADDED: Force display none
+      
+      // Hide buttons
+      const infoBtn = tooltip.querySelector('.info-btn');
+      const closeBtn = tooltip.querySelector('.close-btn');
+      if (infoBtn) infoBtn.style.display = 'none';
+      if (closeBtn) closeBtn.style.display = 'none';
+      
+      // Remove visual indicator from trigger
+      if (trigger) {
+        trigger.style.backgroundColor = '';
+        trigger.style.borderRadius = '';
+      }
+      
+      // Clear global reference
+      openTooltip = null;
+      
+      console.log('✅ Tooltip completely closed');
+    }
+  }
+
+  // Tooltip show/hide logic
   document.querySelectorAll(".model-hover-trigger").forEach(function (trigger) {
     const tooltip = trigger.querySelector(".model-image-tooltip");
 
-    // Remove existing hover event listeners by cloning (prevents double triggers)
-    const newTrigger = trigger.cloneNode(true);
-    trigger.parentNode.replaceChild(newTrigger, trigger);
-
-    // Hover: show modal with first image
-    newTrigger.addEventListener("mouseenter", function () {
-      hoverTimeout = setTimeout(() => {
-        const firstImg = newTrigger.querySelector(".model-image-tooltip img");
-        // directImageModal removed: do nothing
-      }, 200);
+    trigger.addEventListener("mouseenter", function () {
+      if (tooltip && !tooltip.classList.contains("pinned")) {
+        tooltip.style.display = "flex"; // ✅ ADDED: Reset display
+        tooltip.style.visibility = "visible"; // ✅ ADDED: Reset visibility
+        tooltip.style.opacity = "1";
+        tooltip.style.pointerEvents = "auto";
+        
+        // Show Info and Close buttons on hover
+        const infoBtn = tooltip.querySelector('.info-btn');
+        const closeBtn = tooltip.querySelector('.close-btn');
+        if (infoBtn) infoBtn.style.display = 'block';
+        if (closeBtn) closeBtn.style.display = 'block';
+      }
     });
-    newTrigger.addEventListener("mouseleave", function () {
-      clearTimeout(hoverTimeout);
+
+    trigger.addEventListener("mouseleave", function () {
+      if (tooltip && !tooltip.classList.contains("pinned")) {
+        tooltip.style.opacity = "0";
+        tooltip.style.pointerEvents = "none";
+        
+        // Hide Info and Close buttons when not hovering and not pinned
+        const infoBtn = tooltip.querySelector('.info-btn');
+        const closeBtn = tooltip.querySelector('.close-btn');
+        if (infoBtn) infoBtn.style.display = 'none';
+        if (closeBtn) closeBtn.style.display = 'none';
+      }
     });
 
-    // Click: show modal with first image
-    newTrigger.addEventListener("click", function (e) {
-      e.preventDefault();
+    // Keep tooltip visible when hovering over it
+    if (tooltip) {
+      tooltip.addEventListener("mouseenter", function () {
+        if (!tooltip.classList.contains("pinned")) {
+          tooltip.style.display = "flex"; // ✅ ADDED: Reset display
+          tooltip.style.visibility = "visible"; // ✅ ADDED: Reset visibility
+        }
+        tooltip.style.opacity = "1";
+        tooltip.style.pointerEvents = "auto";
+        
+        // Keep buttons visible when hovering over tooltip
+        const infoBtn = tooltip.querySelector('.info-btn');
+        const closeBtn = tooltip.querySelector('.close-btn');
+        if (infoBtn) infoBtn.style.display = 'block';
+        if (closeBtn) closeBtn.style.display = 'block';
+      });
+
+      tooltip.addEventListener("mouseleave", function () {
+        if (!tooltip.classList.contains("pinned")) {
+          tooltip.style.opacity = "0";
+          tooltip.style.pointerEvents = "none";
+          
+          // Hide buttons when leaving tooltip and not pinned
+          const infoBtn = tooltip.querySelector('.info-btn');
+          const closeBtn = tooltip.querySelector('.close-btn');
+          if (infoBtn) infoBtn.style.display = 'none';
+          if (closeBtn) closeBtn.style.display = 'none';
+        }
+      });
+    }
+
+    trigger.addEventListener("click", function (e) {
       e.stopPropagation();
-      const firstImg = newTrigger.querySelector(".model-image-tooltip img");
-      // directImageModal removed: do nothing
+
+      if (tooltip) {
+        // Close any previously opened tooltip
+        if (openTooltip && openTooltip !== tooltip) {
+          const prevTrigger = openTooltip.closest('.model-hover-trigger');
+          closeTooltip(openTooltip, prevTrigger);
+        }
+
+        tooltip.classList.add("pinned");
+        tooltip.style.display = "flex"; // ✅ ADDED: Ensure display
+        tooltip.style.visibility = "visible"; // ✅ ADDED: Ensure visibility
+        tooltip.style.opacity = "1";
+        tooltip.style.pointerEvents = "auto";
+        openTooltip = tooltip;
+        
+        // Keep buttons visible when pinned
+        const infoBtn = tooltip.querySelector('.info-btn');
+        const closeBtn = tooltip.querySelector('.close-btn');
+        if (infoBtn) infoBtn.style.display = 'block';
+        if (closeBtn) closeBtn.style.display = 'block';
+
+        // Add visual indicator that tooltip is pinned
+        trigger.style.backgroundColor = '#e3f2fd';
+        trigger.style.borderRadius = '4px';
+      }
     });
+
+    // ✅ Handle Info button click
+    const infoBtn = tooltip?.querySelector('.info-btn');
+    if (infoBtn) {
+      // Initially hide the button
+      infoBtn.style.display = 'none';
+      
+      infoBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const modelNo = trigger.textContent.trim();
+        
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Model Information',
+            html: `<strong>Plating Stk No:</strong> ${modelNo}`,
+            icon: 'info',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#007bff'
+          });
+        } else {
+          alert('Model Information:\nPlating Stk No: ' + modelNo);
+        }
+      });
+    }
+
+    // ✅ FIXED: Handle Close button click - Complete tooltip closure
+    const closeBtn = tooltip?.querySelector('.close-btn');
+    if (closeBtn) {
+      // Initially hide the button
+      closeBtn.style.display = 'none';
+      
+      closeBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        console.log('🔴 Close button clicked');
+        
+        // Use the helper function to completely close tooltip
+        closeTooltip(tooltip, trigger);
+        
+        // Feedback animation for close button
+        closeBtn.style.transform = 'scale(0.9)';
+        setTimeout(() => {
+          if (closeBtn.style) {
+            closeBtn.style.transform = 'scale(1)';
+          }
+        }, 150);
+      });
+      
+      // ✅ Add hover effect for close button
+      closeBtn.addEventListener('mouseenter', function() {
+        closeBtn.style.backgroundColor = '#c82333';
+        closeBtn.style.transform = 'scale(1.05)';
+      });
+      
+      closeBtn.addEventListener('mouseleave', function() {
+        closeBtn.style.backgroundColor = '#dc3545';
+        closeBtn.style.transform = 'scale(1)';
+      });
+    }
   });
 
-  // directImageModal function removed
+  // ✅ ENHANCED: Close tooltip when clicking outside
+  document.addEventListener("click", function (e) {
+    if (openTooltip && !e.target.closest('.model-image-tooltip') && !e.target.closest('.model-hover-trigger')) {
+      const openTrigger = openTooltip.closest('.model-hover-trigger');
+      closeTooltip(openTooltip, openTrigger);
+    }
+  });
+
+  // ✅ Close tooltip with ESC key
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && openTooltip) {
+      const openTrigger = openTooltip.closest('.model-hover-trigger');
+      closeTooltip(openTooltip, openTrigger);
+      console.log('✅ Tooltip closed with ESC key');
+    }
+  });
+
+  // Prevent tooltip from closing when clicking inside it
+  document.querySelectorAll(".model-image-tooltip").forEach(function (tooltip) {
+    tooltip.addEventListener("click", function (e) {
+      e.stopPropagation();
+    });
+  });
 });
 </script>
+
 
 
 
@@ -730,11 +923,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <!-- Script for Tray Validate Status column -- enable/disable of table column -->
 <script nonce="{{ csp_nonce }}">
+// Updated Script for Tray Validate Status column -- enable/disable of table column with DEBUG
 document.addEventListener("DOMContentLoaded", function () {
   const validateInput = document.getElementById("trayValidateInput");
   const detailsDiv = document.getElementById("trayScanDetails_DayPlanning");
   const errorMessage = document.getElementById("trayErrorMessage");
   const errorText = document.getElementById("trayErrorText");
+
+  console.log("🔍 Tray validation script loaded");
+  console.log("📋 Elements found:", {
+    validateInput: !!validateInput,
+    detailsDiv: !!detailsDiv,
+    errorMessage: !!errorMessage,
+    errorText: !!errorText
+  });
 
   function getCurrentBatchId() {
     const modal = document.getElementById("trayScanModal_DayPlanning");
@@ -744,32 +946,120 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function showError(message) {
+    console.log("🚨 Showing error:", message);
     if (errorMessage && errorText) {
       errorText.textContent = message;
-      errorMessage.style.display = "block";
-      // Auto-hide after 5 seconds
+      
+      // Force display with important styles
+      errorMessage.style.setProperty('display', 'block', 'important');
+      errorMessage.style.setProperty('visibility', 'visible', 'important');
+      errorMessage.style.setProperty('opacity', '1', 'important');
+      errorMessage.style.setProperty('z-index', '99999', 'important');
+      errorMessage.style.setProperty('position', 'relative', 'important');
+      errorMessage.style.setProperty('background-color', '#ffebee', 'important');
+      errorMessage.style.setProperty('border', '1px solid #f44336', 'important');
+      errorMessage.style.setProperty('color', '#c62828', 'important');
+      errorMessage.style.setProperty('padding', '8px 12px', 'important');
+      errorMessage.style.setProperty('border-radius', '4px', 'important');
+      errorMessage.style.setProperty('margin-bottom', '10px', 'important');
+      errorMessage.style.setProperty('font-size', '12px', 'important');
+      errorMessage.style.setProperty('text-align', 'center', 'important');
+      errorMessage.style.setProperty('width', '100%', 'important');
+      
+      console.log("✅ Error message styled");
+      console.log("📏 Error message computed styles:", {
+        display: window.getComputedStyle(errorMessage).display,
+        visibility: window.getComputedStyle(errorMessage).visibility,
+        opacity: window.getComputedStyle(errorMessage).opacity,
+        zIndex: window.getComputedStyle(errorMessage).zIndex,
+        position: window.getComputedStyle(errorMessage).position,
+        top: errorMessage.offsetTop,
+        left: errorMessage.offsetLeft,
+        width: errorMessage.offsetWidth,
+        height: errorMessage.offsetHeight,
+        parentElement: errorMessage.parentElement?.tagName
+      });
+      
+      // Check if element is actually visible
+      const rect = errorMessage.getBoundingClientRect();
+      console.log("📍 Error message position:", {
+        top: rect.top,
+        left: rect.left,
+        bottom: rect.bottom,
+        right: rect.right,
+        width: rect.width,
+        height: rect.height,
+        isInViewport: rect.top >= 0 && rect.left >= 0 && rect.bottom <= window.innerHeight && rect.right <= window.innerWidth
+      });
+      
+      // Scroll to error message if it exists
+      errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      
+      // Flash the background to make it more noticeable
+      let flashCount = 0;
+      const flashInterval = setInterval(() => {
+        if (flashCount < 6) {
+          errorMessage.style.backgroundColor = flashCount % 2 === 0 ? '#ffcdd2' : '#ffebee';
+          flashCount++;
+        } else {
+          clearInterval(flashInterval);
+          errorMessage.style.backgroundColor = '#ffebee';
+        }
+      }, 200);
+      
+      console.log("✅ Error message displayed");
+      
+      // Auto-hide after 8 seconds (increased time)
       setTimeout(() => {
         errorMessage.style.display = "none";
-      }, 5000);
+        console.log("⏰ Auto-hiding error message after 8 seconds");
+      }, 8000);
+    } else {
+      console.log("❌ Error message elements not found!");
+      // Fallback: show alert if error div not found
+      alert(message);
     }
   }
 
   function hideError() {
+    console.log("🫥 Hiding error message");
     if (errorMessage) {
       errorMessage.style.display = "none";
     }
   }
 
   if (validateInput && detailsDiv) {
+    console.log("🎯 Setting up tray validation event listener");
+    
+    // Add input event listener for real-time feedback
+    validateInput.addEventListener("input", function(e) {
+      console.log("⌨️ User typing:", e.target.value);
+    });
+    
     validateInput.addEventListener("keydown", function (e) {
+      console.log("🔑 Key pressed:", e.key, "Value:", validateInput.value.trim());
+      
       if (e.key === "Enter") {
         const trayId = validateInput.value.trim();
-        if (!trayId) return;
+        console.log("🎯 Enter pressed with tray ID:", trayId);
+        
+        if (!trayId) {
+          console.log("⚠️ Empty tray ID, returning");
+          return;
+        }
+        
         const batchId = getCurrentBatchId();
-        if (!batchId) return;
+        console.log("📦 Current batch ID:", batchId);
+        
+        if (!batchId) {
+          console.log("❌ No batch ID found");
+          showError("Batch ID not found. Please refresh and try again.");
+          return;
+        }
 
         // Hide any existing error message
         hideError();
+        console.log("🔄 Making API call to validate tray...");
 
         fetch("/dayplanning/tray_validate/", {
           method: "POST",
@@ -782,62 +1072,99 @@ document.addEventListener("DOMContentLoaded", function () {
             tray_id: trayId
           })
         })
-        .then(res => res.json())
+        .then(res => {
+          console.log("📡 API Response status:", res.status);
+          return res.json();
+        })
         .then(data => {
-          // Find the row in the table with this Tray ID
-          const rows = detailsDiv.querySelectorAll("tbody tr");
-          let found = false;
-          rows.forEach(row => {
-            const trayIdInput = row.querySelector('input[type="text"]');
-            if (trayIdInput && trayIdInput.value.trim() === trayId) {
-              found = true;
-              const statusCell = row.querySelector("td:last-child");
-              if (statusCell) {
-                if (data.success && data.exists) {
-                  // Pass validation - show tick as active, cross as inactive
-                  statusCell.innerHTML = `
-                    <div class="validation-status">
-                      <div class="status-icon fail inactive">
-                        <img src="{% static 'assets/icons/fail.png' %}" alt="Fail" title="Fail" style="width:18px; height:18px;" />
+          console.log("📊 API Response data:", data);
+          
+          // Check if API call was successful
+          if (data.success) {
+            console.log("✅ API call successful, exists:", data.exists);
+            
+            // Check if tray ID exists in database
+            if (!data.exists) {
+              // Tray ID not found in database - show error
+              console.log("❌ Tray not found in database");
+              showError(`Tray ID "${trayId}" not found in database.`);
+              validateInput.value = "";
+              validateInput.focus();
+              return;
+            }
+            
+            console.log("🔍 Tray exists in database, checking modal table...");
+            
+            // Tray ID exists in database, now check if it's in the modal table
+            const rows = detailsDiv.querySelectorAll("tbody tr");
+            console.log("📋 Found", rows.length, "rows in modal table");
+            
+            let found = false;
+            
+            rows.forEach((row, index) => {
+              const trayIdInput = row.querySelector('input[type="text"]');
+              if (trayIdInput) {
+                const rowTrayId = trayIdInput.value.trim();
+                console.log(`🔎 Row ${index + 1}: checking "${rowTrayId}" vs "${trayId}"`);
+                
+                if (rowTrayId === trayId) {
+                  found = true;
+                  console.log(`✅ Found matching tray in row ${index + 1}`);
+                  
+                  const statusCell = row.querySelector("td:last-child");
+                  if (statusCell) {
+                    // Pass validation - show tick as active, cross as inactive
+                    statusCell.innerHTML = `
+                      <div class="validation-status">
+                        <div class="status-icon fail inactive">
+                          <img src="{% static 'assets/icons/fail.png' %}" alt="Fail" title="Fail" style="width:18px; height:18px;" />
+                        </div>
+                        <div class="status-icon pass active">
+                          <img src="{% static 'assets/icons/pass.png' %}" alt="Pass" title="Pass" style="width:18px; height:18px;" />
+                        </div>
                       </div>
-                      <div class="status-icon pass active">
-                        <img src="{% static 'assets/icons/pass.png' %}" alt="Pass" title="Pass" style="width:18px; height:18px;" />
-                      </div>
-                    </div>
-                  `;
-                } else {
-                  // Fail validation - show cross as active, tick as inactive
-                  statusCell.innerHTML = `
-                    <div class="validation-status">
-                      <div class="status-icon fail active">
-                        <img src="{% static 'assets/icons/fail.png' %}" alt="Fail" title="Fail" style="width:18px; height:18px;" />
-                      </div>
-                      <div class="status-icon pass inactive">
-                        <img src="{% static 'assets/icons/pass.png' %}" alt="Pass" title="Pass" style="width:18px; height:18px;" />
-                      </div>
-                    </div>
-                  `;
+                    `;
+                    console.log("✅ Updated status cell to PASS");
+                  }
                 }
               }
+            });
+            
+            if (!found) {
+              // Tray ID exists in database but not in this batch's tray list
+              console.log("❌ Tray exists in DB but not in this batch");
+              showError(`Tray ID "${trayId}" is not assigned to this batch.`);
+            } else {
+              console.log("🎉 Validation successful!");
             }
-          });
-          
-          if (!found) {
-            // Show inline error message instead of SweetAlert
-            showError(`Tray ID "${trayId}" not found in table.`);
+          } else {
+            // API call failed
+            console.log("❌ API call failed:", data.error);
+            showError(data.error || 'Failed to validate tray ID.');
           }
           
-          // --- Always clear and focus input for next scan ---
+          // Always clear and focus input for next scan
           validateInput.value = "";
           validateInput.focus();
         })
         .catch(error => {
-          console.error('Error:', error);
-          showError('An error occurred while validating the tray ID.');
+          console.error('❌ Network error:', error);
+          showError('Network error occurred while validating the tray ID.');
           validateInput.value = "";
           validateInput.focus();
         });
       }
+    });
+    
+    // Also add focus event to ensure input is ready
+    validateInput.addEventListener("focus", function() {
+      console.log("🎯 Validate input focused and ready");
+    });
+    
+  } else {
+    console.log("❌ Required elements not found:", {
+      validateInput: !!validateInput,
+      detailsDiv: !!detailsDiv
     });
   }
   
@@ -856,10 +1183,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     return cookieValue;
   }
+  
+  console.log("🎯 Tray validation script setup complete");
 });
 </script>
 
     <!-- Script for opening Day Planning - Tray Scan modal with read-only view while hitting view.png -->
+
 
 <script nonce="{{ csp_nonce }}">
 // Updated script for opening Day Planning - Tray Scan modal
@@ -872,6 +1202,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const modal = document.getElementById("trayScanModal_DayPlanning");
       const detailsDiv = document.getElementById("trayScanDetails_DayPlanning");
       const modalModelNo = document.getElementById("modalModelNo_DayPlanning");
+      const modalInputQty = document.getElementById("modalInputQty_DayPlanning"); // ✅ NEW
       modal.dataset.batchId = link.getAttribute('data-batch-id');
 
       // Get data attributes
@@ -879,6 +1210,12 @@ document.addEventListener("DOMContentLoaded", function () {
       const modelNo = link.getAttribute('data-model-no');
       const noOfTrays = parseInt(link.getAttribute('data-no-of-trays')) || 0;
       const trayCapacity = link.getAttribute('data-tray-capacity') || "";
+      
+      // ✅ NEW: Get total batch quantity from the row
+      const row = link.closest('tr');
+      const inputQtyCell = row ? row.cells[11] : null; // Assuming Input Qty is in column 12 (index 11)
+      const totalBatchQuantity = inputQtyCell ? inputQtyCell.textContent.trim() : "0";
+      
       let trayQtyList = [];
       try {
         trayQtyList = JSON.parse(link.getAttribute('data-tray-qty-list') || "[]");
@@ -890,8 +1227,13 @@ document.addEventListener("DOMContentLoaded", function () {
       if (modalModelNo && modelNo) {
         modalModelNo.textContent = modelNo;
       }
+      
+      // ✅ NEW: Set input quantity in modal
+      if (modalInputQty) {
+        modalInputQty.textContent = totalBatchQuantity;
+      }
 
-      // --- ADD THIS BLOCK HERE ---
+      // Set model image
       const modalUserImg = modal.querySelector('.user-profile img');
       const modelImage = link.getAttribute('data-model-image');
       if (modalUserImg) {
@@ -910,7 +1252,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (result.success && Array.isArray(result.trays) && result.trays.length > 0) {
           // Data is already ordered with top tray first from the API
           traysData = result.trays;
-          console.log('Fetched trays data:', traysData); // Debug log
+          console.log('Fetched trays data:', traysData);
         }
       } catch (e) {
         console.error('Error fetching tray data:', e);
